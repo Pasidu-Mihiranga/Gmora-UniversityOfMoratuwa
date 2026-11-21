@@ -28,6 +28,7 @@ New decisions get the next number in a new file (no edits to accepted records; s
 | [0021](0021-one-pneumonia-model-with-reported-metrics.md) | One pneumonia model for all ages, with reported metrics | Accepted |
 | [0022](0022-private-consult-without-server-readable-storage.md) | Private consult without server-readable storage | Accepted |
 | [0023](0023-programme-catalogue-and-hospital-offerings.md) | Programme catalogue owned by the platform, offerings by hospitals | Accepted |
+| [0024](0024-customisable-agents-through-typed-settings.md) | Customisable agents through typed settings in layers | Accepted |
 
 ## Template
 

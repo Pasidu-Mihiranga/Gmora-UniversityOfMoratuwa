@@ -124,7 +124,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | M12 | P0 | gateway providers: gemini, openai_compatible, decisions | W0 | important | three adapters with declared capabilities; recorded-response tests; Jev noul, choice and score mapping; zero-retention provider preference on OpenRouter |
 | M13 | P0 | PHI minimization pipeline | W0 | critical | purpose profiles; pseudonymizer from structured fields (si and Latin); outbound inspector with NIC, phone, email detectors; restore; egress tests with canaries (`SEC-30` to `SEC-33`) |
 | M14 | P0 | imaging: registry and ONNX adapter | W0, F02 | important | manifest with status `reported`; SHA-256 check; preprocessing per manifest; bands with the 0.5 hard floor `IMG-5`; unavailable path; Jev image gate optional; patient never sees probability |
-| F02 | P0 | uploads: validation and file store | W0 | critical | magic-byte types, size and page limits, image re-encode with EXIF strip, encrypted `FileStore`, 202 plus background processing, safe serving headers, `FileScanner` no-op port (`UPL-1` to `UPL-7`) |
+| F02 | P0 | uploads: validation and file store | W0 | critical | magic-byte types, full-parse check, size and page limits, CDR (image re-encode with EXIF strip and pixel limit, PDF scrub and rebuild), encrypted `FileStore`, 202 plus background processing, safe serving headers, `FileScanner` no-op port (`UPL-1` to `UPL-7`) |
 | P01 | P0 | programmes: catalogue, offerings, referrals, enrolment | W0 | important | catalogue enable flags; offerings with approval states; referrals need a treating relationship; enrolment creates timers and per-programme consent categories; ranking ignores fees (`PRG-1` to `PRG-6`); elder care registered |
 | P02 | P1 | pregnancy programme | P01, D09 | important | registration, schedule, maternal red flags, partner alerts within consent |
 | P03 | P1 | newborn programme | P01, D09 | important | registration, vaccination and check-up reminders, infant red flag, guardian alerts |
@@ -133,6 +133,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | K01 | P0 | knowledge: ingestion and hybrid retrieval | W0 | important | structure-aware chunker; local and Vertex embedding adapters; pgvector HNSW and full-text; RRF; `knowledge ingest` CLI idempotent by hash; `retrieve` returns cited chunks (`KNW-20` to `KNW-24`) |
 | K02 | P0 | knowledge: shared and user caches | K01, M04 | critical | shared cache write rules `KNW-32`; user cache encrypted with fingerprints `KNW-33` to `KNW-35`; stale-hit test; never-cached list enforced |
 | K03 | P0 | Intent classifier and tier router | W0, M12 | important | decision-model `choice` over the intent catalog with 0.75 threshold; keyword fallback without a key; direct tool calls for T2 intents; tier recorded on every request (`KNW-1` to `KNW-4`) |
+| C01 | P0 | customisation: settings, layers, quotas, suggestions | M03, M12 | critical | catalogue with bounds per role; layer resolution L0 to L4; plain-language parse to `RuleProposal` with preview; versions and revert; guardian suggestions; atomic quota reservation in the gateway with a concurrency test; care-access paths never quota-limited (`CUS-1` to `CUS-17`) |
 | M16 | P0 | verifier: checks, Jev policy, reviews | W0 | critical | six deterministic checks; Jev questions; policy `VER-4`; fail closed `VER-9`; rules-only escalation `VER-10`; review queue API |
 
 ## 7. Wave 2: agents
@@ -161,6 +162,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | U09 | P0 | Dev panel: clock and reset | W0 | advance clock, reset scenario, visible only in dev and demo |
 | U10 | P0 | Private consult screen | PC1 | disclosure, streaming chat, quick exit, WebCrypto encryption for opt-in history with PIN wrap and recovery code, delete now, nothing readable in browser storage |
 | U11 | P0 | Programme screens | P01 | patient programmes and referrals, doctor referral action, hospital offerings editor, admin catalogue and approvals |
+| U13 | P0 | "My assistant" settings screens | C01 | templates, bounded controls first, locked items with reasons, preview, history with revert, optional typing box, guardian suggestion cards, quota display |
 | U12 | P1 | Document camera scanner | F02 | edge detection, perspective correction, CLAHE before upload |
 
 ## 9. Wave 4: integration, evaluation, delivery

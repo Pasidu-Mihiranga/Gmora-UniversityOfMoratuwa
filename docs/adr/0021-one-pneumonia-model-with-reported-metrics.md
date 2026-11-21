@@ -5,7 +5,7 @@ Status: Accepted (27 Nov 2026). Supersedes ADR-0017.
 ## Context
 
 ADR-0017 planned a paediatric model for children and a general model for adults, before evidence was
-available. The team's PneumoScan final pitch (in the earlier prototype folder) reports that the
+available. The team's PneumoScan final pitch reports that the
 combined, phone-trained model (`general.onnx`, from `pneumonia_resnet50_best.pth`) reaches AUC 0.988
 on 3,510 held-out images, 0.995 on the paediatric subgroup (n=859) and 0.983 on adults (n=2,651),
 94.5% accuracy, and that the paediatric-only model was an earlier version with 87.0% accuracy and a
