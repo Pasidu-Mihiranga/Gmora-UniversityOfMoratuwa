@@ -44,13 +44,18 @@ creates `version + 1`; consumers declare which versions they accept.
 | `identity.user_registered` | identity | user_id, role | notifications |
 | `consent.grant_changed` | consent | patient_id, grantee_id, categories, change (`granted`, `revoked`, `narrowed`) | agents (revalidate), notifications |
 | `consent.rule_confirmed` | consent | rule_id, owner_id, version | agents |
+| `consent.setting_changed` | consent | owner_id, setting_key, version, affects_user_ids | agents, notifications |
+| `consent.suggestion_created` | consent | suggestion_id, patient_id, guardian_id, setting_key | notifications |
 | `record.resource_written` | record | resource_type, resource_id, patient_id | agents (doctor assistant refresh) |
 | `reports.report_uploaded` | reports | document_id, patient_id | reports (extraction) |
 | `reports.report_extracted` | reports | report_id, observation_ids, patient_id | cases, agents |
 | `imaging.study_uploaded` | imaging | study_id, patient_id | imaging (screening) |
-| `imaging.screening_completed` | imaging | study_id, flagged (bool), model_version, validation_status | cases (urgency floor), agents |
+| `imaging.screening_completed` | imaging | study_id, band, flagged (bool), model_version, validation_status | cases (urgency floor), agents |
 | `care.dose_taken` | care | administration_id, statement_id, patient_id | agents (guardian) |
 | `care.dose_missed` | care | administration_id, statement_id, slot (`morning`, `noon`, `evening`, `night`), patient_id | agents (guardian) |
+| `care.alert_rule_fired` | care | rule_id, rule_type, patient_id, guardian_id | agents (guardian) |
+| `care.enrolled` | care | enrollment_id, patient_id, programme_key, offering_id | notifications |
+| `care.referral_created` | care | referral_id, patient_id, programme_key, referred_by | notifications |
 | `booking.slot_held` | booking | hold_id, slot_id, expires_at, case_id | cases |
 | `booking.appointment_booked` | booking | appointment_id, practitioner_role_id, case_id | cases, agents (doctor assistant), notifications |
 | `booking.appointment_cancelled` | booking | appointment_id, by (`patient`, `hospital`, `system`), case_id | cases, agents |
