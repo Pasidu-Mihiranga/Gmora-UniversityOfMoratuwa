@@ -107,11 +107,13 @@ idempotent by content hash.
 ## 4. Caches
 
 ### Shared knowledge cache (one answer for everyone)
-`KNW-30` Used only for intent `general_health_question`. Stored in `knowledge_answer_cache(id,
+`KNW-30` Used only for intent `general_health_question`, keyed by a **canonical topic** and
+language, with answers generated from the canonical topic question, never the user's wording
+(poisoning defence, `SG-22`). Stored in `knowledge_answer_cache(id, topic_key,
 language, normalized_question, question_embedding, answer, cited_chunk_ids, corpus_version,
 prompt_version, model_id, verified_at, hits, created_at, expires_at)`.
 
-`KNW-31` A hit is an exact match on the normalized question in the same language and intent.
+`KNW-31` A hit is an exact match on the canonical topic in the same language.
 **Semantic hits are off by default** (flag `shared_cache_semantic`). They may be switched on only
 after the evaluation measures the false-match rate of the chosen similarity threshold (starting
 candidate 0.92) on a labelled set of paraphrase and near-miss question pairs, and the rate is at most

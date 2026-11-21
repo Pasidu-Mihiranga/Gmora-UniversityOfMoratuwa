@@ -71,7 +71,7 @@ Wave 0 from the contracts in `02-contracts-and-domain.md`.
 | `audit_log` | `(patient_id, at DESC)`, `(actor_id, at DESC)`, `(trace_id)`, BRIN `(at)` | audit search |
 | `ops_model_calls` | `(case_id)`, BRIN `(at)` | ops page |
 | `knowledge_chunks` | HNSW on `embedding` (cosine), GIN on `tsv`, `(language)` | hybrid retrieval |
-| `knowledge_answer_cache` | unique `(language, normalized_question)`, HNSW on `question_embedding` | shared cache |
+| `knowledge_answer_cache` | unique `(topic_key, language)`, HNSW on `question_embedding` | shared cache |
 | `knowledge_user_cache` | `(patient_id, language, normalized_question)` | user cache |
 | `notifications_items` | `(user_id, created_at DESC) WHERE read_at IS NULL` | unread badge |
 | `care_offerings` | `(programme_key, status)`, `(organization_id)` | offering lists |

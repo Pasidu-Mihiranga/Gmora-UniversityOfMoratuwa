@@ -38,7 +38,8 @@ The 60-attack injection suite runs in `eval` with real models, not in CI.
 | `backend` | `uv pip install` (cached) -> `ruff check` + `ruff format --check` -> `lint-imports` (module boundaries) -> `alembic upgrade head` + `alembic check` on a Postgres service -> `pytest -x -q` -> OpenAPI drift check |
 | `frontend` | `npm ci` (cached) -> `tsc -b` -> `oxlint` -> `vite build` -> generated types drift check |
 
-Plus two quick repository checks in the `backend` job: `python scripts/check_text.py` and `gitleaks`.
+Plus quick repository checks: `python scripts/check_text.py`, `gitleaks`, `pip-audit` (backend job)
+and `npm audit --audit-level=high` (frontend job) (`SG-27`).
 
 `QA-11` Type checking with mypy runs on `suwapath/contracts` and `suwapath/platform` only (the shared
 foundation), not on every module.

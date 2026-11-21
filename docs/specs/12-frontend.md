@@ -97,6 +97,10 @@ cannot be dismissed by accident.
 
 `FE-27` No em dashes or en dashes in any UI text (`scripts/check_text.py`).
 
+`FE-28` Security rules from `20-security-and-guardrails.md` apply: the shared `SafeMarkdown`
+component is the only way to render model text (`SG-13`), banned APIs are linted (`SG-14`), and
+caches and tokens are cleared on logout (`SG-16`).
+
 ## 6. Simple mode for older users
 
 `FE-40` **One design system, two densities.** Simple mode is not a separate app or a separate
