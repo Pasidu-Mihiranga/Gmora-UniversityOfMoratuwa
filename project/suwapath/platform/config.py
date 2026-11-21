@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     model_name_fast: str = ""
     google_genai_use_vertexai: bool = True
     google_cloud_project: str = ""
-    google_cloud_location: str = "us-central1"
+    google_cloud_location: str = "global"
     google_application_credentials: str = ""
     google_api_key: SecretStr = SecretStr("")
     openai_compat_preset: Literal["", "openai", "openrouter", "groq", "ollama"] = ""

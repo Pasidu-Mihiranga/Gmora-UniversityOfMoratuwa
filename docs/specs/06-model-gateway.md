@@ -87,6 +87,20 @@ separately from the top probability; policies that say "confidence" (`VER-4`) us
 policies that say "top probability" (`KNW-3`) use `probabilities`. Measured on one synthetic call:
 1.3 s, USD 0.000016. The adapter records `model`, `usage.cost` and latency in `ops_model_calls`.
 
+`GW-2b` **Gemini on Vertex, measured on 27 Nov 2026** (project's `global` endpoint; the newer models
+return 404 on `us-central1`). Synthetic Sinhala prompt, structured JSON or streamed text:
+
+| Model | Result |
+|---|---|
+| `gemini-3.5-flash`, thinking `minimal` | first token 0.85 s, full reply 1.3 s, natural Sinhala; **chosen for `MODEL_NAME`** |
+| `gemini-3.1-flash-lite` | 0.83 s for structured extraction, correct; **chosen for `MODEL_NAME_FAST`** |
+| `gemini-3.5-flash-lite` | 0.84 s, correct (fallback for `MODEL_NAME_FAST`) |
+| `gemini-2.5-flash` | 1.6 s, correct; works on `us-central1` too |
+| `gemini-3.8-flash` | 4.6 s first token at the lowest allowed thinking level; too slow for chat |
+
+The Gemini adapter sets thinking to `minimal` for chat and structured calls unless a purpose asks
+for more. The choice is re-checked by the latency and quality suites.
+
 `GW-3` If `MODEL_PROVIDER` is unset: use `gemini` when Google credentials exist, else `offline`.
 If `DECISION_PROVIDER` is unset: use `decisions` when `OPENROUTER_API_KEY` exists, else `none`
 (verifier stage 1 only, `VER-10`).
