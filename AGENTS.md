@@ -65,6 +65,22 @@ Frontend (from `project/frontend/`): `npm install`, `npm run dev`, `npm run buil
 
 Repository checks (from the root): `python scripts/check_text.py`.
 
+## Docker hygiene
+
+Rebuilds leave old image layers behind. Clean up, but only this project's leftovers:
+
+```
+docker system df                                     # look first
+docker image prune -f --filter label=com.docker.compose.project=suwapath   # dangling project images
+docker builder prune -f --filter until=72h           # old build cache
+docker compose down --rmi local                      # project images, when rebuilding from scratch
+```
+
+- **Never** run `docker system prune -a`, `docker volume prune` or `docker compose down -v` without
+  asking the developer first: they delete other projects' images and the database volume.
+- Never delete containers, images or volumes that do not belong to the `suwapath` compose project.
+- If disk space is low, report `docker system df` and propose what to delete; do not decide alone.
+
 ## How we work in parallel
 
 - Every piece of work is a GitHub issue with a spec reference, acceptance criteria and its
