@@ -63,7 +63,7 @@ ruff check . && ruff format --check .
 
 Frontend (from `project/frontend/`): `npm install`, `npm run dev`, `npm run build`.
 
-Repository checks (from the root): `python scripts/check_text.py`.
+Everything CI runs, in one command (from the root): `scripts/check.sh`.
 
 ## Docker hygiene
 
@@ -91,6 +91,22 @@ docker compose down --rmi local                      # project images, when rebu
 - One issue per branch: `feat/<issue>-short-name`, `fix/<issue>-short-name`. Keep pull requests
   small and merge often. `main` must always run and pass all checks.
 - Pull request description: what changed, how it was tested, `Closes #<issue>`.
+
+## Working with any coding model
+
+Contributors use different models (Claude, GPT/Codex, Gemini, Grok and others). Quality comes from
+the repository, not the model:
+
+- **Read only the issue's context pack:** the spec IDs and files it lists. Do not load whole specs or
+  unrelated folders; it wastes tokens and invites drift.
+- **Work until `scripts/check.sh` passes.** It runs exactly what CI runs. Never weaken a check to pass
+  it: no disabling lint rules, no new `type: ignore` without a reason, no editing tests to make them
+  pass, no skipping contract suites.
+- **Follow existing patterns.** Copy the shape of the nearest existing module, port, double or test.
+- **Critical-tier issues** (consent, encryption, PHI minimization, red flags, verifier, booking
+  concurrency, event idempotency): use the strongest model available to you, and before merging get
+  a review from a teammate and from the strongest available model.
+- Never commit generated code you have not read.
 
 ## Ambiguity protocol (people and coding agents)
 

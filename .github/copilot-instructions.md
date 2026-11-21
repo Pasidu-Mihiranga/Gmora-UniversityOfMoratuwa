@@ -1,0 +1,2 @@
+All rules for this repository are in AGENTS.md at the repository root. Read it before any change,
+and run scripts/check.sh before opening a pull request.
