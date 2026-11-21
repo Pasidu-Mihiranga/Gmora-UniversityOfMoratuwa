@@ -39,6 +39,20 @@ Examples: "add a pregnancy programme" = new `CareProgramme` + alert rules + si/e
 "Notify by WhatsApp" = new `NotificationChannel`. "Add a skin lesion model" = new manifest and
 registration. "Add a pharmacy agent" = new `Agent` + tools + intents.
 
+## 3a. Features requested on the day (judging criterion)
+
+`EXT-5` A feature requested on the final day is built with the playbook above, and the way it was
+embedded is itself evidence for the judges:
+- one `contract-change` pull request for the spec delta, then one implementation pull request;
+- a `docs/day-of/<feature>.md` log: request time, spec delta, files added vs files changed, tests
+  added, time to merge, flag name;
+- the demo shows the feature switched on through `/admin/flags`.
+
+`EXT-6` **Rehearsal:** on 1 December the team runs one mock request end to end (for example "add a
+WhatsApp-style notification channel" or "add a diabetes foot-care programme") with the same log, and
+measures time to merge and the share of changes that were new files rather than edits. The target is
+that a registry-shaped feature lands in under 2 hours without editing working modules.
+
 ## 4. MCP (P2)
 
 `EXT-10` Built only after issue I02 (Amma end to end) is green.

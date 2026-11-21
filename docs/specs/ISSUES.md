@@ -185,7 +185,10 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | E08 | P0 | Results report | E02 to E06 | `docs/results/` with tables, charts, confidence intervals, limitations |
 | X01 | P0 | Full-stack compose and run guide | W0 | one command starts everything; README execution guide |
 | X02 | P0 | Final docs | E08 | PROJECT_DETAILS sections mapped to the judging criteria (problem selection and justification, global impact, mitigation strategy, multi-agent solution design, single-agent benchmarking, evaluation methodology, independent research), each linking to its evidence; Workflow and README updated with results; PDPA duty mapping (lawful basis, sensitive data, data subject rights, retention, breach response) and the NMRA non-diagnostic position; booking fees shown in the UI, payment processing stated as out of the MVP |
-| X03 | P0 | Demo video | I03 or I02 | `project-demo.mp4` per storyboard in `16` |
+| X08 | P0 | Scaling evidence | X01, I02 | Locust scenarios and replica comparison per `ARC-13a`; `docs/results/scaling.md` |
+| X09 | P0 | Day-of feature rehearsal | I02 | mock request run end to end with the `EXT-5` log on 1 Dec; measured time to merge and files added vs changed |
+| X10 | P0 | Presentation deck | E08, X08, X09 | four parts per `16 section 4`, every claim linked to evidence |
+| X03 | P0 | Demo video | I03 or I02, X10 | `project-demo.mp4` following the four parts of `16 section 4` |
 | X04 | P2 | MCP server phase A | I02, A02, M01 | `EXT-10` to `EXT-14` |
 | X05 | P2 | VM deployment | X01 | compose on the VM with TLS; secrets from the server's `.env` |
 | X06 | P2 | Tamil and voice | | |

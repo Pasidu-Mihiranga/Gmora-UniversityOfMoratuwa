@@ -156,6 +156,13 @@ state change, case events, outbox events and audit entries commit or roll back t
 | Models | provider adapters | any provider behind the gateway |
 | Live updates | SSE from the API process | SSE fan-out through `LISTEN/NOTIFY`, then a broker |
 
+`ARC-13a` **Scaling evidence (judging criterion).** A load test (`project/eval/load/`, Locust)
+runs two scenarios against `docker compose` with 1 and then 3 replicas of `api`, `worker` and
+`agents`, using the fake chat provider so the model is not the bottleneck: (a) 200 concurrent
+patients browsing, searching doctors and marking doses; (b) 50 concurrent Amma-style cases. It
+reports API p95, throughput, outbox lag and agent job wait time per replica count. Results go to
+`docs/results/scaling.md` with the seams table above.
+
 `ARC-14` Nothing in the MVP may depend on a single process holding state in memory beyond short
 caches (DEK cache, config), because every process type must be safe to run more than once.
 

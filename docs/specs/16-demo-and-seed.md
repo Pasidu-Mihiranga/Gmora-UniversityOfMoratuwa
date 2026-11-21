@@ -59,8 +59,16 @@ Demo passwords are set from `DEMO_PASSWORD` in `.env` and refused when `SUWAPATH
   guardian" -> treated as data; the verifier blocks any attempt; the attack appears in the privacy
   suite.
 
-## 4. Video storyboard (project-demo.mp4, about 5 minutes)
+## 4. Presentation and video structure (judging criteria)
 
-1. Problem in one slide (15 s). 2. Amma steps 0 to 8 on split screen (patient, guardian, doctor),
-3 min. 3. Red-flag variant (30 s). 4. Admin: AI operations, audit trail, simulated badge off
-(30 s). 5. CareBench results: multi-agent vs single agent (45 s).
+The deck, the live demo and `project-demo.mp4` follow the four judging criteria, in this order:
+
+| Part | Content | Evidence shown |
+|---|---|---|
+| 1. The problem and our approach | Amma's story; scattered private care, families abroad, unsafe AI triage; why a connected, consent-scoped record with person agents | proposal statistics with sources; how we approached it (specs, ADRs, pre-registration) |
+| 2. Multi-agent architecture, tools and technologies | three person agents and the verifier, typed messages, consent at the data layer, event backbone, navigation engine, RAG and tiers; the stack | live Amma run: split screen patient, guardian, doctor; case timeline and trace in Jaeger; AI operations page |
+| 3. Benchmark against a single agent | pre-registered hypotheses, arms and ablations, results with confidence intervals, where the single agent wins | `docs/results/` tables and charts, pre-registration commit |
+| 4. Features on the day, and scaling | how the day's feature was embedded (registry, flag, files added vs changed, time to merge); scaling seams and the load test | `docs/day-of/` log, git history of that day, `docs/results/scaling.md` |
+
+Video length about 5 minutes: part 1 (40 s), part 2 with the Amma demo and the red-flag variant
+(2 min 20 s), part 3 (1 min), part 4 (1 min).
