@@ -13,8 +13,14 @@ extend-exclude = ["migrations/versions"]
 select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "S", "TID"]
 ignore = ["S101"]
 
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"datetime.datetime.now".msg = "Read time through the Clock port (EVT-16)."
+"datetime.datetime.utcnow".msg = "Read time through the Clock port (EVT-16)."
+"pickle".msg = "No pickle (SG-26)."
+
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S105", "S106"]
+"tests/**" = ["S105", "S106", "TID251"]
+"suwapath/platform/clock.py" = ["TID251"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
