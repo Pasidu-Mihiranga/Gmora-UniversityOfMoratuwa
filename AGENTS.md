@@ -24,11 +24,20 @@ If code and spec disagree, the spec wins until a pull request changes the spec.
 ```
 README.md                 overview, setup, how to run
 AGENTS.md                 this file
-docs/                     proposal, workflow, project details, specs
+docs/
+  Proposal.docx           what we promised (PDF copy alongside)
+  PROJECT_DETAILS.md      objectives, features, technical summary
+  Workflow.md             process flow and implementation workflow
+  specs/                  the contracts every issue is built against (start at specs/README.md)
+  adr/                    architecture decision records
 project/
-  main.py                 application entry point (FastAPI)
+  main.py                 application entry point (CLI: api, worker, agents, migrate, seed, eval, ...)
   requirements.txt        Python dependencies (pinned)
-  suwapath/               backend package
+  suwapath/
+    contracts/            shared types, events, ports, fakes (the only shared dependency)
+    platform/             technical kernel (db, events, clock, crypto, gateway, http)
+    modules/<name>/       one folder per module: domain, application, adapters, api
+    bootstrap.py          composition root (the only place that wires modules)
   tests/                  backend tests
   frontend/               React + TypeScript web app
   eval/                   CareBench evaluation harness and datasets
@@ -66,6 +75,21 @@ Repository checks (from the root): `python scripts/check_text.py`.
 - One issue per branch: `feat/<issue>-short-name`, `fix/<issue>-short-name`. Keep pull requests
   small and merge often. `main` must always run and pass all checks.
 - Pull request description: what changed, how it was tested, `Closes #<issue>`.
+
+## Ambiguity protocol (people and coding agents)
+
+Specs are meant to leave no room for guessing on shared contracts. When something is still unclear:
+
+1. **Search first:** the issue, the cited spec sections, `docs/adr/`, then the code of the port you
+   depend on.
+2. **Small and local** (naming, internal structure, a private helper, an extra test): decide using
+   the existing patterns, and write the decision in one line in the pull request description.
+3. **Affects another module, a contract, the database schema, security, safety or the UI flow:**
+   stop. Ask the developer who owns the issue, giving two or three options with their trade-offs and
+   a recommendation. Coding agents must not decide these silently.
+4. **Architectural** (a new process, store, library, provider or pattern): write a short ADR in
+   `docs/adr/` with the options, and get agreement before building.
+5. Never fill a gap by inventing clinical facts, model metrics, dataset details or product claims.
 
 ## Commits
 
@@ -109,10 +133,23 @@ Repository checks (from the root): `python scripts/check_text.py`.
 Safety-critical code (items 2 to 9) is written test first, and its tests must cover the edge cases
 named in the spec.
 
+## Testing (risk based, see docs/specs/14-quality-and-ci.md)
+
+- **Critical** (consent, encryption, PHI minimization, red flags, verifier, booking concurrency,
+  event idempotency, case transitions): test first, every edge case in the spec.
+- **Important** (agents with the fake provider, tools, navigation, adherence, timers, routes): happy
+  path and main failure path.
+- **Normal** (UI pages, formatting, admin screens): type checks and a smoke test where cheap.
+- Tests never call paid model APIs. Real providers run only in `python main.py eval`.
+- Do not add tests, CI jobs or tooling beyond this without a reason in the pull request.
+
 ## Code standards
 
 - Python 3.12, type hints everywhere, Pydantic models for every boundary. Ruff for lint and format.
+- Modules never import each other. They use ports from `suwapath.contracts` and events; only
+  `bootstrap.py` wires implementations. Import rules are checked in CI.
 - Business logic does not import FastAPI. Routes are thin.
+- All time comes from the `Clock` port, never `datetime.now()`.
 - Every model call goes through the model gateway, which applies the timeout, retries and the
   cost and latency log. No direct SDK calls elsewhere.
 - No secrets in code. Configuration comes from the root `.env` through `suwapath.core.config`.
