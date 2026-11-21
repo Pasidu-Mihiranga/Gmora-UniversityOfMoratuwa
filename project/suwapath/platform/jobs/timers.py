@@ -7,6 +7,7 @@ from sqlalchemy import select
 from suwapath.contracts.events.catalog import TimerFired
 from suwapath.contracts.ids import TimerId
 from suwapath.platform.models import TimerRow
+from suwapath.platform.tracing import set_trace_id
 from suwapath.platform.uow import UnitOfWorkFactory
 
 
@@ -27,6 +28,10 @@ async def fire_due_timers(uow_factory: UnitOfWorkFactory, batch: int = 100) -> i
             .all()
         )
         for timer in timers:
+            if isinstance(timer.payload.get("trace_id"), str):
+                set_trace_id(
+                    timer.payload["trace_id"]
+                )  # keep the workflow's trace (spec 20, AUD-2)
             timer.status = "fired"
             timer.fired_at = now
             uow.publish(

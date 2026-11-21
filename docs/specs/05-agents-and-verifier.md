@@ -271,8 +271,9 @@ model_id, cost, latency, at)`.
 `VER-9` **Fail closed.** If Jev is configured and the call fails after retries, the message is
 `held` and retried every 2 minutes (`verifier_hold_retry`) for 30 minutes, then escalated to a human.
 
-`VER-10` **No model verifier configured** (no OpenRouter key): the verifier runs stage 1 only and
-every message that passes is **escalated to the human reviewer** of `VER-5` instead of being
-allowed. The verdict records `model_checks: "not_run"`, and the UI shows "Checked by rules only,
+`VER-10` **No model verifier configured** (no OpenRouter key): the verifier runs stage 1 only. A
+**person-bound** message that passes is **escalated to the human reviewer** of `VER-5` instead of
+being allowed; an agent-to-agent message that passes is allowed, because it reaches no person and
+every person-facing message it leads to is verified in turn. The verdict records `model_checks: "not_run"`, and the UI shows "Checked by rules only,
 waiting for your approval". This keeps the keyless demo working without pretending a model check
 happened.
