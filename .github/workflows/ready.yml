@@ -1,0 +1,30 @@
+# When an issue closes, every issue labelled `blocked` whose blockers are now all closed becomes
+# `ready` (docs/specs/ISSUES.md section 1). Uses GitHub's native "blocked by" dependencies.
+name: ready
+
+on:
+  issues:
+    types: [closed, reopened]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  update-ready:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move unblocked issues to ready
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for n in $(gh issue list -R "$REPO" --label blocked --state open --limit 300 --json number -q '.[].number'); do
+            open_blockers=$(gh api "repos/$REPO/issues/$n/dependencies/blocked_by" --paginate \
+              -q '[.[] | select(.state == "open")] | length' | awk '{s+=$1} END {print s+0}')
+            if [ "$open_blockers" -eq 0 ]; then
+              gh issue edit "$n" -R "$REPO" --remove-label blocked --add-label ready
+              echo "#$n is ready"
+            fi
+          done

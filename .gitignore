@@ -1,0 +1,41 @@
+# OS and editor
+.DS_Store
+.idea/
+*.swp
+
+# Secrets: never commit keys or credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+*service-account*.json
+*-credentials.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Model weights live outside git (see project/models/README.md)
+*.onnx
+*.pth
+*.pt
+*.h5
+*.safetensors
+
+# Local runtime data
+project/storage/
+project/eval/runs/

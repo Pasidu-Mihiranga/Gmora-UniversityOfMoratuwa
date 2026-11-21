@@ -1,0 +1,87 @@
+[project]
+name = "suwapath"
+version = "0.1.0"
+description = "SuwaPath: multi-agent care navigation for Sri Lanka"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "S", "TID"]
+ignore = ["S101"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"datetime.datetime.now".msg = "Read time through the Clock port (EVT-16)."
+"datetime.datetime.utcnow".msg = "Read time through the Clock port (EVT-16)."
+"pickle".msg = "No pickle (SG-26)."
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "TID251"]
+"suwapath/platform/clock.py" = ["TID251"]
+"suwapath/contracts/testing/**" = ["TID251"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-q"
+markers = [
+  "integration: needs Postgres (docker compose up -d db)",
+  "live: calls real model providers; opt-in with SUWAPATH_LIVE=1",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["suwapath/contracts", "suwapath/platform"]
+
+[tool.importlinter]
+root_package = "suwapath"
+
+[[tool.importlinter.contracts]]
+name = "Contracts import nothing from the rest of suwapath (ARC-7)"
+type = "forbidden"
+source_modules = ["suwapath.contracts"]
+forbidden_modules = ["suwapath.platform", "suwapath.modules"]
+
+[[tool.importlinter.contracts]]
+name = "Platform never imports modules (ARC-8)"
+type = "forbidden"
+source_modules = ["suwapath.platform"]
+forbidden_modules = ["suwapath.modules"]
+
+[[tool.importlinter.contracts]]
+name = "Modules never import each other (ARC-9)"
+type = "independence"
+modules = [
+  "suwapath.modules.identity",
+  "suwapath.modules.consent",
+  "suwapath.modules.record",
+  "suwapath.modules.audit",
+  "suwapath.modules.safety",
+  "suwapath.modules.navigation",
+  "suwapath.modules.booking",
+  "suwapath.modules.care",
+  "suwapath.modules.imaging",
+  "suwapath.modules.reports",
+  "suwapath.modules.knowledge",
+  "suwapath.modules.private",
+  "suwapath.modules.memory",
+  "suwapath.modules.notifications",
+  "suwapath.modules.cases",
+  "suwapath.modules.verifier",
+  "suwapath.modules.agents",
+  "suwapath.modules.ops",
+]
+
+[[tool.importlinter.contracts]]
+name = "Modules do not import the composition root (ARC-10)"
+type = "forbidden"
+source_modules = ["suwapath.modules"]
+forbidden_modules = ["suwapath.bootstrap"]
+allow_indirect_imports = true

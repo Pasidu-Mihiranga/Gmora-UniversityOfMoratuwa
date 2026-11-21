@@ -1,0 +1,38 @@
+name: Task
+description: One unit of work from docs/specs/ISSUES.md
+labels: ["blocked"]
+body:
+  - type: input
+    id: spec
+    attributes:
+      label: Spec rules
+      description: Spec IDs this task implements, e.g. SEC-10, BOOK-3
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context pack (read only these)
+      description: Spec sections and files needed, to keep model context small
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Ownership boundary
+      description: Paths this task may change
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk tier
+      options: [critical, important, normal]
+    validations:
+      required: true
