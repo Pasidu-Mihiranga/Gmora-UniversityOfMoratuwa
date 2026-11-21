@@ -38,6 +38,7 @@ sends `NOTIFY suwapath_outbox` after commit.
 | booking | `booking_organizations`, `booking_practitioner_roles`, `booking_schedules`, `booking_slots`, `booking_holds`, `booking_appointments` |
 | care | `care_programme_types`, `care_offerings`, `care_referrals`, `care_enrollments`, `care_medication_administrations`, `care_alert_rules` |
 | private | `private_sessions`, `private_messages` (ciphertext only) |
+| memory | `memory_items` |
 | reports | `reports_reports`, `reports_extractions` |
 | imaging | `imaging_studies`, `imaging_results` |
 | knowledge | `knowledge_documents`, `knowledge_chunks`, `knowledge_answer_cache`, `knowledge_user_cache` |

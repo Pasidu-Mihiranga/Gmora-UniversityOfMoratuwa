@@ -35,6 +35,7 @@ every issue is built against.
 | [18-programmes-and-private-consult.md](18-programmes-and-private-consult.md) | Programme catalogue, offerings, referrals, enrolment; the private consult |
 | [19-customisable-agents.md](19-customisable-agents.md) | Templates, typed settings in layers, plain-language rules, quotas, guardian suggestions |
 | [20-security-and-guardrails.md](20-security-and-guardrails.md) | Authorization decision points, auth hardening, input and output guardrails, frontend and HTTP security, cache security, OWASP LLM Top 10 mapping |
+| [21-memory-and-context.md](21-memory-and-context.md) | Memory types and stores, case summaries, learned facts, context builder, retention and deletion |
 | [ISSUES.md](ISSUES.md) | Work breakdown: waves, dependencies, ownership boundaries, acceptance criteria |
 
 ## Non-negotiable constraints
