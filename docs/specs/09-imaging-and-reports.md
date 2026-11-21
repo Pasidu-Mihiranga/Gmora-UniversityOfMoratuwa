@@ -127,8 +127,16 @@ PneumoScan pipeline) is P1.
 - size at most 10 MB; images at most 4096 px on the long side (larger are downscaled);
 - PDFs at most 20 pages; encrypted or malformed PDFs are rejected with a clear message.
 
-`UPL-3` Images are decoded and **re-encoded** (PNG for X-rays, JPEG for photos), which strips EXIF
-metadata including GPS location and drops anything appended to the file.
+`UPL-3` **Content disarm and reconstruction (CDR).** We do not try to detect bad files; we rebuild
+every file from its content and keep only the rebuilt copy:
+- the file must parse completely as its detected type (a file that is two formats at once is
+  rejected);
+- images are decoded and **re-encoded** (PNG for X-rays, JPEG for photos), which strips EXIF
+  metadata including GPS location and drops anything appended; a pixel limit (40 megapixels) stops
+  decompression bombs;
+- PDFs are opened with PyMuPDF, **scrubbed** (JavaScript, embedded files, attachments, links, forms,
+  annotations and metadata removed) and saved as a new clean file;
+- the original upload is discarded after reconstruction.
 
 `UPL-4` The upload request returns `202 Accepted` with the document ID and status `processing`
 immediately. Extraction, OCR and imaging inference run in the worker as event subscribers
