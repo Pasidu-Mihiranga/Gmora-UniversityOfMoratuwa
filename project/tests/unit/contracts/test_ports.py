@@ -12,6 +12,7 @@ import suwapath.contracts.ports as ports_pkg
 # Methods that legitimately take a patient id without a caller principal: worker entry points
 # and system tasks that run as the module itself, never on behalf of a person.
 SYSTEM_ONLY = {
+    "MemoryService.summarize_closed_case",
     "RecordService.patient_for_user",
     "BookingService.release_holds_for_case",
 }
