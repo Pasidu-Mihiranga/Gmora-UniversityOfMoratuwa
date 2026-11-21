@@ -86,7 +86,7 @@ updated what she shares with you").
    missed in 24 hours. Last week this would have alerted you once (Tuesday)."
 5. Confirm, Edit or Cancel. Confirm saves a new version.
 
-`CUS-7` Parsing uses the person's model budget (section 5). With the fake provider, a fixed set of
+`CUS-7` Parsing uses the person's model budget (section 5). With the offline provider, a fixed set of
 patterns per setting is parsed and the form is offered for everything else.
 
 ## 5. Limits (quotas) per person

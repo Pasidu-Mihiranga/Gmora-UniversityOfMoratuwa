@@ -26,7 +26,7 @@
 only place that knows concrete implementations and wires them to ports.
 
 This rule is what makes parallel work safe: a developer builds module X against the ports it needs,
-using the in-memory fakes from `suwapath.contracts.testing`, while another developer builds the real
+using the in-memory test doubles from `suwapath.contracts.testing`, while another developer builds the real
 implementation of those ports.
 
 ## 3. Code layout
@@ -49,7 +49,7 @@ project/
       tools.py                   ToolSpec, ToolCall, ToolResult (MCP-shaped)
       api/                       request and response models used by routes
       ports/                     one Protocol per module service
-      testing/                   in-memory fakes for every port and shared port test suites
+      testing/                   in-memory test doubles for every port and shared port test suites
     platform/                    technical kernel, no business rules
       config.py  db.py  uow.py  clock.py  ids.py  logging.py  tracing.py
       http/                      app factory, error mapping, auth dependency, SSE helpers
@@ -158,7 +158,7 @@ state change, case events, outbox events and audit entries commit or roll back t
 
 `ARC-13a` **Scaling evidence (judging criterion).** A load test (`project/eval/load/`, Locust)
 runs two scenarios against `docker compose` with 1 and then 3 replicas of `api`, `worker` and
-`agents`, using the fake chat provider so the model is not the bottleneck: (a) 200 concurrent
+`agents`, using the offline chat provider so the model is not the bottleneck: (a) 200 concurrent
 patients browsing, searching doctors and marking doses; (b) 50 concurrent Amma-style cases. It
 reports API p95, throughput, outbox lag and agent job wait time per replica count. Results go to
 `docs/results/scaling.md` with the seams table above.
@@ -172,4 +172,4 @@ caches (DEK cache, config), because every process type must be safe to run more 
 `platform.config.Settings`. No module reads `os.environ`.
 
 `ARC-16` With no model keys configured the application MUST still start and run the full demo
-using the fake chat provider (`06-model-gateway.md`). Real keys only change which adapter is bound.
+using the offline chat provider (`06-model-gateway.md`). Real keys only change which adapter is bound.

@@ -37,7 +37,7 @@ class ModelCallRecord(Contract):
 
 
 class OpsOverview(Contract):
-    provider_mode: Literal["real", "simulated"]
+    provider_mode: Literal["real", "offline"]
     decision_provider: Literal["jev", "none"]
     cost_today_usd: float
     calls_today: int

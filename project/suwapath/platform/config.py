@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://suwapath:suwapath@localhost:5433/suwapath"
     web_origins: str = "http://localhost:5173"
 
-    model_provider: Literal["", "fake", "gemini", "openai_compatible"] = ""
+    model_provider: Literal["", "offline", "gemini", "openai_compatible"] = ""
     model_name: str = ""
     model_name_fast: str = ""
     google_genai_use_vertexai: bool = True
@@ -53,14 +53,14 @@ class Settings(BaseSettings):
         return self.suwapath_env in ("development", "demo", "test")
 
     @property
-    def resolved_model_provider(self) -> Literal["fake", "gemini", "openai_compatible"]:
-        """GW-3: explicit choice, else Gemini when Google credentials exist, else fake."""
+    def resolved_model_provider(self) -> Literal["offline", "gemini", "openai_compatible"]:
+        """GW-3: explicit choice, else Gemini when Google credentials exist, else offline."""
         if self.model_provider:
             return self.model_provider
         has_google = bool(
             self.google_application_credentials or self.google_api_key.get_secret_value()
         )
-        return "gemini" if has_google else "fake"
+        return "gemini" if has_google else "offline"
 
     @property
     def resolved_decision_provider(self) -> Literal["decisions", "none"]:

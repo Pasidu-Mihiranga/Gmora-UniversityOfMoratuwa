@@ -12,7 +12,7 @@ and **does the multi-agent design beat a single agent** (proposal section 6).
 | `suwapath` | three person agents and the independent verifier |
 
 `EVAL-1` All arms use the same chat model, tools (including the red-flag rules and the clash list),
-triggers, seed data and budget. Only the architecture differs. The fake provider is refused
+triggers, seed data and budget. Only the architecture differs. The offline provider is refused
 (`GW-14`).
 
 ### Ablations (which part of the design causes the gain)

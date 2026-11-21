@@ -76,7 +76,7 @@ true for `uncertain`, `possible` and `signs`.
 
 `IMG-6` If weights are missing or the checksum fails, the model is **unavailable**: the upload is
 still stored and attached to the record, the result is `screening_unavailable`, and the doctor is
-told to review the image directly. There is no fake image model.
+told to review the image directly. There is no offline stand-in for the image model.
 
 ### Flow
 

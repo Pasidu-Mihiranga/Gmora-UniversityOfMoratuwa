@@ -34,7 +34,7 @@ project/
   main.py                 application entry point (CLI: api, worker, agents, migrate, seed, eval, ...)
   requirements.txt        Python dependencies (pinned)
   suwapath/
-    contracts/            shared types, events, ports, fakes (the only shared dependency)
+    contracts/            shared types, events, ports, test doubles (the only shared dependency)
     platform/             technical kernel (db, events, clock, crypto, gateway, http)
     modules/<name>/       one folder per module: domain, application, adapters, api
     bootstrap.py          composition root (the only place that wires modules)
@@ -153,7 +153,7 @@ named in the spec.
 
 - **Critical** (consent, encryption, PHI minimization, red flags, verifier, booking concurrency,
   event idempotency, case transitions): test first, every edge case in the spec.
-- **Important** (agents with the fake provider, tools, navigation, adherence, timers, routes): happy
+- **Important** (agents with the offline provider, tools, navigation, adherence, timers, routes): happy
   path and main failure path.
 - **Normal** (UI pages, formatting, admin screens): type checks and a smoke test where cheap.
 - Tests never call paid model APIs. Real providers run only in `python main.py eval`.

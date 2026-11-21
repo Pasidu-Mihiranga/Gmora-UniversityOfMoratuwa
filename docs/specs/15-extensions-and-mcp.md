@@ -17,7 +17,7 @@ Nothing scans packages or uses plugin frameworks.
 | `report_parsers` | `ReportParser` | reports | text layer, vision, OCR | class with `can_parse` and `parse` |
 | `verifier_checks` | `VerifierCheck` | verifier | scope, wording, urgency, sources, canary, format | class returning `CheckResult` |
 | `notification_channels` | `NotificationChannel` | notifications | in-app, SMS (no-op sender) | class with `send` |
-| `model_providers` | `ChatModel`, `DecisionModel` | platform | gemini, openai_compatible, decisions, fake | adapter + capabilities |
+| `model_providers` | `ChatModel`, `DecisionModel` | platform | gemini, openai_compatible, decisions, offline | adapter + capabilities |
 
 ## 2. Feature flags
 

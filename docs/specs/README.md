@@ -20,7 +20,7 @@ every issue is built against.
 | [03-events-and-processes.md](03-events-and-processes.md) | Event envelope and catalog, outbox, case event log, workers, timers, clock |
 | [04-security-and-privacy.md](04-security-and-privacy.md) | Identity, access control, consent, encryption, PHI minimization, audit |
 | [05-agents-and-verifier.md](05-agents-and-verifier.md) | Agent interface, agent communication protocol, the four agents, verifier |
-| [06-model-gateway.md](06-model-gateway.md) | Providers, capabilities, budgets, fake mode, prompts |
+| [06-model-gateway.md](06-model-gateway.md) | Providers, capabilities, budgets, offline mode, prompts |
 | [07-clinical-safety.md](07-clinical-safety.md) | Urgency, red flags, emergency lane, wording rules, clash list |
 | [08-care-navigation-booking.md](08-care-navigation-booking.md) | Care programmes, adherence, routing, matching, trip planning, booking |
 | [09-imaging-and-reports.md](09-imaging-and-reports.md) | Chest X-ray screening, model manifests, lab report reading |
@@ -43,7 +43,7 @@ every issue is built against.
 2. Consent and urgency floors are enforced in code, never only in prompts (`SEC-20`, `SAF-3`).
 3. The verifier fails closed (`VER-9`).
 4. The doctor approves every clinical reply (`AGT-30`).
-5. Fake LLM mode never simulates imaging or model verification (`GW-14`, `IMG-6`).
+5. Offline LLM mode never simulates imaging or model verification (`GW-14`, `IMG-6`).
 6. Model metrics carry their status (`unvalidated`, `reported`, `validated`); no claim beyond the
    evidence, and no sensitivity claim until measured (`IMG-4`).
 7. MCP is P2, built only after the core Amma workflow works (`EXT-10`).

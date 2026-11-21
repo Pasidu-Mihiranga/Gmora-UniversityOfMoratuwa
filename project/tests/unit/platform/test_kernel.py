@@ -56,7 +56,7 @@ def test_logs_drop_args_and_unknown_extras() -> None:
 
 
 def test_provider_resolution() -> None:
-    assert Settings(_env_file=None).resolved_model_provider == "fake"
+    assert Settings(_env_file=None).resolved_model_provider == "offline"
     assert Settings(_env_file=None).resolved_decision_provider == "none"
     with_keys = Settings(
         _env_file=None, google_application_credentials="/x.json", openrouter_api_key=SecretStr("k")

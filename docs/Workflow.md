@@ -64,7 +64,7 @@ offered another doctor.
 | Phase | Dates | Output |
 |---|---|---|
 | Plan | 27 Nov | specifications, decisions (ADRs), work breakdown |
-| Foundation (Wave 0) | 27 to 28 Nov | contracts, platform, event backbone, gateway with fake mode, schema, module stubs, frontend foundation, CI; verified locally |
+| Foundation (Wave 0) | 27 to 28 Nov | contracts, platform, event backbone, gateway with offline mode, schema, module stubs, frontend foundation, CI; verified locally |
 | Data prep | from 27 Nov | routing labels, red-flag vignettes, attack set, model cards |
 | Modules (Wave 1) | 29 Nov | modules implemented against frozen ports, in parallel |
 | Agents (Wave 2) | 29 to 30 Nov | runtime, tools, three agents, baseline, verifier |
@@ -84,5 +84,5 @@ offered another doctor.
 
 ### Running the project
 See the README for setup. Summary: copy `.env.example` to `.env`, `docker compose up` in `project/`,
-open the web app, log in with a demo account. Without model keys everything runs in simulated mode,
+open the web app, log in with a demo account. Without model keys everything runs in offline mode,
 clearly labelled.

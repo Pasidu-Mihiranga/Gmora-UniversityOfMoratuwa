@@ -31,6 +31,7 @@ New decisions get the next number in a new file (no edits to accepted records; s
 | [0024](0024-customisable-agents-through-typed-settings.md) | Customisable agents through typed settings in layers | Accepted |
 | [0025](0025-layered-guardrails-and-canonical-shared-cache.md) | Layered guardrails and a canonical-topic shared cache | Accepted |
 | [0026](0026-pgvector-now-qdrant-adapter-later.md) | pgvector now; Qdrant as a later adapter behind the same interface | Accepted |
+| [0027](0027-offline-mode-and-test-double-naming.md) | "Offline mode" and "test doubles" instead of "fake" | Accepted |
 
 ## Template
 

@@ -95,7 +95,7 @@ grants. Safety rules (`07-clinical-safety.md`) cannot be switched off by any rul
 `SEC-15` A patient, guardian or doctor can type a rule ("Share my medicines with my son, not my
 chats"). The flow is: parse with the gateway into a typed `RuleProposal` (structured output) ->
 validate (`SEC-14`) -> show back in plain words in the person's language -> person confirms ->
-stored as a new version -> `consent.rule_confirmed`. With the fake provider, parsing uses a small
+stored as a new version -> `consent.rule_confirmed`. With the offline provider, parsing uses a small
 deterministic pattern set and the UI also offers a form.
 
 ## 3. Encryption at rest (envelope encryption)

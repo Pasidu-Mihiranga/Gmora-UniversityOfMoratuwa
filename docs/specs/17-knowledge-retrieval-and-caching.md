@@ -142,7 +142,7 @@ expire after 7 days and are deleted with the patient's key (crypto-shredding).
 
 ### Never cached
 Symptom intake, urgency assessments, emergency messages, cross-role messages, doctor briefs and
-replies, anything produced by the fake provider.
+replies, anything produced by the offline provider.
 
 ### Provider-side caching
 `KNW-36` System prompts, tool definitions and corpus preambles stay byte-stable per prompt version so

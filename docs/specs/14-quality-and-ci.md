@@ -8,21 +8,21 @@ shared state. Everything else gets light tests. No coverage gates, no test theat
 | Risk tier | Code | What is required |
 |---|---|---|
 | **Critical** | consent and access policy, encryption, PHI minimization, red flags and urgency floor, verifier, booking concurrency, event delivery idempotency, case aggregate transitions | tests written first; every edge case named in the spec has a test; property tests for the access policy |
-| **Important** | agents (with the fake provider), tools, navigation ranking, adherence, timers, API routes | happy path plus the main failure path per use case |
+| **Important** | agents (with the offline provider), tools, navigation ranking, adherence, timers, API routes | happy path plus the main failure path per use case |
 | **Normal** | UI pages, formatting, admin screens | type checks and a smoke render where cheap |
 
 `QA-1` Every port in `contracts/ports` has one **shared contract test suite** in
-`contracts/testing/`. Both the real implementation and the in-memory fake must pass it. This keeps
-fakes honest, so code built against fakes works against the real thing.
+`contracts/testing/`. Both the real implementation and its test double must pass it. This keeps
+test doubles honest, so code built against test doubles works against the real thing.
 
-`QA-2` Model calls in tests use the fake provider or recorded responses. Tests never call paid APIs.
+`QA-2` Model calls in tests use the offline provider or recorded responses. Tests never call paid APIs.
 Real providers are exercised only by `python main.py eval`.
 
 `QA-3` Integration tests run against real Postgres (the CI service or local docker compose), not
 SQLite.
 
 `QA-4` One API-level end-to-end test of the Amma scenario (and its red-flag and timeout variants)
-runs with the fake provider. It is the integration gate for the whole team (issue I02).
+runs with the offline provider. It is the integration gate for the whole team (issue I02).
 
 `QA-5` Security suites that run in CI: IDOR sweep over every route with a patient ID (another
 patient's ID must give 404), consent property tests, PHI egress tests with canary identifiers.

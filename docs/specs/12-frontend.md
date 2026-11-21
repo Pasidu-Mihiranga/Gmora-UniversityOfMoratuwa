@@ -80,7 +80,7 @@ one primary action per screen, plain words, no medical jargon.
 `FE-21` Language switch (සිංහල / English) is visible on every patient and guardian screen. All
 static text comes from `i18n`. Agent replies arrive already in the patient's language.
 
-`FE-22` Badges: "Simulated AI" on anything produced by the fake provider; "Checked by rules only"
+`FE-22` Badges: "Demo mode · sample replies" on anything produced by the offline provider; "Checked by rules only"
 when model verification did not run; "Unvalidated screening model" on imaging lines for doctors.
 
 `FE-23` Patients never see model probabilities, imaging scores or diagnosis words (`SAF-20`).

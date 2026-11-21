@@ -53,12 +53,12 @@ drops images because the provider has no vision).
 | `gemini` | Gemini on Vertex AI | ADC from `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_API_KEY` | default real chat provider |
 | `openai_compatible` | OpenAI, OpenRouter, Groq, Ollama | `OPENAI_COMPAT_API_KEY` (none for Ollama) | `OPENAI_COMPAT_PRESET` sets base URL; capabilities per preset and model |
 | `decisions` | Jev (`typesafe/jev-1.14`) via OpenRouter Decisions API | `OPENROUTER_API_KEY` | verifier, guardian week score, image gate |
-| `fake` | deterministic scripted responses | none | default when no chat keys are set |
+| `offline` | deterministic scripted responses | none | default when no chat keys are set |
 
 Configuration:
 
 ```
-MODEL_PROVIDER=fake|gemini|openai_compatible
+MODEL_PROVIDER=offline|gemini|openai_compatible
 MODEL_NAME=                     # e.g. the Gemini Flash model id on Vertex
 MODEL_NAME_FAST=                # optional smaller model for short structured calls
 OPENAI_COMPAT_PRESET=openai|openrouter|groq|ollama
@@ -87,7 +87,7 @@ separately from the top probability; policies that say "confidence" (`VER-4`) us
 policies that say "top probability" (`KNW-3`) use `probabilities`. Measured on one synthetic call:
 1.3 s, USD 0.000016. The adapter records `model`, `usage.cost` and latency in `ops_model_calls`.
 
-`GW-3` If `MODEL_PROVIDER` is unset: use `gemini` when Google credentials exist, else `fake`.
+`GW-3` If `MODEL_PROVIDER` is unset: use `gemini` when Google credentials exist, else `offline`.
 If `DECISION_PROVIDER` is unset: use `decisions` when `OPENROUTER_API_KEY` exists, else `none`
 (verifier stage 1 only, `VER-10`).
 
@@ -136,15 +136,15 @@ prompt caching can apply.
 cost tiers of `17-knowledge-retrieval-and-caching.md` (`KNW-1`): rules, then caches, then a decision
 model classifier with direct tool calls, and only then the chat model.
 
-## 6. Fake mode
+## 6. Offline mode
 
-`GW-14` The fake provider:
+`GW-14` The offline provider:
 - returns deterministic responses from scripted handlers keyed by `(agent_kind, purpose, step)`
   with fixtures for the seeded scenarios (Amma and variants) in Sinhala and English;
 - marks every response `simulated=True`; this flag travels to case events and messages, and the UI
-  shows a "Simulated AI" badge on anything it produced;
+  shows a "Demo mode · sample replies" label on anything it produced;
 - is **never** used for imaging (not an LLM) or for verifier model checks (the decision provider
-  has no fake; see `VER-10`);
+  has no offline stand-in; see `VER-10`);
 - is refused by the evaluation runner, except `--smoke` runs whose results are labelled invalid.
 
 ## 7. Prompts

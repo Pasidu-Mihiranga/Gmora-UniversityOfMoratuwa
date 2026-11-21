@@ -23,7 +23,7 @@ dependencies.
 
 | Wave | When | What | Who |
 |---|---|---|---|
-| 0 Foundation | Fri 27 to Sat 28 Nov | contracts, platform, events, gateway (fake), schema, bootstrap with stubs, frontend foundation, CI | Oshada with Claude Code, locally |
+| 0 Foundation | Fri 27 to Sat 28 Nov | contracts, platform, events, gateway (offline mode), schema, bootstrap with stubs, frontend foundation, CI | Oshada with Claude Code, locally |
 | D Data prep | from Fri 27 Nov (no code, starts now) | DDXPlus labels, red-flag vignettes, injection attacks, model cards | any member |
 | 1 Modules | Sun 29 Nov | module implementations against frozen ports | all five, in parallel |
 | 2 Agents | Sun 29 to Mon 30 Nov | agent runtime, tools, three agents, baseline, verifier | three members |
@@ -75,10 +75,10 @@ fixtures.)
 |---|---|---|
 | W0.1 | Backend skeleton: `main.py` CLI, `requirements.txt`, `pyproject.toml` (ruff, pytest, mypy, import-linter), docker compose (Postgres 16, Jaeger), Dockerfile | 01 |
 | W0.2 | `contracts/`: ids, enums, errors, principal, FHIR resource models, event envelope and catalog payloads, agent protocol and intents, tool spec, API models, all ports | 02, 03, 05, 10 |
-| W0.3 | `contracts/testing/`: in-memory fakes for every port and shared contract test suites | 14 QA-1 |
+| W0.3 | `contracts/testing/`: in-memory test doubles for every port and shared contract test suites | 14 QA-1 |
 | W0.4 | `platform/`: config, db, UnitOfWork, clock (system and simulated), ids, JSON logging with PHI filter, tracing, problem+json errors, app factory, auth dependency, registries, flags; HTTP security layer: headers and CSP, CORS, CSRF check on refresh, `no-store`, body limits, rate limiter, route role table check | 01, 04, 20 |
 | W0.5 | Event backbone: outbox, dispatcher, inbox idempotency, retries, dead letters, timers, agent job queue, with critical tests | 03 |
-| W0.6 | Model gateway core: ports, pipeline (budget, capability check, timeout and retry, usage log), fake provider with Amma fixtures | 06 |
+| W0.6 | Model gateway core: ports, pipeline (budget, capability check, timeout and retry, usage log), offline provider with Amma fixtures | 06 |
 | W0.7 | Initial migration `0001_initial`: every table and index in `11-persistence.md` | 11 |
 | W0.8 | Composition root and module stubs: every module package with `register()`, routers mounted with 501 stubs and real response models, so the full OpenAPI exists | 01, 10 |
 | W0.9 | Frontend foundation: design tokens and UI kit brought across, AppShell, all routes declared with placeholders, auth flow, TanStack Query, typed client from OpenAPI, i18n scaffold, badges, simple mode tokens, `SafeMarkdown`, banned-API lint rules | 12, 20 |
@@ -144,7 +144,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 |---|---|---|---|---|
 | A01 | P0 | Agent runtime | W0 | registry; AgentContext; ToolInvoker (allowlist, risk, audit); Messenger via outbox; supervisor subscriptions `EVT-13`; limits; LangGraph checkpointer; `main.py agents` |
 | A02 | P0 | Tool adapters | A01, M05, M06, M07, M08, M09, M10 | every tool in `05 §4` as a `ToolSpec` with JSON Schema; handlers pass the agent principal; argument IDs checked against scope |
-| A03 | P0 | Patient companion | A02, M16, M13, K01, K03 | intake (max 3 questions per turn), safety first, routing, holds and proposals, answers agent requests, streams replies, si and en; fake fixtures for Amma and variants |
+| A03 | P0 | Patient companion | A02, M16, M13, K01, K03 | intake (max 3 questions per turn), safety first, routing, holds and proposals, answers agent requests, streams replies, si and en; offline-mode fixtures for Amma and variants |
 | A04 | P0 | Guardian agent | A02, M16 | week score via Jev (fallback rules when no key); check-in first policy; alerts within consent; follow-up timer; guardian rules as triggers |
 | A05 | P0 | Doctor assistant | A02, M16 | sourced brief in doctor's order; clashes from safety; missing-fact requests; reply drafting; approval interrupt with 4 h timeout and resume |
 | A06 | P0 | Single-agent baseline (two arms) | A02 | same interface, tools, model and budget; consent in prompt; optional verifier tool |
@@ -172,7 +172,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | ID | P | Title | Blocked by | Acceptance criteria (summary) |
 |---|---|---|---|---|
 | I01 | P0 | Seed loader | M01, M03, M05, M08, M09 | `main.py seed` loads W0.11 fixtures through ports; idempotent; reset endpoint |
-| I02 | P0 | Amma end to end (API level) | A03, A04, A05, I01 | scenario and 3 variants pass with the fake provider; the team's integration gate |
+| I02 | P0 | Amma end to end (API level) | A03, A04, A05, I01 | scenario and 3 variants pass with the offline provider; the team's integration gate |
 | I03 | P1 | Browser walkthrough (Playwright, local only) | I02, U01, U03, U05, U06 | scripted demo run used for rehearsal and recording |
 | E00 | P0 | Pre-registration | D01, D03 | `docs/evaluation/PREREGISTRATION.md` with hypotheses H1 to H8, metrics, arms, sizes, tests and decision rules, committed before any real-model run (`EVAL-9`); `SOURCES.md` |
 | E01 | P0 | CareBench harness | A06, M12, E00 | arms including ablations (`EVAL-1a`), runner, seeds, budget guard, metrics, stats, reports |
@@ -200,5 +200,5 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 
 After Wave 0 there are 19 module issues with no dependencies on each other except M05 (on M03 and
 M04). With five people that is three to four issues each on Sunday, each small because the contract,
-tables, fakes and stubs already exist. Agents (Wave 2) can start on fakes before all modules merge;
+tables, test doubles and stubs already exist. Agents (Wave 2) can start on test doubles before all modules merge;
 screens (Wave 3) start on generated types and fixtures.

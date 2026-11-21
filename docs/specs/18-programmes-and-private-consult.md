@@ -83,7 +83,7 @@ how to delete. Starting the session is an explicit action.
 
 `PRV-6` Provider: the configured chat provider must have no data retention for this purpose
 (Vertex AI, or OpenRouter restricted to zero-retention providers). If the configured provider cannot
-guarantee that, the private consult is disabled and says so. The fake provider works (labelled).
+guarantee that, the private consult is disabled and says so. The offline provider works (labelled).
 
 ### Optional saved history (client-side encryption)
 `PRV-7` By default nothing is saved: the conversation lives only in browser memory and disappears

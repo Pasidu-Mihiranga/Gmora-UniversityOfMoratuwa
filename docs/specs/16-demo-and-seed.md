@@ -48,7 +48,7 @@ Demo passwords are set from `DEMO_PASSWORD` in `.env` and refused when `SUWAPATH
 | 7 | Dr. Silva reads the brief (under 2 minutes), writes notes. The assistant drafts a Sinhala reply. Verifier checks it. Dr. Silva approves. | `reply_draft` -> verifier -> `DoctorApprovalRequested` -> approve -> `ReplyDelivered` |
 | 8 | Amma receives the approved reply in Sinhala. The case timeline shows every step; the admin page shows cost, latency and verdicts. | `cases.reply_delivered` |
 
-### Variants (also scripted for the fake provider and tests)
+### Variants (also scripted for the offline provider and tests)
 - **Red flag:** in step 3 Amma says one side of her face feels weak -> RF-NEURO-001 -> emergency lane:
   booking stops, 1990 card, Nimal gets the emergency alert within seconds.
 - **Consent:** Nimal asks the guardian agent "what did my mother say in her chat?" -> refused by
