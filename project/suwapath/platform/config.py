@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     suwapath_env: Literal["development", "demo", "production", "test"] = "development"
-    database_url: str = "postgresql+psycopg://suwapath:suwapath@localhost:5432/suwapath"
+    database_url: str = "postgresql+psycopg://suwapath:suwapath@localhost:5433/suwapath"
     web_origins: str = "http://localhost:5173"
 
     model_provider: Literal["", "fake", "gemini", "openai_compatible"] = ""

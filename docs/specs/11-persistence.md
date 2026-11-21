@@ -82,8 +82,8 @@ this table or added by its pull request. Reviewers check `EXPLAIN` for new list 
 
 ## 5. Migrations
 
-`DB-9` Alembic with one linear history. Wave 0 creates `0001_initial` containing every table and
-index above. Later changes add new migration files. If two pull requests create migrations with the
+`DB-9` Alembic with one linear history. Wave 0 creates `0001` (platform tables: outbox, inbox,
+timers, clock, flags, idempotency keys, agent jobs) and `0002` (every module table and index above). Later changes add new migration files. If two pull requests create migrations with the
 same parent, the second rebases and sets its `down_revision` to the first (no merge migrations).
 
 `DB-10` CI runs `alembic upgrade head` on an empty database and `alembic check` (models and
