@@ -123,7 +123,8 @@ schema in `contracts/agents.py`.
 - **Triggers:** `cases.case_opened`, `cases.patient_message_received`, requests from other agents.
 - **Judgements:** what to ask next (at most 3 follow-up questions per turn of intake, max 6 total);
   which doctors to offer; how to phrase answers to the patient.
-- **Tools:** `safety.assess`, `navigation.route`, `navigation.find_doctors`,
+- **Tools:** `safety.assess`, `navigation.start`, `navigation.answer`, `navigation.result`,
+  `navigation.find_doctors`,
   `navigation.plan_trip`, `booking.hold_slot`, `record.read_summary`, `care.log_dose`,
   `reports.explain` (draft only), `knowledge.retrieve`, `cases.append`.
 - **Tiers:** every patient message is routed by `KNW-1` (rules, caches, classifier with direct tool
@@ -149,7 +150,8 @@ schema in `contracts/agents.py`.
 - **Judgements:** what the doctor must know (brief), what is missing, how to turn the doctor's
   notes into a patient reply.
 - **Brief:** sections in the doctor's preferred order (default: alerts and clashes, reason for
-  visit, conditions, medications, allergies, recent results, adherence, imaging flag, open
+  visit, navigation summary (findings, negatives, urgency, specialties considered; never hypotheses,
+  `NAV-8`), conditions, medications, allergies, recent results, adherence, imaging flag, open
   questions). **Every line carries provenance IDs** (`CON-9`).
 - **Clashes:** computed by `safety.check_clashes` (deterministic), never by the model.
 - **Missing facts:** sends `confirm_missing_fact` to the companion; updates the brief on answer.

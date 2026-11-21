@@ -24,6 +24,7 @@ New decisions get the next number in a new file (no edits to accepted records; s
 | [0017](0017-two-pneumonia-models-selected-by-age.md) | Two pneumonia models selected by age, unvalidated until measured | Accepted |
 | [0018](0018-knowledge-rag-with-hybrid-retrieval.md) | Knowledge RAG with hybrid retrieval in Postgres | Accepted |
 | [0019](0019-llm-only-when-needed.md) | LLM only when needed: cost tiers, intent classifier and two caches | Accepted |
+| [0020](0020-knowledge-driven-navigation-engine.md) | Knowledge-driven navigation engine with information-gain questioning | Accepted |
 
 ## Template
 

@@ -37,6 +37,7 @@ Critical path: **W0 -> M10 cases -> A01 runtime -> A03, A05 agents -> I02 Amma e
 
 ```mermaid
 flowchart LR
+  D08 --> M07
   W0[Wave 0 foundation] --> M01 & M02 & M03 & M04 & M06 & M07 & M08 & M09 & M10 & M11 & M12 & M14 & M15 & M16 & K01
   K01 --> K02
   M04 --> K02
@@ -97,6 +98,7 @@ green; login page renders; every route returns 501 or a placeholder; CI green; b
 | D04 | P0 | Pneumonia model cards and release | for general and paediatric: class order, preprocessing, training data, split, metrics with threshold, age range; weights uploaded as a GitHub release; `fetch_models.py` downloads and checks SHA-256 |
 | D06 | P0 | Retrieval query set | 120 questions (60 si, 60 en) with gold chunk IDs and intents; `project/eval/datasets/retrieval/` |
 | D07 | P0 | Knowledge corpus curation | about 60 documents per `KNW-11`, each with source, publisher, licence and language; Sinhala versions where available; `project/suwapath/modules/knowledge/corpus/` |
+| D08 | P0 | Navigation knowledge base | DDXPlus conditions and evidences mapped to our concept IDs; elder-care and chronic-disease extension groups with references; `routing.yaml` from D01 labels; `questions.yaml` in si and en; `modules/navigation/kb/` |
 | D05 | P1 | Sinhala content review | all `si.yaml` safety strings and UI `si.ts` strings reviewed by a native speaker |
 
 ## 6. Wave 1: modules (all blocked by Wave 0 only, unless listed)
@@ -112,7 +114,8 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | M04 | P0 | crypto: envelope encryption | W0 | critical | `LocalKeyProvider`; AES-GCM with AAD; encrypted column types; DEK cache TTL; crypto-shred; tests for AAD swap rejection and nonce uniqueness (`SEC-20` to `SEC-26`) |
 | M05 | P0 | record: FHIR-shaped record | M03, M04 | critical | resources of `02` table stored with encrypted fields; every read through `AccessPolicy` with field filtering; provenance; FHIR Bundle export; IDOR tests |
 | M06 | P0 | safety: lexicon, red flags, wording, clashes | W0 | critical | rules v1 ported with firing and near-miss tests in si and en; floor logic `SAF-3`; banned wording files with tests; clash checker with demo formulary and allergy classes |
-| M07 | P0 | navigation: routing and matching | W0 | important | `route` with catalog-bounded model step; `find_doctors` with ranking rules and bounding box; `plan_trip` bounded search (P1 part) |
+| M07 | P0 | navigation engine | W0, D08 | critical | knowledge graph loader with versions; findings extraction; ambiguity check; Bayes scoring; information-gain question choice; stop and decide rules `NAV-1` to `NAV-9`; red-flag screen never capped; tests per safeguard |
+| M17 | P0 | navigation: doctor matching, direct channelling, trips | W0 | important | `find_doctors` ranking `NAV-10` with no commercial input; bounding box; same-day filter and slot extraction `NAV-13`; `plan_trip` bounded search (P1 part) |
 | M08 | P0 | booking: sessions, holds, appointments | W0 | critical | holds with TTL timer; confirm idempotent; partial unique index prevents double booking (concurrency test with 20 parallel confirms); `SafetyStop` in emergency; hospital views |
 | M09 | P0 | care: doses, adherence, alert rules | W0 | important | dose timers rolling 48 h; taken and missed paths; adherence summary; alert rule registry with 3 types; guardian rules respect grants |
 | M10 | P0 | cases: aggregate, timeline, SSE | W0 | critical | event-sourced case with state machine `02 §5`; optimistic locking; timeline projection filtered by access; SSE with tickets and Last-Event-ID replay |

@@ -13,7 +13,7 @@ Every patient-facing answer ends in navigation: a specialty, a doctor, a booking
 | `emergency` | "This may be an emergency. Call 1990 now." | 1990 card, nearest emergency unit, guardian emergency alert | stopped |
 | `urgent_24h` | "Please see a doctor today." | earliest same-day slot, guardian informed per consent | allowed, today only |
 | `soon_72h` | "Please see a doctor within 3 days." | slots within 72 h | allowed |
-| `routine` | "Book a visit at a time that suits you." | normal search | allowed |
+| `routine` | "Please see a doctor within 2 weeks." | slots within 14 days | allowed |
 
 Sinhala wording for every message lives in `modules/safety/content/si.yaml` and is reviewed by a
 native speaker on the team before the demo.
