@@ -1,6 +1,6 @@
 # ADR-0017: Two pneumonia models selected by age, unvalidated until measured
 
-Status: Accepted (27 Nov 2026)
+Status: Superseded by ADR-0021 (27 Nov 2026)
 
 ## Context
 
