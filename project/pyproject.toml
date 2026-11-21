@@ -54,3 +54,34 @@ name = "Platform never imports modules (ARC-8)"
 type = "forbidden"
 source_modules = ["suwapath.platform"]
 forbidden_modules = ["suwapath.modules"]
+
+[[tool.importlinter.contracts]]
+name = "Modules never import each other (ARC-9)"
+type = "independence"
+modules = [
+  "suwapath.modules.identity",
+  "suwapath.modules.consent",
+  "suwapath.modules.record",
+  "suwapath.modules.audit",
+  "suwapath.modules.safety",
+  "suwapath.modules.navigation",
+  "suwapath.modules.booking",
+  "suwapath.modules.care",
+  "suwapath.modules.imaging",
+  "suwapath.modules.reports",
+  "suwapath.modules.knowledge",
+  "suwapath.modules.private",
+  "suwapath.modules.memory",
+  "suwapath.modules.notifications",
+  "suwapath.modules.cases",
+  "suwapath.modules.verifier",
+  "suwapath.modules.agents",
+  "suwapath.modules.ops",
+]
+
+[[tool.importlinter.contracts]]
+name = "Modules do not import the composition root (ARC-10)"
+type = "forbidden"
+source_modules = ["suwapath.modules"]
+forbidden_modules = ["suwapath.bootstrap"]
+allow_indirect_imports = true

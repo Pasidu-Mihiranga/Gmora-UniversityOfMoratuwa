@@ -5,6 +5,7 @@ Usage:
     python main.py migrate [revision]
     python main.py worker
     python main.py clock show | advance 4h
+    python main.py openapi [--out path]
 
 Further commands (worker, agents, migrate, seed, eval, openapi, clock, mcp) are added as their
 components land. See docs/specs/01-architecture.md section 7.
@@ -22,7 +23,7 @@ def _cmd_api(args: argparse.Namespace) -> int:
     import uvicorn
 
     uvicorn.run(
-        "suwapath.platform.http.app:create_app",
+        "suwapath.bootstrap:create_api",
         factory=True,
         host=args.host,
         port=args.port,
@@ -42,31 +43,26 @@ def _cmd_migrate(args: argparse.Namespace) -> int:
 def _cmd_worker(args: argparse.Namespace) -> int:
     import asyncio
 
-    from suwapath.platform.clock import Clock, SystemClock
-    from suwapath.platform.clock_store import SharedClock
-    from suwapath.platform.config import get_settings
-    from suwapath.platform.db import Database
-    from suwapath.platform.events.subscribers import SubscriberRegistry
+    from suwapath.bootstrap import build_container
     from suwapath.platform.events.worker import Worker, install_signal_handlers
     from suwapath.platform.logging import configure_logging
-    from suwapath.platform.uow import UnitOfWorkFactory
 
     configure_logging()
-    settings = get_settings()
 
     async def run() -> None:
-        db = Database(settings.database_url)
-        shared = SharedClock() if settings.dev_tools_enabled else None
-        clock: Clock = shared if shared is not None else SystemClock()
-        # Module subscribers are registered by bootstrap.py once the modules exist (W0.8).
+        container = build_container()
         worker = Worker(
-            db, UnitOfWorkFactory(db, clock), SubscriberRegistry(), settings.database_url, shared
+            container.db,
+            container.uow_factory,
+            container.subscribers,
+            container.settings.database_url,
+            container.shared_clock,
         )
         install_signal_handlers(worker)
         try:
             await worker.run()
         finally:
-            await db.dispose()
+            await container.db.dispose()
 
     asyncio.run(run())
     return 0
@@ -107,6 +103,19 @@ def _cmd_clock(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_openapi(args: argparse.Namespace) -> int:
+    import json
+    from pathlib import Path
+
+    from suwapath.bootstrap import create_api
+
+    schema = create_api().openapi()
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).write_text(json.dumps(schema, indent=2, sort_keys=True) + "\n")
+    print(f"Wrote {args.out} ({len(schema['paths'])} paths)")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="main.py", description="SuwaPath command line")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -128,6 +137,10 @@ def build_parser() -> argparse.ArgumentParser:
     clock.add_argument("action", choices=["show", "advance"])
     clock.add_argument("duration", nargs="?", type=_parse_duration, default=None)
     clock.set_defaults(handler=_cmd_clock)
+
+    openapi = sub.add_parser("openapi", help="write the OpenAPI document for the frontend (API-3)")
+    openapi.add_argument("--out", default="frontend/src/shared/api/openapi.json")
+    openapi.set_defaults(handler=_cmd_openapi)
 
     return parser
 
