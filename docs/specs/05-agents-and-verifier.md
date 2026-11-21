@@ -168,7 +168,20 @@ One agent with all records of the case in its context, the consent policy writte
 the same tools, triggers, model and budget. A second arm adds the verifier as a tool it may call.
 It is registered only when `SUWAPATH_ENV` is `development` or the eval runner is active.
 
-## 5. Tools
+## 5. Edge cases and the long tail
+
+`AGT-35` We do not write a function for every situation. **Safety-critical edge cases are handled
+explicitly in code** (red flags, consent, verifier, booking races, timeouts, budget exhaustion).
+Everything else is handled by agents composing general tools, following this ladder:
+1. a deterministic rule or tool answers it;
+2. the agent combines existing tools (search, hold, ask, retrieve knowledge, message another agent);
+3. the agent asks one clarifying question;
+4. a safe default (general physician, the soonest safe window, "show this to your doctor");
+5. hand over to a human (the doctor for clinical matters, the patient for consent matters), saying
+   clearly what SuwaPath can and cannot do.
+Agents never invent a capability, a doctor, a slot, a clinical fact or a policy.
+
+## 6. Tools
 
 `AGT-40` A tool is a `ToolSpec(name, description, input_schema, output_schema, risk, data_categories)`
 plus an async handler. Schemas are JSON Schema generated from Pydantic models, which is the MCP tool
@@ -182,7 +195,7 @@ is audited (`AUD-1`) and timed.
 `AGT-42` A tool handler never trusts IDs in arguments: it checks them against the principal's
 `patient_scope` and the case.
 
-## 6. The verifier
+## 7. The verifier
 
 `VER-1` The verifier is a service (`Verifier.check(message) -> Verdict`) invoked by the delivery
 path for every message under `AGT-10`. It never sees the author's prompt or reasoning, only the

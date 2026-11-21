@@ -146,6 +146,28 @@ It is never presented to patients as a guarantee.
 Navigation state per case is stored as case events (`FactRecorded`, `UrgencyAssessed`,
 `RouteSuggested`), so it is replayable and audited.
 
+#### Booking follow-up questions
+
+`NAV-14` Before searching, the companion fills the booking slots it needs and asks only for the ones
+that are missing and matter, **at most 2 questions**, offered as tap choices rather than free text:
+
+| Slot | Default when not asked | Ask when |
+|---|---|---|
+| date window | from the urgency window (`today`, within 3 days, within 2 weeks) | urgency is `soon_72h` or `routine` |
+| time of day | any | always offered as a choice (morning, afternoon, evening, any) |
+| area | patient's home district | the patient may be elsewhere (asked once, remembered for the case) |
+| doctor language | patient's language preferred | never asked, used for ranking |
+| specific doctor or hospital | none | the patient mentioned one, or has a treating doctor in that specialty |
+
+`NAV-15` **Continuity of care.** If the patient already has a treating doctor in the recommended
+specialty, that doctor is offered first ("Continue with Dr. Silva?") when they have a slot within
+the urgency window. Ranking order: clinical fit, continuity, earliest slot in the window, distance,
+fee.
+
+`NAV-16` **Several doctors in one trip only when needed.** The trip planner (`NAV-12`) is offered
+only when the patient has two or more open needs (for example two referrals, or follow-ups due with
+two specialists) or asks for it. It is never forced on a single need.
+
 #### Direct channelling
 
 `NAV-13` "I need to channel Dr. Silva today" is classified as `book_or_find_doctor` (`KNW-3`) with
