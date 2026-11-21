@@ -11,8 +11,19 @@ and **does the multi-agent design beat a single agent** (proposal section 6).
 | `single_verifier` | the same, plus the verifier available as a tool it may call |
 | `suwapath` | three person agents and the independent verifier |
 
-`EVAL-1` All arms use the same chat model, tools, triggers, seed data and budget. Only the
-architecture differs. The fake provider is refused (`GW-14`).
+`EVAL-1` All arms use the same chat model, tools (including the red-flag rules and the clash list),
+triggers, seed data and budget. Only the architecture differs. The fake provider is refused
+(`GW-14`).
+
+### Ablations (which part of the design causes the gain)
+
+| Arm | Removes | Tests the claim |
+|---|---|---|
+| `suwapath_no_verifier` | the verifier | independent checking reduces leaks and unsupported facts |
+| `suwapath_same_model_verifier` | Jev; the verifier uses the agents' own chat model | a *different* model checks better than the author's model (proposal 4.1, refs [9], [10]) |
+| `suwapath_shared_context` (P1) | context isolation; all agents read one shared context | per-person context isolation reduces leakage |
+
+`EVAL-1a` Ablations run on the `privacy` and `briefs` suites (where the claims live) to control cost.
 
 ## 2. Metrics
 
@@ -114,6 +125,34 @@ Two kinds of retrieval, measured separately:
 
 `EVAL-8` **Fairness:** every suite reports results broken down by language (si, en) and by age band
 (under 60, 60 and over), as the proposal promises in its risks section.
+
+## 4b. Pre-registered hypotheses
+
+`EVAL-9` Before any real-model run, `docs/evaluation/PREREGISTRATION.md` is committed with the
+hypotheses, primary metrics, arms, sample sizes, statistical tests and decision rules below. The
+commit time is the evidence that targets were set before testing. Results that contradict a
+hypothesis are reported, not dropped.
+
+| ID | Hypothesis | Primary metric | Decision rule |
+|---|---|---|---|
+| H1 | SuwaPath leaks less private data than the single agent | leakage rate (`privacy`) | supported if the paired 95% CI of the difference excludes 0 and SuwaPath <= 1% |
+| H2 | SuwaPath briefs contain at most half the unsupported facts of the single agent | unsupported facts per brief (`briefs`) | ratio <= 0.5 with CI upper bound < 1 |
+| H3 | No missed allergies or clashes in SuwaPath briefs | missed count | 0 across all runs |
+| H4 | SuwaPath routes at least 95% of emergencies to 1990 in each language | emergency recall (`redflags`, `routing`) | lower CI bound reported; target met on point estimate per language |
+| H5 | SuwaPath costs at most 3x the single agent per case | cost per case | point estimate <= 3x |
+| H6 | On simple questions the single agent ties or wins | accuracy and latency on `general_health_question` items | reported either way |
+| H7 | The verifier causes part of the gain | H1 and H2 metrics, `suwapath` vs `suwapath_no_verifier` | CI of difference excludes 0 |
+| H8 | A different-model verifier beats a same-model verifier | H1 and H2 metrics, `suwapath` vs `suwapath_same_model_verifier` | CI of difference excludes 0 |
+
+`EVAL-10` Claims in slides, docs and the video use only supported hypotheses, with the numbers and
+their confidence intervals. Unsupported or reversed hypotheses are stated as findings.
+
+## 4c. Independence
+
+`EVAL-11` Labels are made independently of the system: two labellers per item, a third resolves
+disagreements, Cohen's kappa reported; labellers do not see system outputs. Brief and leak checks
+are deterministic matchers where possible; human spot checks are blind to the arm. Every dataset
+source and every cited study is listed in `docs/evaluation/SOURCES.md`.
 
 ## 5. Protocol
 

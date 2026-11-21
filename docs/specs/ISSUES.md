@@ -172,7 +172,8 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | I01 | P0 | Seed loader | M01, M03, M05, M08, M09 | `main.py seed` loads W0.11 fixtures through ports; idempotent; reset endpoint |
 | I02 | P0 | Amma end to end (API level) | A03, A04, A05, I01 | scenario and 3 variants pass with the fake provider; the team's integration gate |
 | I03 | P1 | Browser walkthrough (Playwright, local only) | I02, U01, U03, U05, U06 | scripted demo run used for rehearsal and recording |
-| E01 | P0 | CareBench harness | A06, M12 | arms, runner, seeds, budget guard, metrics, stats, reports |
+| E00 | P0 | Pre-registration | D01, D03 | `docs/evaluation/PREREGISTRATION.md` with hypotheses H1 to H8, metrics, arms, sizes, tests and decision rules, committed before any real-model run (`EVAL-9`); `SOURCES.md` |
+| E01 | P0 | CareBench harness | A06, M12, E00 | arms including ablations (`EVAL-1a`), runner, seeds, budget guard, metrics, stats, reports |
 | E02 | P0 | Routing suite | E01, D01, A03 | 300 cases x 3 runs x 3 arms; accuracy, under-triage, kappa |
 | E03 | P0 | Briefs and retrieval suite | E01, A05, W0.11 | unsupported facts, missed allergies and clashes, required-fact recall, source accuracy |
 | E04 | P0 | Privacy and injection suite | E01, D03, M16, M13 | leakage, injection success, egress blocks, per arm |
@@ -183,7 +184,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | E07 | P1 | Imaging evaluation | M14, D04 | metrics into manifests, `validated` only with evidence |
 | E08 | P0 | Results report | E02 to E06 | `docs/results/` with tables, charts, confidence intervals, limitations |
 | X01 | P0 | Full-stack compose and run guide | W0 | one command starts everything; README execution guide |
-| X02 | P0 | Final docs | E08 | PROJECT_DETAILS, Workflow, README updated with results; PDPA duty mapping (lawful basis, sensitive data, data subject rights, retention, breach response) and the NMRA non-diagnostic position; booking fees shown in the UI, payment processing stated as out of the MVP |
+| X02 | P0 | Final docs | E08 | PROJECT_DETAILS sections mapped to the judging criteria (problem selection and justification, global impact, mitigation strategy, multi-agent solution design, single-agent benchmarking, evaluation methodology, independent research), each linking to its evidence; Workflow and README updated with results; PDPA duty mapping (lawful basis, sensitive data, data subject rights, retention, breach response) and the NMRA non-diagnostic position; booking fees shown in the UI, payment processing stated as out of the MVP |
 | X03 | P0 | Demo video | I03 or I02 | `project-demo.mp4` per storyboard in `16` |
 | X04 | P2 | MCP server phase A | I02, A02, M01 | `EXT-10` to `EXT-14` |
 | X05 | P2 | VM deployment | X01 | compose on the VM with TLS; secrets from the server's `.env` |
