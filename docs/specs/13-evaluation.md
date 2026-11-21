@@ -100,6 +100,21 @@ Two kinds of retrieval, measured separately:
 | `imaging` | held-out test set | only when available (`IMG-4`) | P1 |
 | Human reference | | medical students, blind scoring | after MVP |
 
+## 4a. Proposal KPIs and fairness
+
+| Proposal KPI | How we measure it |
+|---|---|
+| Doctor understands a history in under 2 minutes, with a source on every fact | timed reading of 10 briefs by team members acting as doctors (proxy, stated as such), plus the share of brief lines with a valid source |
+| Zero missed allergies and clashes in briefs | `briefs` suite |
+| Guardian alerted within 15 minutes of a missed-dose pattern | `monitoring` suite alert delay on the simulated clock (P0 for this metric) |
+| At least 85% sent to the right specialty first time | `routing` suite on independently reviewed labels (`NAV-9`) |
+| At least 95% of emergencies routed to 1990 | `redflags` and `routing` suites |
+| Pneumonia flags | `imaging` suite when a held-out set is available; otherwise reported metrics labelled as such |
+| 0 private data leaks in 60 attacks | `privacy` suite |
+
+`EVAL-8` **Fairness:** every suite reports results broken down by language (si, en) and by age band
+(under 60, 60 and over), as the proposal promises in its risks section.
+
 ## 5. Protocol
 
 `EVAL-2` Each case runs 3 times. Temperature 0 where the provider allows; fixed seeds for data.

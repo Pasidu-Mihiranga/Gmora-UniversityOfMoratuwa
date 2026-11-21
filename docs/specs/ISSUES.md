@@ -177,12 +177,13 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | E03 | P0 | Briefs and retrieval suite | E01, A05, W0.11 | unsupported facts, missed allergies and clashes, required-fact recall, source accuracy |
 | E04 | P0 | Privacy and injection suite | E01, D03, M16, M13 | leakage, injection success, egress blocks, per arm |
 | E05 | P0 | Red-flag suite | E01, D02, M06 | recall and false alarms per language |
+| E10 | P0 | Monitoring alert-delay and KPI table | E01, A04 | guardian alert delay on the simulated clock (15 min KPI), timed brief reading proxy, KPI table of `13 section 4a`, all results split by language and age band |
 | E06 | P0 | Tools and latency suite | E01, A03, A04, A05 | tool selection and argument accuracy on 50 gold turns; TTFT, step, verifier, case time, API p50 and p95; cost |
 | E09 | P0 | Retrieval, cache and tier suite | E01, K01, K02, K03, D06, D07 | Recall@5, MRR, nDCG, context precision, faithfulness; chunking, embedding, hybrid and rerank comparisons; cache hit rate, stale hits, tier mix and cost saved |
 | E07 | P1 | Imaging evaluation | M14, D04 | metrics into manifests, `validated` only with evidence |
 | E08 | P0 | Results report | E02 to E06 | `docs/results/` with tables, charts, confidence intervals, limitations |
 | X01 | P0 | Full-stack compose and run guide | W0 | one command starts everything; README execution guide |
-| X02 | P0 | Final docs | E08 | PROJECT_DETAILS, Workflow, README updated with results |
+| X02 | P0 | Final docs | E08 | PROJECT_DETAILS, Workflow, README updated with results; PDPA duty mapping (lawful basis, sensitive data, data subject rights, retention, breach response) and the NMRA non-diagnostic position; booking fees shown in the UI, payment processing stated as out of the MVP |
 | X03 | P0 | Demo video | I03 or I02 | `project-demo.mp4` per storyboard in `16` |
 | X04 | P2 | MCP server phase A | I02, A02, M01 | `EXT-10` to `EXT-14` |
 | X05 | P2 | VM deployment | X01 | compose on the VM with TLS; secrets from the server's `.env` |
