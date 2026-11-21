@@ -68,6 +68,25 @@ OPENROUTER_API_KEY=
 JEV_MODEL=typesafe/jev-1.14
 ```
 
+`GW-2a` **Jev Decisions API, as verified on 27 Nov 2026** (`POST https://openrouter.ai/api/alpha/decisions`,
+`Authorization: Bearer <OPENROUTER_API_KEY>`):
+
+```json
+{"model": "typesafe/jev-1.14",
+ "state": ["...context strings or image parts..."],
+ "questions": {
+   "q1": {"type": "noul", "instructions": "The message says the person has a fever."},
+   "q2": {"type": "choice", "instructions": "How soon should this person see a doctor?",
+          "criteria": {"today": "Needs a doctor today.", "within_3_days": "..."}}}}
+```
+
+Response: `answers.q1 = {"type": "noul", "noul": 0.02}`;
+`answers.q2 = {"type": "choice", "choice": "within_2_weeks", "probabilities": {...}, "confidence":
+0.67}`; plus `usage.cost` in USD and `model` with the dated version. `confidence` is reported
+separately from the top probability; policies that say "confidence" (`VER-4`) use this field, and
+policies that say "top probability" (`KNW-3`) use `probabilities`. Measured on one synthetic call:
+1.3 s, USD 0.000016. The adapter records `model`, `usage.cost` and latency in `ops_model_calls`.
+
 `GW-3` If `MODEL_PROVIDER` is unset: use `gemini` when Google credentials exist, else `fake`.
 If `DECISION_PROVIDER` is unset: use `decisions` when `OPENROUTER_API_KEY` exists, else `none`
 (verifier stage 1 only, `VER-10`).
