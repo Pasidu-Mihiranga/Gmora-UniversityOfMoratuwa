@@ -1,5 +1,6 @@
 # CI (docs/specs/14-quality-and-ci.md QA-10): the same checks as scripts/check.sh, on every pull
-# request and push to main. Target under 6 minutes. backend and frontend are required checks.
+# request and push to main. Target under 6 minutes. backend is a required check; the frontend job
+# is added with the frontend foundation (W0.9).
 name: ci
 
 on:
@@ -68,25 +69,6 @@ jobs:
         run: |
           python main.py openapi --out /tmp/openapi.json
           diff -u frontend/src/shared/api/openapi.json /tmp/openapi.json
-
-  frontend:
-    if: hashFiles('project/frontend/package.json') != ''
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: project/frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: project/frontend/package-lock.json
-      - run: npm ci
-      - run: npx tsc -b
-      - run: npm run lint
-      - run: npm run build
 
   security:
     # Informational (not a required check): findings are reviewed in the pull request (SG-27).

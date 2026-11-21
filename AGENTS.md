@@ -99,7 +99,6 @@ the repository, not the model. Codex reads this file directly, Claude Code throu
 Copilot and Cursor through their pointer files; Gemini CLI users set `"contextFileName": "AGENTS.md"`
 in `.gemini/settings.json`.
 
-
 - **Read only the issue's context pack:** the spec IDs and files it lists. Do not load whole specs or
   unrelated folders; it wastes tokens and invites drift.
 - **Work until `scripts/check.sh` passes.** It runs exactly what CI runs. Never weaken a check to pass
