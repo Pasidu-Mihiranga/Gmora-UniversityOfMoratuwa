@@ -92,7 +92,9 @@ MRR, nDCG and context precision (Sinhala weighted first), with latency, cost and
 recorded alongside. Embedding model
 name and version are stored with every vector; changing the model triggers re-embedding.
 
-`KNW-22` **Store:** PostgreSQL with the `pgvector` extension (no new infrastructure).
+`KNW-22` **Store:** PostgreSQL with the `pgvector` extension (no new infrastructure). Documents,
+chunks and vectors persist in the database volume and its backups. A Qdrant adapter behind
+`KnowledgeService` is the scale-out path (ADR-0026).
 `knowledge_chunks(id, document_id, language, heading_path, text, tokens, embedding vector(n),
 tsv tsvector, embedding_model)`, HNSW index on `embedding` (cosine), GIN on `tsv`.
 
