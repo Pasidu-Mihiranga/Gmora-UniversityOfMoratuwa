@@ -29,7 +29,10 @@ pythonpath = ["."]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 addopts = "-q"
-markers = ["integration: needs Postgres (docker compose up -d db)"]
+markers = [
+  "integration: needs Postgres (docker compose up -d db)",
+  "live: calls real model providers; opt-in with SUWAPATH_LIVE=1",
+]
 
 [tool.mypy]
 python_version = "3.12"
