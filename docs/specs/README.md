@@ -32,6 +32,7 @@ every issue is built against.
 | [15-extensions-and-mcp.md](15-extensions-and-mcp.md) | Registries, feature flags, last-day feature playbook, MCP (P2) |
 | [16-demo-and-seed.md](16-demo-and-seed.md) | Synthetic world, demo accounts, the Amma scenario |
 | [17-knowledge-retrieval-and-caching.md](17-knowledge-retrieval-and-caching.md) | Knowledge RAG, cost and latency tiers, intent classification, shared and user-scoped caches |
+| [18-programmes-and-private-consult.md](18-programmes-and-private-consult.md) | Programme catalogue, offerings, referrals, enrolment; the private consult |
 | [ISSUES.md](ISSUES.md) | Work breakdown: waves, dependencies, ownership boundaries, acceptance criteria |
 
 ## Non-negotiable constraints
@@ -41,8 +42,8 @@ every issue is built against.
 3. The verifier fails closed (`VER-9`).
 4. The doctor approves every clinical reply (`AGT-30`).
 5. Fake LLM mode never simulates imaging or model verification (`GW-14`, `IMG-6`).
-6. Pneumonia models start as `validation_status: "unvalidated"`; no performance claim without
-   measured evidence (`IMG-4`).
+6. Model metrics carry their status (`unvalidated`, `reported`, `validated`); no claim beyond the
+   evidence, and no sensitivity claim until measured (`IMG-4`).
 7. MCP is P2, built only after the core Amma workflow works (`EXT-10`).
 8. Every PHI access, including any MCP access, goes through the same consent and audit controls
    (`SEC-21`, `AUD-1`).

@@ -74,6 +74,23 @@ patient's own data; "consented" and "treating" refer to `SEC-10`.
 | `GET /programmes` | any | available programmes |
 | `POST /patients/{pid}/enrollments` | P own | join a programme |
 
+### Programmes and private consult
+| Method and path | Roles | Purpose |
+|---|---|---|
+| `GET /programmes/{key}/offerings?near=&cursor=` | P, G, D | approved offerings by distance and next session |
+| `POST /patients/{pid}/enrollments` | P own | join (self or from a referral, optional offering) |
+| `GET /patients/{pid}/enrollments` | P own, G consented, D treating | enrolments |
+| `POST /doctor/referrals` | D treating | refer a patient to a programme or offering |
+| `GET /patients/{pid}/referrals`, `POST /referrals/{id}/accept`, `POST /referrals/{id}/decline` | P own | referrals |
+| `GET /hospital/offerings`, `POST /hospital/offerings`, `PATCH /hospital/offerings/{id}` | H own org | manage offerings, submit for approval |
+| `GET /admin/programmes`, `PUT /admin/programmes/{key}` | A | catalogue: enable or disable types |
+| `GET /admin/offerings?status=pending_approval`, `POST /admin/offerings/{id}/decision` | A | approve or reject |
+| `POST /private/sessions` | P | start (after disclosure); returns session id |
+| `POST /private/sessions/{id}/turns` | P | one turn, processed in memory, streamed reply |
+| `PUT /private/sessions/{id}/messages` | P | store client-encrypted ciphertext (opt-in only) |
+| `GET /private/sessions/{id}/messages` | P | ciphertext for the device to decrypt |
+| `DELETE /private/sessions/{id}` | P | delete now |
+
 ### Navigation and booking
 | Method and path | Roles | Purpose |
 |---|---|---|
@@ -154,6 +171,7 @@ table. Heartbeat comment every 15 s.
 | `doctor.approval_required` | draft id |
 | `notification.created` | notification |
 | `booking.updated` | appointment id, status |
+| `document.processed` | document id, kind (`report`, `imaging`), status |
 
 `API-21` The API process listens on Postgres `LISTEN suwapath_stream` to fan out to its open streams,
 so any API replica can serve any stream.

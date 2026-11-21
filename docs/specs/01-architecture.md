@@ -60,7 +60,7 @@ project/
       registry.py  flags.py
     modules/
       identity/  consent/  record/  audit/  safety/  navigation/  booking/  care/
-      imaging/  reports/  knowledge/  notifications/  cases/  verifier/  agents/  ops/
+      imaging/  reports/  knowledge/  private/  notifications/  cases/  verifier/  agents/  ops/
       mcp/                       (P2)
     bootstrap.py                 composition root
   tests/
@@ -110,7 +110,8 @@ state change, case events, outbox events and audit entries commit or roll back t
 | safety | lexicon, red-flag rules, urgency floor, wording rules, clash list | `SafetyService` |
 | navigation | specialty routing, doctor matching, trip planning | `NavigationService` |
 | booking | sessions, slots, holds, appointments | `BookingService` |
-| care | programmes, medication schedules, dose events, alert rules | `CareService` |
+| care | programme catalogue, offerings, referrals, enrolment, medication schedules, dose events, alert rules | `CareService` |
+| private | private consult sessions (in-memory processing, ciphertext-only storage) | `PrivateConsultService` |
 | imaging | image model registry, screening | `ImagingService` |
 | reports | lab report upload, extraction, explanation drafts | `ReportService` |
 | knowledge | public health knowledge corpus, chunking, embeddings, hybrid retrieval, shared and user-scoped answer caches, intent tiers | `KnowledgeService` |

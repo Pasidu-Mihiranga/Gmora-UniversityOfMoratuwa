@@ -65,11 +65,11 @@ client refreshes once and retries; on failure it goes to login.
 | Role | Routes |
 |---|---|
 | public | `/login` |
-| patient | `/patient` (home: today's doses, next appointment, open case), `/patient/companion` and `/patient/companion/:caseId`, `/patient/record`, `/patient/sharing`, `/patient/medicines`, `/patient/appointments`, `/patient/find-care`, `/patient/reports`, `/patient/imaging`, `/patient/reviews`, `/patient/notifications`, `/patient/settings` |
+| patient | `/patient` (home: today's doses, next appointment, open case), `/patient/companion` and `/patient/companion/:caseId`, `/patient/record`, `/patient/sharing`, `/patient/medicines`, `/patient/appointments`, `/patient/find-care`, `/patient/reports`, `/patient/imaging`, `/patient/programmes`, `/patient/private`, `/patient/reviews`, `/patient/notifications`, `/patient/settings` |
 | guardian | `/guardian` (dependents), `/guardian/dependents/:patientId`, `/guardian/alerts`, `/guardian/rules`, `/guardian/notifications`, `/guardian/settings` |
-| doctor | `/doctor` (queue), `/doctor/cases/:caseId` (brief with sources, notes, request fact), `/doctor/approvals`, `/doctor/reviews`, `/doctor/notifications`, `/doctor/settings` |
-| hospital_admin | `/hospital` (sessions), `/hospital/sessions/:sessionId` |
-| system_admin | `/admin` (AI operations), `/admin/audit`, `/admin/budgets`, `/admin/dead-letters`, `/admin/flags` |
+| doctor | `/doctor` (queue), `/doctor/cases/:caseId` (brief with sources, notes, request fact, refer to programme), `/doctor/approvals`, `/doctor/reviews`, `/doctor/notifications`, `/doctor/settings` |
+| hospital_admin | `/hospital` (sessions), `/hospital/sessions/:sessionId`, `/hospital/offerings` |
+| system_admin | `/admin` (AI operations), `/admin/programmes` (catalogue and offering approvals), `/admin/audit`, `/admin/budgets`, `/admin/dead-letters`, `/admin/flags` |
 | dev and demo | `/dev` (clock, scenario reset), visible only when the API reports `env` is development or demo |
 
 ## 5. UX rules
@@ -96,3 +96,20 @@ cannot be dismissed by accident.
 (document page and highlighted line). Unverified lines are marked.
 
 `FE-27` No em dashes or en dashes in any UI text (`scripts/check_text.py`).
+
+## 6. Assets, images and caching
+
+`FE-30` Brand assets come from the team's logo files: SVG favicon plus PNG 32, 180 (Apple touch),
+192 and 512, and the PWA manifest icons. Generated once by a script, committed.
+
+`FE-31` Illustrations and photos are WebP (quality 80), in two sizes for `srcset` (mobile and
+desktop), with explicit `width` and `height` to avoid layout shift, and `loading="lazy"` below the
+fold. Source images stay out of the bundle; a script converts them.
+
+`FE-32` Vite emits hashed file names. Static assets are served with
+`Cache-Control: public, max-age=31536000, immutable`; `index.html` with `no-cache`.
+
+`FE-33` Server data caching is TanStack Query only, with explicit `staleTime` per query type
+(reference data such as specialties: 1 hour; doctor search: 1 minute; case and alerts: live through
+SSE). **No service worker or browser storage ever caches API responses**, because they contain
+health data and devices are often shared.

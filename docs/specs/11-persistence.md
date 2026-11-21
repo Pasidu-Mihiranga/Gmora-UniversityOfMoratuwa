@@ -36,7 +36,8 @@ sends `NOTIFY suwapath_outbox` after commit.
 | consent | `consent_grants`, `consent_rules`, `consent_rule_versions` |
 | record | `record_patient_keys`, `record_patients`, `record_practitioners`, `record_conditions`, `record_allergies`, `record_medication_statements`, `record_observations`, `record_provenance`, `record_documents` |
 | booking | `booking_organizations`, `booking_practitioner_roles`, `booking_schedules`, `booking_slots`, `booking_holds`, `booking_appointments` |
-| care | `care_programmes`, `care_enrollments`, `care_medication_administrations`, `care_alert_rules` |
+| care | `care_programme_types`, `care_offerings`, `care_referrals`, `care_enrollments`, `care_medication_administrations`, `care_alert_rules` |
+| private | `private_sessions`, `private_messages` (ciphertext only) |
 | reports | `reports_reports`, `reports_extractions` |
 | imaging | `imaging_studies`, `imaging_results` |
 | knowledge | `knowledge_documents`, `knowledge_chunks`, `knowledge_answer_cache`, `knowledge_user_cache` |
@@ -73,6 +74,8 @@ Wave 0 from the contracts in `02-contracts-and-domain.md`.
 | `knowledge_answer_cache` | unique `(language, normalized_question)`, HNSW on `question_embedding` | shared cache |
 | `knowledge_user_cache` | `(patient_id, language, normalized_question)` | user cache |
 | `notifications_items` | `(user_id, created_at DESC) WHERE read_at IS NULL` | unread badge |
+| `care_offerings` | `(programme_key, status)`, `(organization_id)` | offering lists |
+| `private_messages` | `(session_id, created_at)`, `(expires_at)` | reads and hourly purge |
 
 `DB-8` Any new query used by an endpoint that lists or searches must be backed by an index named in
 this table or added by its pull request. Reviewers check `EXPLAIN` for new list queries.

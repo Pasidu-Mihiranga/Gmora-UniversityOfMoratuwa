@@ -26,14 +26,14 @@ quoted data block (`06-model-gateway.md`, `GW-20`).
 | `Role` | `patient`, `guardian`, `doctor`, `hospital_admin`, `system_admin` |
 | `PrincipalKind` | `user`, `agent`, `system` |
 | `AgentKind` | `patient_companion`, `guardian_agent`, `doctor_assistant`, `verifier`, `single_agent_baseline` |
-| `Purpose` | `care_navigation`, `guardian_monitoring`, `doctor_brief`, `booking`, `verification`, `emergency`, `self_access`, `treatment`, `administration`, `evaluation` |
+| `Purpose` | `care_navigation`, `guardian_monitoring`, `doctor_brief`, `booking`, `verification`, `emergency`, `self_access`, `treatment`, `administration`, `evaluation`, `private_consult` |
 | `DataCategory` | `demographics`, `contact`, `conditions`, `allergies`, `medications`, `adherence`, `observations`, `reports`, `imaging`, `appointments`, `conversations`, `sensitive_sexual_health`, `sensitive_mental_health` |
 | `Urgency` (ordered) | `routine` < `soon_72h` < `urgent_24h` < `emergency` |
 | `Language` | `si`, `en` (`ta` reserved) |
 | `CaseStatus` | `open`, `intake`, `assessed`, `emergency`, `in_care`, `awaiting_doctor`, `replied`, `handed_to_human`, `closed` |
 | `MessageKind` | `request`, `answer`, `alert`, `brief`, `draft`, `approval`, `block`, `revision_request`, `info` |
 | `VerdictKind` | `allow`, `revise`, `block`, `escalate`, `hold` |
-| `ValidationStatus` | `unvalidated`, `validated` |
+| `ValidationStatus` | `unvalidated`, `reported`, `validated` |
 | `ToolRisk` | `read`, `write_reversible`, `write_irreversible` |
 
 `CON-5` `Urgency` comparison uses its order. Helper `max_urgency(a, b)` is the only allowed way to
