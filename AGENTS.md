@@ -95,7 +95,10 @@ docker compose down --rmi local                      # project images, when rebu
 ## Working with any coding model
 
 Contributors use different models (Claude, GPT/Codex, Gemini, Grok and others). Quality comes from
-the repository, not the model:
+the repository, not the model. Codex reads this file directly, Claude Code through `CLAUDE.md`,
+Copilot and Cursor through their pointer files; Gemini CLI users set `"contextFileName": "AGENTS.md"`
+in `.gemini/settings.json`.
+
 
 - **Read only the issue's context pack:** the spec IDs and files it lists. Do not load whole specs or
   unrelated folders; it wastes tokens and invites drift.
