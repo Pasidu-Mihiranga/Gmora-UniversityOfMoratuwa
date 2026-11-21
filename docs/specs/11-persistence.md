@@ -2,8 +2,8 @@
 
 ## 1. Database
 
-`DB-1` PostgreSQL 16 with extensions `pg_trgm` and `pgcrypto` (for `gen_random_bytes` in tests
-only). SQLAlchemy 2.0 async with the `psycopg` (v3) driver. LangGraph's Postgres checkpointer uses
+`DB-1` PostgreSQL 16 (image `pgvector/pgvector:pg16`) with extensions `vector`, `pg_trgm` and
+`pgcrypto` (for `gen_random_bytes` in tests only). SQLAlchemy 2.0 async with the `psycopg` (v3) driver. LangGraph's Postgres checkpointer uses
 the same database, schema `langgraph`.
 
 `DB-2` Every module owns its tables. Table names are prefixed with the module name
@@ -39,6 +39,7 @@ sends `NOTIFY suwapath_outbox` after commit.
 | care | `care_programmes`, `care_enrollments`, `care_medication_administrations`, `care_alert_rules` |
 | reports | `reports_reports`, `reports_extractions` |
 | imaging | `imaging_studies`, `imaging_results` |
+| knowledge | `knowledge_documents`, `knowledge_chunks`, `knowledge_answer_cache`, `knowledge_user_cache` |
 | cases | `cases_cases`, `cases_events`, `cases_timeline`, `cases_communications` |
 | agents | `agents_jobs`, `agents_messages` |
 | verifier | `verifier_verdicts`, `verifier_reviews` |
@@ -68,6 +69,9 @@ Wave 0 from the contracts in `02-contracts-and-domain.md`.
 | `consent_grants` | `(patient_id, grantee_id) WHERE status = 'active'` | access decisions |
 | `audit_log` | `(patient_id, at DESC)`, `(actor_id, at DESC)`, `(trace_id)`, BRIN `(at)` | audit search |
 | `ops_model_calls` | `(case_id)`, BRIN `(at)` | ops page |
+| `knowledge_chunks` | HNSW on `embedding` (cosine), GIN on `tsv`, `(language)` | hybrid retrieval |
+| `knowledge_answer_cache` | unique `(language, normalized_question)`, HNSW on `question_embedding` | shared cache |
+| `knowledge_user_cache` | `(patient_id, language, normalized_question)` | user cache |
 | `notifications_items` | `(user_id, created_at DESC) WHERE read_at IS NULL` | unread badge |
 
 `DB-8` Any new query used by an endpoint that lists or searches must be backed by an index named in

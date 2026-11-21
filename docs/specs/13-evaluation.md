@@ -35,17 +35,15 @@ architecture differs. The fake provider is refused (`GW-14`).
 | Unnecessary tool calls | calls not in the gold set, per turn |
 | Agent failure types | per MAST categories (specification, inter-agent misalignment, verification), counted from logs |
 
-### Evidence retrieval (brief building)
-The doctor assistant retrieves structured facts through tools, not a vector index (ADR-0009).
+### Retrieval
+Two kinds of retrieval, measured separately:
 | Metric | Definition |
 |---|---|
-| Required-fact recall | required facts (labelled per synthetic patient) present in the brief |
-| Retrieval precision | facts in the brief that belong to the required or relevant set |
-| Source accuracy | cited provenance points to the right document and line |
-
-If a vector retrieval component is ever added (for example a guidance corpus), its pull request MUST
-add: recall@k, MRR, nDCG@k, context precision and recall, and faithfulness, measured on a labelled
-query set, plus a chunking and embedding comparison table.
+| Required-fact recall (briefs) | required personal facts present in the brief (structured, consent-checked retrieval) |
+| Retrieval precision (briefs) | facts in the brief that belong to the required or relevant set |
+| Source accuracy (briefs) | cited provenance points to the right document and line |
+| Knowledge RAG metrics | Recall@5, MRR@10, nDCG@10, context precision, faithfulness, answer relevance (`17-knowledge-retrieval-and-caching.md` section 5) |
+| Cache and tier metrics | shared cache hit rate, user cache stale hits (must be 0), tier mix and cost saved |
 
 ### Privacy and security
 | Metric | Definition |
@@ -82,6 +80,9 @@ query set, plus a chunking and embedding comparison table.
 | Deterministic safety assessment p95 | <= 50 ms | ours |
 | API p95 (non-model) | <= 200 ms | ours |
 | Case time (Amma) | <= 60 s | ours |
+| Knowledge Recall@5 | >= 0.85 | ours |
+| Faithfulness | >= 0.95 | ours |
+| User cache stale hits | 0 | ours |
 | Simple questions | we expect `single` to tie or win | proposal |
 
 ## 4. Suites
@@ -94,6 +95,7 @@ query set, plus a chunking and embedding comparison table.
 | `privacy` | 60 attacks | direct injection in patient text, indirect injection in uploaded reports, guardian over-asking, role confusion, exfiltration through agent messages, tool misuse; adapted from public injection benchmarks (cited in the suite README); every attack plants canary values | P0 |
 | `redflags` | 60 per language (si, en) | vignettes written by the team, checked by native speakers | P0 |
 | `latency` | 20 Amma-style runs | measured from spans and `ops_model_calls` | P0 |
+| `retrieval` | 120 labelled questions (60 si, 60 en) | gold chunk IDs; chunking, embedding, hybrid and rerank comparisons; cache and tier replay | P0 |
 | `monitoring` | 10 month-long timelines | simulated clock; alert delay and false alerts | P1 |
 | `imaging` | held-out test set | only when available (`IMG-4`) | P1 |
 | Human reference | | medical students, blind scoring | after MVP |

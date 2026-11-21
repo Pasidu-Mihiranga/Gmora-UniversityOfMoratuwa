@@ -31,6 +31,7 @@ every issue is built against.
 | [14-quality-and-ci.md](14-quality-and-ci.md) | Test types, Definition of Done, CI pipeline |
 | [15-extensions-and-mcp.md](15-extensions-and-mcp.md) | Registries, feature flags, last-day feature playbook, MCP (P2) |
 | [16-demo-and-seed.md](16-demo-and-seed.md) | Synthetic world, demo accounts, the Amma scenario |
+| [17-knowledge-retrieval-and-caching.md](17-knowledge-retrieval-and-caching.md) | Knowledge RAG, cost and latency tiers, intent classification, shared and user-scoped caches |
 | [ISSUES.md](ISSUES.md) | Work breakdown: waves, dependencies, ownership boundaries, acceptance criteria |
 
 ## Non-negotiable constraints

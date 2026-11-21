@@ -30,6 +30,16 @@ class DecisionModel(Protocol):          # Jev and other decision models
     async def decide(self, state: list, questions: dict[str, Question]) -> dict[str, Answer]: ...
 ```
 
+```python
+class EmbeddingModel(Protocol):
+    model_id: str
+    dimensions: int
+    async def embed(self, texts: list[str], kind: Literal["query", "document"]) -> list[list[float]]: ...
+```
+
+Embedding adapters: `local` (multilingual model on ONNX Runtime, no key) and `gemini` (Vertex
+embeddings). Embeddings of personal data are never created (`KNW-10`).
+
 `Capabilities(structured_output, tool_calling, vision, streaming, languages, max_context)`.
 
 `GW-2` The gateway checks the request against the bound provider's capabilities before calling.
@@ -102,6 +112,10 @@ booking).
 `GW-13` Short structured decisions (intent, yes or no, scores) use Jev or `MODEL_NAME_FAST`, not the
 main chat model. The system prompt and tool definitions are kept stable per agent so provider
 prompt caching can apply.
+
+`GW-15` **LLM only when needed.** Before any chat model call, the request is routed through the
+cost tiers of `17-knowledge-retrieval-and-caching.md` (`KNW-1`): rules, then caches, then a decision
+model classifier with direct tool calls, and only then the chat model.
 
 ## 6. Fake mode
 

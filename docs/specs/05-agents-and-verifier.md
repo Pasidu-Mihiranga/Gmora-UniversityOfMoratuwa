@@ -125,7 +125,9 @@ schema in `contracts/agents.py`.
   which doctors to offer; how to phrase answers to the patient.
 - **Tools:** `safety.assess`, `navigation.route`, `navigation.find_doctors`,
   `navigation.plan_trip`, `booking.hold_slot`, `record.read_summary`, `care.log_dose`,
-  `reports.explain` (draft only), `cases.append`.
+  `reports.explain` (draft only), `knowledge.retrieve`, `cases.append`.
+- **Tiers:** every patient message is routed by `KNW-1` (rules, caches, classifier with direct tool
+  calls, then the chat model). The companion's model is called only at T3.
 - **Rules:** it never books without the patient's tap (it creates a hold and a proposal);
   it calls `safety.assess` on every patient message before anything else; it answers agent
   requests by asking the patient, never by guessing.
