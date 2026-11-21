@@ -28,3 +28,18 @@ python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
 files = ["suwapath/contracts", "suwapath/platform"]
+
+[tool.importlinter]
+root_package = "suwapath"
+
+[[tool.importlinter.contracts]]
+name = "Contracts import nothing from the rest of suwapath (ARC-7)"
+type = "forbidden"
+source_modules = ["suwapath.contracts"]
+forbidden_modules = ["suwapath.platform", "suwapath.modules"]
+
+[[tool.importlinter.contracts]]
+name = "Platform never imports modules (ARC-8)"
+type = "forbidden"
+source_modules = ["suwapath.platform"]
+forbidden_modules = ["suwapath.modules"]
