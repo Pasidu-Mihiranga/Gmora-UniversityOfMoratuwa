@@ -97,7 +97,30 @@ cannot be dismissed by accident.
 
 `FE-27` No em dashes or en dashes in any UI text (`scripts/check_text.py`).
 
-## 6. Assets, images and caching
+## 6. Simple mode for older users
+
+`FE-40` **One design system, two densities.** Simple mode is not a separate app or a separate
+design. It is a mode of the same design system (`data-mode="simple"` on the root) that swaps token
+values and component size variants: same colours, typeface, icons, shapes and components, so the
+product looks and feels the same everywhere.
+
+`FE-41` Token changes in simple mode: base text 22 px (headings scale with it), tap targets at least
+56 px with 16 px spacing, icon size 32 px, higher contrast text, one column, no hover-only actions,
+no swipe-only gestures.
+
+`FE-42` Layout in simple mode: the patient home is a grid of at most 4 large tiles, each an icon
+**with a text label** (never icon alone): "Talk to SuwaPath", "My medicines", "My doctor visits",
+"Emergency 1990" (always red, always present). One task per screen, a large Back button, confirm
+every action in plain words, and a "Call my son" style tile when a guardian exists.
+
+`FE-43` Who gets it: offered at first login to patients aged 60 or more (default on), switchable
+any time in settings (`CUS` patient setting `display_mode`), and a guardian may suggest it
+(`CUS-16`). The user can also choose text size (normal, large, extra large) independently.
+
+`FE-44` Every screen used by patients is built from components that support both densities; a
+feature is not done until its screen works in simple mode (checked in review).
+
+## 7. Assets, images and caching
 
 `FE-30` Brand assets come from the team's logo files: SVG favicon plus PNG 32, 180 (Apple touch),
 192 and 512, and the PWA manifest icons. Generated once by a script, committed.

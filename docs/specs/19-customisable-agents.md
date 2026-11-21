@@ -48,6 +48,7 @@ updated what she shares with you").
 |---|---|---|
 | Language | si, en | default from sign-up |
 | Reply style | simple, detailed | simple |
+| Display mode and text size | standard or simple; normal, large, extra large | simple and large for age 60+ (`FE-43`) |
 | Dose reminder times | per slot | 05:00 to 23:00; default 08:00, 13:00, 19:00, 22:00 |
 | Check-in frequency | daily, every 2 days, weekly, off | daily in elder care |
 | Quiet hours | window | max 10 h; emergency and red-flag messages always pass |
