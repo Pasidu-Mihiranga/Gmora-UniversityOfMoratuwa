@@ -76,12 +76,12 @@ fixtures.)
 | W0.1 | Backend skeleton: `main.py` CLI, `requirements.txt`, `pyproject.toml` (ruff, pytest, mypy, import-linter), docker compose (Postgres 16, Jaeger), Dockerfile | 01 |
 | W0.2 | `contracts/`: ids, enums, errors, principal, FHIR resource models, event envelope and catalog payloads, agent protocol and intents, tool spec, API models, all ports | 02, 03, 05, 10 |
 | W0.3 | `contracts/testing/`: in-memory fakes for every port and shared contract test suites | 14 QA-1 |
-| W0.4 | `platform/`: config, db, UnitOfWork, clock (system and simulated), ids, JSON logging with PHI filter, tracing, problem+json errors, app factory, auth dependency, registries, flags | 01, 04 |
+| W0.4 | `platform/`: config, db, UnitOfWork, clock (system and simulated), ids, JSON logging with PHI filter, tracing, problem+json errors, app factory, auth dependency, registries, flags; HTTP security layer: headers and CSP, CORS, CSRF check on refresh, `no-store`, body limits, rate limiter, route role table check | 01, 04, 20 |
 | W0.5 | Event backbone: outbox, dispatcher, inbox idempotency, retries, dead letters, timers, agent job queue, with critical tests | 03 |
 | W0.6 | Model gateway core: ports, pipeline (budget, capability check, timeout and retry, usage log), fake provider with Amma fixtures | 06 |
 | W0.7 | Initial migration `0001_initial`: every table and index in `11-persistence.md` | 11 |
 | W0.8 | Composition root and module stubs: every module package with `register()`, routers mounted with 501 stubs and real response models, so the full OpenAPI exists | 01, 10 |
-| W0.9 | Frontend foundation: design tokens and UI kit brought across, AppShell, all routes declared with placeholders, auth flow, TanStack Query, typed client from OpenAPI, i18n scaffold, badges | 12 |
+| W0.9 | Frontend foundation: design tokens and UI kit brought across, AppShell, all routes declared with placeholders, auth flow, TanStack Query, typed client from OpenAPI, i18n scaffold, badges, simple mode tokens, `SafeMarkdown`, banned-API lint rules | 12, 20 |
 | W0.10 | CI workflow, PR and issue templates, `ready.yml` | 14 |
 | W0.11 | Seed generator (JSON fixtures only, no loader yet) | 16 |
 
@@ -133,6 +133,8 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | K01 | P0 | knowledge: ingestion and hybrid retrieval | W0 | important | structure-aware chunker; local and Vertex embedding adapters; pgvector HNSW and full-text; RRF; `knowledge ingest` CLI idempotent by hash; `retrieve` returns cited chunks (`KNW-20` to `KNW-24`) |
 | K02 | P0 | knowledge: shared and user caches | K01, M04 | critical | shared cache write rules `KNW-32`; user cache encrypted with fingerprints `KNW-33` to `KNW-35`; stale-hit test; never-cached list enforced |
 | K03 | P0 | Intent classifier and tier router | W0, M12 | important | decision-model `choice` over the intent catalog with 0.75 threshold; keyword fallback without a key; direct tool calls for T2 intents; tier recorded on every request (`KNW-1` to `KNW-4`) |
+| G01 | P0 | Input guardrails | W0 | critical | normalization (NFC, control, zero-width and bidi removal), length limits, language detection, injection screen with patterns and optional Jev, `suspected_injection` turn flag that disables write tools, applied to typed and extracted text (`SG-7`) |
+| G02 | P0 | Output guardrails | W0, M16 | critical | prompt-echo check `SG-10`, reverse PHI inspector for non-patient recipients `SG-11`, language and length checks; (P1) Jev tool-call support check `SG-12` |
 | C01 | P0 | customisation: settings, layers, quotas, suggestions | M03, M12 | critical | catalogue with bounds per role; layer resolution L0 to L4; plain-language parse to `RuleProposal` with preview; versions and revert; guardian suggestions; atomic quota reservation in the gateway with a concurrency test; care-access paths never quota-limited (`CUS-1` to `CUS-17`) |
 | M16 | P0 | verifier: checks, Jev policy, reviews | W0 | critical | six deterministic checks; Jev questions; policy `VER-4`; fail closed `VER-9`; rules-only escalation `VER-10`; review queue API |
 
@@ -176,7 +178,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | E01 | P0 | CareBench harness | A06, M12, E00 | arms including ablations (`EVAL-1a`), runner, seeds, budget guard, metrics, stats, reports |
 | E02 | P0 | Routing suite | E01, D01, A03 | 300 cases x 3 runs x 3 arms; accuracy, under-triage, kappa |
 | E03 | P0 | Briefs and retrieval suite | E01, A05, W0.11 | unsupported facts, missed allergies and clashes, required-fact recall, source accuracy |
-| E04 | P0 | Privacy and injection suite | E01, D03, M16, M13 | leakage, injection success, egress blocks, per arm |
+| E04 | P0 | Privacy and injection suite | E01, D03, M16, M13, G01 | leakage, injection success, egress blocks, per arm; includes report-upload injection, shared-cache poisoning and output-rendering payloads |
 | E05 | P0 | Red-flag suite | E01, D02, M06 | recall and false alarms per language |
 | E10 | P0 | Monitoring alert-delay and KPI table | E01, A04 | guardian alert delay on the simulated clock (15 min KPI), timed brief reading proxy, KPI table of `13 section 4a`, all results split by language and age band |
 | E06 | P0 | Tools and latency suite | E01, A03, A04, A05 | tool selection and argument accuracy on 50 gold turns; TTFT, step, verifier, case time, API p50 and p95; cost |
