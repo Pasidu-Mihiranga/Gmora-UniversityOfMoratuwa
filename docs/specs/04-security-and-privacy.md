@@ -168,8 +168,9 @@ prev_hash, hash)`. `metadata_json` holds no PHI.
 `AUD-3` **Tamper evidence:** `hash = SHA-256(prev_hash || canonical_json(entry))`. A verification
 command (`python main.py audit verify`) checks the chain.
 
-`AUD-4` Append-only: the application database role has `INSERT` and `SELECT` on `audit_log`, no
-`UPDATE` or `DELETE`.
+`AUD-4` Append-only: a database trigger rejects every `UPDATE` and `DELETE` on `audit_log` and
+`cases_events` (migration 0002). In production the application role also has no `TRUNCATE` on them;
+`TRUNCATE` is used only by development and test resets.
 
 `AUD-5` Writes that change state write their audit entry in the same transaction. Reads write
 their audit entry synchronously before the data is returned.

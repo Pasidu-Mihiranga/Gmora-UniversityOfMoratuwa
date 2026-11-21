@@ -20,14 +20,6 @@ TEST_URL = os.environ.get(
     "SUWAPATH_TEST_DATABASE_URL",
     "postgresql+psycopg://suwapath:suwapath@localhost:5433/suwapath_test",
 )
-TABLES = (
-    "platform_outbox",
-    "platform_inbox",
-    "platform_timers",
-    "platform_flags",
-    "platform_idempotency_keys",
-    "agents_jobs",
-)
 
 
 def _plain(url: str) -> str:
@@ -56,7 +48,16 @@ def database_url() -> str:
 async def db(database_url: str) -> AsyncIterator[Database]:
     database = Database(database_url, pool_size=10)
     async with database.engine.begin() as conn:
-        await conn.execute(text(f"TRUNCATE {', '.join(TABLES)} RESTART IDENTITY"))
+        tables = (
+            await conn.execute(
+                text(
+                    "SELECT string_agg(quote_ident(tablename), ', ') FROM pg_tables "
+                    "WHERE schemaname = 'public' "
+                    "AND tablename NOT IN ('alembic_version', 'platform_clock')"
+                )
+            )
+        ).scalar_one()
+        await conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY"))
         await conn.execute(text("UPDATE platform_clock SET offset_seconds = 0"))
     yield database
     await database.dispose()

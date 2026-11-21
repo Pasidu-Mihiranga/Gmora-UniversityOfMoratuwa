@@ -8,6 +8,7 @@ sqlalchemy[asyncio]==2.1.9
 psycopg[binary,pool]==3.3.9
 alembic==1.20.1
 google-genai==3.6.1
+pgvector==0.5.1
 
 # Development and tests
 pytest==9.2.0

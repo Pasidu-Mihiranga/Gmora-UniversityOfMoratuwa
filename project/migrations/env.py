@@ -5,11 +5,12 @@ from __future__ import annotations
 import asyncio
 from logging.config import fileConfig
 
+import pgvector.sqlalchemy  # noqa: F401  (registers the vector type for autogenerate)
 from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from suwapath.platform import models as _platform_models  # noqa: F401  (registers tables)
+from suwapath.bootstrap import import_all_models
 from suwapath.platform.config import get_settings
 from suwapath.platform.db import Base
 
@@ -17,6 +18,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
+import_all_models()
 target_metadata = Base.metadata
 
 
