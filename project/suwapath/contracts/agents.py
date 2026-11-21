@@ -280,6 +280,8 @@ class AgentMessageDraft(Contract):
     consent_scope: frozenset[DataCategory] = frozenset()
     quoted: tuple[UntrustedText, ...] = ()
     in_reply_to: MessageId | None = None
+    # Same logical message, same key: retries never send twice (AGT-12). Default comes from the job.
+    dedupe_hint: str | None = None
 
 
 class AgentResult(Contract):
