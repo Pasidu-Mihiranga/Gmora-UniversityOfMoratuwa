@@ -181,6 +181,34 @@ Everything else is handled by agents composing general tools, following this lad
    clearly what SuwaPath can and cannot do.
 Agents never invent a capability, a doctor, a slot, a clinical fact or a policy.
 
+## 5a. Suggested replies and actions
+
+`AGT-36` Every companion, guardian-agent and doctor-assistant reply carries up to 3 `Suggestion`s
+(contract `suwapath.contracts.suggestions`). Two sources, cheapest first:
+1. **From the current step, with no model (T0):** navigation question options ("Yes", "No",
+   "Not sure"), booking choices (time of day, the next 3 slots), result actions ("Book this
+   doctor", "Show other doctors"), dose prompts ("I took it", "Remind me in 30 minutes"), doctor
+   actions ("Ask for the glucose reading", "Approve the reply").
+2. **From the model (T3 only):** the same structured response that holds the reply also holds up to 3
+   reply suggestions, so no extra call is made.
+
+`AGT-37` Validation before a suggestion is shown:
+- reply suggestions: at most 40 characters, in the user's language, pass the `wording` check, and
+  contain no clinical claim;
+- action suggestions are **built by the server** from real tool results (a slot that exists, a
+  doctor in the search results); the model may only choose among server-provided candidate actions
+  by ID and can never invent a doctor, a slot or an action.
+
+`AGT-38` Safety rules for suggestions:
+- red-flag screening questions show neutral options with equal weight; "Not sure" is treated as
+  "Yes" for safety;
+- no suggestion may understate a symptom ("I feel fine now") while intake is open;
+- during an emergency the only suggestions are "Call 1990" and calling an approved guardian;
+- private consult suggestions are generic, never personalised, and never stored.
+
+`AGT-39` Suggestion use (shown, tapped, edited before send) is recorded as counts per step type,
+with no text, for the UX metrics in `13-evaluation.md`.
+
 ## 6. Tools
 
 `AGT-40` A tool is a `ToolSpec(name, description, input_schema, output_schema, risk, data_categories)`

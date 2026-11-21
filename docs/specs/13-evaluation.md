@@ -73,6 +73,7 @@ Two kinds of retrieval, measured separately:
 | Case time | first message to booked appointment and guardian informed, excluding human waits |
 | API latency | non-model endpoints (p50, p95) |
 | Cost | USD per case and per arm; tokens in and out |
+| Suggestion use | share of turns where a chip was used, and edited before send (UX, `AGT-39`) |
 
 ## 3. Targets (set before testing)
 

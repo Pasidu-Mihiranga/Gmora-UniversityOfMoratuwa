@@ -101,6 +101,22 @@ cannot be dismissed by accident.
 component is the only way to render model text (`SG-13`), banned APIs are linted (`SG-14`), and
 caches and tokens are cleared on logout (`SG-16`).
 
+## 5a. Suggested replies and actions (chips)
+
+`FE-50` After each agent message, up to **3 chips** (2 in simple mode), each at most 40 characters,
+in the user's language, shown just above the input bar as one labelled group ("Suggested replies"),
+reachable by keyboard and screen reader.
+
+`FE-51` Two kinds of chip:
+- **reply chip:** fills the input bar with its text; the user can edit it and sends with the Send
+  button. It never sends by itself.
+- **action chip:** opens the matching confirmation step (for example "Book 4:00 pm with
+  Dr. Silva" opens the booking card with a Confirm button). An action chip never completes an
+  irreversible action in one tap (`BOOK-2`).
+
+`FE-52` A chip does exactly what its label says. Chips disappear when used or when a new message
+arrives, and never cover the latest reply.
+
 ## 6. Simple mode for older users
 
 `FE-40` **One design system, two densities.** Simple mode is not a separate app or a separate
