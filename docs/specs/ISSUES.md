@@ -37,7 +37,12 @@ Critical path: **W0 -> M10 cases -> A01 runtime -> A03, A05 agents -> I02 Amma e
 
 ```mermaid
 flowchart LR
-  W0[Wave 0 foundation] --> M01 & M02 & M03 & M04 & M06 & M07 & M08 & M09 & M10 & M11 & M12 & M14 & M15 & M16
+  W0[Wave 0 foundation] --> M01 & M02 & M03 & M04 & M06 & M07 & M08 & M09 & M10 & M11 & M12 & M14 & M15 & M16 & K01
+  K01 --> K02
+  M04 --> K02
+  M12 --> K03
+  K01 & K03 --> A03
+  D06 & D07 --> E09
   M04 --> M05
   M03 --> M05
   W0 --> M13
@@ -90,6 +95,8 @@ green; login page renders; every route returns 501 or a placeholder; CI green; b
 | D02 | P0 | Red-flag vignettes si/en | 60 per language, half positive, half near-miss; each with expected rule ID and urgency; Sinhala checked by a native speaker; `project/eval/datasets/redflags/` |
 | D03 | P0 | Injection attack set | 60 attacks across the six categories of `13-evaluation.md`, each with target recipient and canary fields; sources cited; `project/eval/datasets/privacy/` |
 | D04 | P0 | Pneumonia model cards and release | for general and paediatric: class order, preprocessing, training data, split, metrics with threshold, age range; weights uploaded as a GitHub release; `fetch_models.py` downloads and checks SHA-256 |
+| D06 | P0 | Retrieval query set | 120 questions (60 si, 60 en) with gold chunk IDs and intents; `project/eval/datasets/retrieval/` |
+| D07 | P0 | Knowledge corpus curation | about 60 documents per `KNW-11`, each with source, publisher, licence and language; Sinhala versions where available; `project/suwapath/modules/knowledge/corpus/` |
 | D05 | P1 | Sinhala content review | all `si.yaml` safety strings and UI `si.ts` strings reviewed by a native speaker |
 
 ## 6. Wave 1: modules (all blocked by Wave 0 only, unless listed)
@@ -114,6 +121,9 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | M13 | P0 | PHI minimization pipeline | W0 | critical | purpose profiles; pseudonymizer from structured fields (si and Latin); outbound inspector with NIC, phone, email detectors; restore; egress tests with canaries (`SEC-30` to `SEC-33`) |
 | M14 | P0 | imaging: registry and ONNX adapter | W0 | important | manifest loading and SHA-256 check; age-based variant; preprocessing per manifest; unavailable path; Jev image gate optional; patient never sees probability |
 | M15 | P1 | reports: upload and extraction | W0 | important | text layer, vision, OCR fallback; observation parsing with printed ranges; provenance with page and line |
+| K01 | P0 | knowledge: ingestion and hybrid retrieval | W0 | important | structure-aware chunker; local and Vertex embedding adapters; pgvector HNSW and full-text; RRF; `knowledge ingest` CLI idempotent by hash; `retrieve` returns cited chunks (`KNW-20` to `KNW-24`) |
+| K02 | P0 | knowledge: shared and user caches | K01, M04 | critical | shared cache write rules `KNW-32`; user cache encrypted with fingerprints `KNW-33` to `KNW-35`; stale-hit test; never-cached list enforced |
+| K03 | P0 | Intent classifier and tier router | W0, M12 | important | decision-model `choice` over the intent catalog with 0.75 threshold; keyword fallback without a key; direct tool calls for T2 intents; tier recorded on every request (`KNW-1` to `KNW-4`) |
 | M16 | P0 | verifier: checks, Jev policy, reviews | W0 | critical | six deterministic checks; Jev questions; policy `VER-4`; fail closed `VER-9`; rules-only escalation `VER-10`; review queue API |
 
 ## 7. Wave 2: agents
@@ -122,7 +132,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 |---|---|---|---|---|
 | A01 | P0 | Agent runtime | W0 | registry; AgentContext; ToolInvoker (allowlist, risk, audit); Messenger via outbox; supervisor subscriptions `EVT-13`; limits; LangGraph checkpointer; `main.py agents` |
 | A02 | P0 | Tool adapters | A01, M05, M06, M07, M08, M09, M10 | every tool in `05 §4` as a `ToolSpec` with JSON Schema; handlers pass the agent principal; argument IDs checked against scope |
-| A03 | P0 | Patient companion | A02, M16, M13 | intake (max 3 questions per turn), safety first, routing, holds and proposals, answers agent requests, streams replies, si and en; fake fixtures for Amma and variants |
+| A03 | P0 | Patient companion | A02, M16, M13, K01, K03 | intake (max 3 questions per turn), safety first, routing, holds and proposals, answers agent requests, streams replies, si and en; fake fixtures for Amma and variants |
 | A04 | P0 | Guardian agent | A02, M16 | week score via Jev (fallback rules when no key); check-in first policy; alerts within consent; follow-up timer; guardian rules as triggers |
 | A05 | P0 | Doctor assistant | A02, M16 | sourced brief in doctor's order; clashes from safety; missing-fact requests; reply drafting; approval interrupt with 4 h timeout and resume |
 | A06 | P0 | Single-agent baseline (two arms) | A02 | same interface, tools, model and budget; consent in prompt; optional verifier tool |
@@ -154,6 +164,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | E04 | P0 | Privacy and injection suite | E01, D03, M16, M13 | leakage, injection success, egress blocks, per arm |
 | E05 | P0 | Red-flag suite | E01, D02, M06 | recall and false alarms per language |
 | E06 | P0 | Tools and latency suite | E01, A03, A04, A05 | tool selection and argument accuracy on 50 gold turns; TTFT, step, verifier, case time, API p50 and p95; cost |
+| E09 | P0 | Retrieval, cache and tier suite | E01, K01, K02, K03, D06, D07 | Recall@5, MRR, nDCG, context precision, faithfulness; chunking, embedding, hybrid and rerank comparisons; cache hit rate, stale hits, tier mix and cost saved |
 | E07 | P1 | Imaging evaluation | M14, D04 | metrics into manifests, `validated` only with evidence |
 | E08 | P0 | Results report | E02 to E06 | `docs/results/` with tables, charts, confidence intervals, limitations |
 | X01 | P0 | Full-stack compose and run guide | W0 | one command starts everything; README execution guide |
@@ -165,7 +176,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 
 ## 10. Parallel capacity check
 
-After Wave 0 there are 16 module issues with no dependencies on each other except M05 (on M03 and
+After Wave 0 there are 19 module issues with no dependencies on each other except M05 (on M03 and
 M04). With five people that is three to four issues each on Sunday, each small because the contract,
 tables, fakes and stubs already exist. Agents (Wave 2) can start on fakes before all modules merge;
 screens (Wave 3) start on generated types and fixtures.

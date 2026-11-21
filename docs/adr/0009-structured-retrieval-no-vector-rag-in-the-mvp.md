@@ -1,6 +1,6 @@
 # ADR-0009: Structured retrieval, no vector RAG in the MVP
 
-Status: Accepted (27 Nov 2026)
+Status: Superseded by ADR-0018 (27 Nov 2026)
 
 ## Context
 

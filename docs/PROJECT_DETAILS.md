@@ -70,6 +70,7 @@ and every message that crosses between people passes the verifier.
 | Verifier model | Jev (TypeSafe) via OpenRouter Decisions API | typed decisions with calibrated probabilities |
 | Records | PostgreSQL, FHIR R4-shaped resources, FHIR Bundle export | ready for national health records |
 | Security | per-patient AES-256-GCM keys wrapped by a KEK (local now, AWS KMS later); attribute-based consent; PHI minimization before model calls; hash-chained audit | a leaked database stays unreadable; least privilege for people and agents |
+| Knowledge and cost | curated health corpus, structure-aware chunking, multilingual embeddings, pgvector plus full-text hybrid retrieval with citations; rules, caches and an intent classifier before any chat model call | grounded answers, lower latency and cost |
 | Imaging | ResNet50 pneumonia models (general and paediatric) on ONNX Runtime | local, fast, no external calls |
 | Frontend | React 19, TypeScript, Tailwind, TanStack Query, generated API types, SSE | fast, accessible, contract-safe |
 | Observability | OpenTelemetry traces, structured logs without PHI, model call ledger | every step, cost and delay visible |
