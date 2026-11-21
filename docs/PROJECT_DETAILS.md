@@ -34,7 +34,8 @@ Lankans are 60 or older, and private hospitals deliver 55% of outpatient visits 
 | Private by design | yes | per-patient encryption keys, consent check on every message between roles, full audit |
 | AI operations and audit | yes | cost, latency, budgets, verdicts and a tamper-evident audit trail for admins |
 | Sinhala and English | yes | text in both languages |
-| Pregnancy, newborn, sexual-health programmes | next | added as care programme registrations |
+| Care programmes | yes | elder care in full; pregnancy and newborn as working demonstration programmes; platform-owned catalogue, hospital offerings, doctor referrals |
+| Private consult | yes | sexual-health questions answered privately: nothing readable stored on the server, optional history encrypted in the browser, automatic deletion |
 | Tamil and voice | next | |
 | MCP access for AI assistants | next (P2) | tools without patient data first, under the same consent and audit |
 
@@ -71,7 +72,7 @@ and every message that crosses between people passes the verifier.
 | Records | PostgreSQL, FHIR R4-shaped resources, FHIR Bundle export | ready for national health records |
 | Security | per-patient AES-256-GCM keys wrapped by a KEK (local now, AWS KMS later); attribute-based consent; PHI minimization before model calls; hash-chained audit | a leaked database stays unreadable; least privilege for people and agents |
 | Knowledge and cost | curated health corpus, structure-aware chunking, multilingual embeddings, pgvector plus full-text hybrid retrieval with citations; rules, caches and an intent classifier before any chat model call | grounded answers, lower latency and cost |
-| Imaging | ResNet50 pneumonia models (general and paediatric) on ONNX Runtime | local, fast, no external calls |
+| Imaging | one ResNet50 pneumonia model on ONNX Runtime, metrics labelled `reported` until re-measured | local, fast, no external calls |
 | Frontend | React 19, TypeScript, Tailwind, TanStack Query, generated API types, SSE | fast, accessible, contract-safe |
 | Observability | OpenTelemetry traces, structured logs without PHI, model call ledger | every step, cost and delay visible |
 
@@ -91,5 +92,5 @@ leakage rate, time to first token, p95 latencies and cost per case. Targets were
 ## 7. Limitations
 
 Synthetic records and simulated hospitals; not a clinical trial; DDXPlus is not Sri Lankan; the
-pneumonia models are reported as unvalidated until measured on a held-out test set; automated symptom
+pneumonia metrics are team-reported until our own evaluation re-measures them; automated symptom
 checking is less accurate than doctors, so SuwaPath guides and never diagnoses.

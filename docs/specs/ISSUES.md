@@ -95,10 +95,11 @@ green; login page renders; every route returns 501 or a placeholder; CI green; b
 | D01 | P0 | DDXPlus routing labels | 300-case stratified subset chosen with a script; each condition mapped to specialty and urgency by two members independently; disagreements resolved by a third; kappa computed; files in `project/eval/datasets/routing/` |
 | D02 | P0 | Red-flag vignettes si/en | 60 per language, half positive, half near-miss; each with expected rule ID and urgency; Sinhala checked by a native speaker; `project/eval/datasets/redflags/` |
 | D03 | P0 | Injection attack set | 60 attacks across the six categories of `13-evaluation.md`, each with target recipient and canary fields; sources cited; `project/eval/datasets/privacy/` |
-| D04 | P0 | Pneumonia model cards and release | for general and paediatric: class order, preprocessing, training data, split, metrics with threshold, age range; weights uploaded as a GitHub release; `fetch_models.py` downloads and checks SHA-256 |
+| D04 | P0 | Pneumonia model card and release | for `general.onnx`: confirm class order and normalization from the training code; dataset names; accuracy threshold; weights uploaded as a GitHub release; `fetch_models.py` downloads and checks SHA-256 |
 | D06 | P0 | Retrieval query set | 120 questions (60 si, 60 en) with gold chunk IDs and intents; `project/eval/datasets/retrieval/` |
 | D07 | P0 | Knowledge corpus curation | about 60 documents per `KNW-11`, each with source, publisher, licence and language; Sinhala versions where available; `project/suwapath/modules/knowledge/corpus/` |
 | D08 | P0 | Navigation knowledge base | DDXPlus conditions and evidences mapped to our concept IDs; elder-care and chronic-disease extension groups with references; `routing.yaml` from D01 labels; `questions.yaml` in si and en; `modules/navigation/kb/` |
+| D09 | P1 | Pregnancy and newborn programme content | schedule templates citing their public sources (antenatal visits, national immunisation schedule); si and en text; reviewed |
 | D05 | P1 | Sinhala content review | all `si.yaml` safety strings and UI `si.ts` strings reviewed by a native speaker |
 
 ## 6. Wave 1: modules (all blocked by Wave 0 only, unless listed)
@@ -122,7 +123,12 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | M11 | P1 | notifications: channels and stream | W0 | normal | in-app and SMS no-op channels; quiet hours; `/notifications`; `/me/stream` |
 | M12 | P0 | gateway providers: gemini, openai_compatible, decisions | W0 | important | three adapters with declared capabilities; recorded-response tests; Jev noul, choice and score mapping; zero-retention provider preference on OpenRouter |
 | M13 | P0 | PHI minimization pipeline | W0 | critical | purpose profiles; pseudonymizer from structured fields (si and Latin); outbound inspector with NIC, phone, email detectors; restore; egress tests with canaries (`SEC-30` to `SEC-33`) |
-| M14 | P0 | imaging: registry and ONNX adapter | W0 | important | manifest loading and SHA-256 check; age-based variant; preprocessing per manifest; unavailable path; Jev image gate optional; patient never sees probability |
+| M14 | P0 | imaging: registry and ONNX adapter | W0, F02 | important | manifest with status `reported`; SHA-256 check; preprocessing per manifest; bands with the 0.5 hard floor `IMG-5`; unavailable path; Jev image gate optional; patient never sees probability |
+| F02 | P0 | uploads: validation and file store | W0 | critical | magic-byte types, size and page limits, image re-encode with EXIF strip, encrypted `FileStore`, 202 plus background processing, safe serving headers, `FileScanner` no-op port (`UPL-1` to `UPL-7`) |
+| P01 | P0 | programmes: catalogue, offerings, referrals, enrolment | W0 | important | catalogue enable flags; offerings with approval states; referrals need a treating relationship; enrolment creates timers and per-programme consent categories; ranking ignores fees (`PRG-1` to `PRG-6`); elder care registered |
+| P02 | P1 | pregnancy programme | P01, D09 | important | registration, schedule, maternal red flags, partner alerts within consent |
+| P03 | P1 | newborn programme | P01, D09 | important | registration, vaccination and check-up reminders, infant red flag, guardian alerts |
+| PC1 | P0 | private consult backend | W0, M12 | critical | in-memory turns with no text persisted anywhere (test asserts DB, logs and traces); rules-only safety; disclosure gate; zero-retention provider check; ciphertext-only storage with expiry purge; generic audit (`PRV-1` to `PRV-14`) |
 | M15 | P1 | reports: upload and extraction | W0 | important | text layer, vision, OCR fallback; observation parsing with printed ranges; provenance with page and line |
 | K01 | P0 | knowledge: ingestion and hybrid retrieval | W0 | important | structure-aware chunker; local and Vertex embedding adapters; pgvector HNSW and full-text; RRF; `knowledge ingest` CLI idempotent by hash; `retrieve` returns cited chunks (`KNW-20` to `KNW-24`) |
 | K02 | P0 | knowledge: shared and user caches | K01, M04 | critical | shared cache write rules `KNW-32`; user cache encrypted with fingerprints `KNW-33` to `KNW-35`; stale-hit test; never-cached list enforced |
@@ -153,6 +159,9 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | U07 | P1 | Hospital sessions | M08 | sessions with counts; appointment list without clinical data |
 | U08 | P0 | Admin: AI operations and audit | W0, M02 | provider mode, cost, latency, budgets, verdicts, dead letters, flags, audit search |
 | U09 | P0 | Dev panel: clock and reset | W0 | advance clock, reset scenario, visible only in dev and demo |
+| U10 | P0 | Private consult screen | PC1 | disclosure, streaming chat, quick exit, WebCrypto encryption for opt-in history with PIN wrap and recovery code, delete now, nothing readable in browser storage |
+| U11 | P0 | Programme screens | P01 | patient programmes and referrals, doctor referral action, hospital offerings editor, admin catalogue and approvals |
+| U12 | P1 | Document camera scanner | F02 | edge detection, perspective correction, CLAHE before upload |
 
 ## 9. Wave 4: integration, evaluation, delivery
 
@@ -176,6 +185,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | X04 | P2 | MCP server phase A | I02, A02, M01 | `EXT-10` to `EXT-14` |
 | X05 | P2 | VM deployment | X01 | compose on the VM with TLS; secrets from the server's `.env` |
 | X06 | P2 | Tamil and voice | | |
+| X07 | P2 | ClamAV scanning | F02 | ClamAV adapter for `FileScanner` in the worker, `pending_scan` status |
 
 ## 10. Parallel capacity check
 

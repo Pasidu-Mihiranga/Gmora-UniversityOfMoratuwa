@@ -21,10 +21,13 @@ New decisions get the next number in a new file (no edits to accepted records; s
 | [0014](0014-frontend-rebuilt-on-our-earlier-design-system.md) | Frontend rebuilt on our earlier design system | Accepted |
 | [0015](0015-risk-based-testing-and-a-lean-ci.md) | Risk-based testing and a lean CI | Accepted |
 | [0016](0016-mcp-shaped-tools-mcp-server-as-p2.md) | MCP-shaped tools; MCP server as P2 | Accepted |
-| [0017](0017-two-pneumonia-models-selected-by-age.md) | Two pneumonia models selected by age, unvalidated until measured | Accepted |
+| [0017](0017-two-pneumonia-models-selected-by-age.md) | Two pneumonia models selected by age, unvalidated until measured | Superseded by 0021 |
 | [0018](0018-knowledge-rag-with-hybrid-retrieval.md) | Knowledge RAG with hybrid retrieval in Postgres | Accepted |
 | [0019](0019-llm-only-when-needed.md) | LLM only when needed: cost tiers, intent classifier and two caches | Accepted |
 | [0020](0020-knowledge-driven-navigation-engine.md) | Knowledge-driven navigation engine with information-gain questioning | Accepted |
+| [0021](0021-one-pneumonia-model-with-reported-metrics.md) | One pneumonia model for all ages, with reported metrics | Accepted |
+| [0022](0022-private-consult-without-server-readable-storage.md) | Private consult without server-readable storage | Accepted |
+| [0023](0023-programme-catalogue-and-hospital-offerings.md) | Programme catalogue owned by the platform, offerings by hospitals | Accepted |
 
 ## Template
 
