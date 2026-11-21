@@ -27,4 +27,4 @@ addopts = "-q"
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-files = ["suwapath/platform"]
+files = ["suwapath/contracts", "suwapath/platform"]

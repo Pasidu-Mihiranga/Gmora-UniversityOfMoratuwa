@@ -65,6 +65,14 @@ confidence means a general physician first, never a forced specialist.
 chat model (`KNW-1` T2), but any symptom words in them still go through the red-flag rules, and
 ranking never uses commissions, booking fees, listing fees or any commercial input.
 
+#### Specialty catalog
+
+`NAV-3a` Specialties (enum `Specialty` in contracts): general_medicine, cardiology, endocrinology,
+nephrology, neurology, respiratory, gastroenterology, orthopaedics, rheumatology, dermatology, ent,
+ophthalmology, psychiatry, obstetrics_gynaecology, paediatrics, general_surgery, urology,
+venereology (confidential sexual health clinics, used by the private consult `PRV-12`). The engine
+and any model step can only return values from this catalog.
+
 #### Knowledge graph
 
 `NAV-4` Static, versioned files in `modules/navigation/kb/` (loaded at startup, `kb_version` recorded
