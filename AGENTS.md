@@ -149,6 +149,10 @@ named in the spec.
 - Modules never import each other. They use ports from `suwapath.contracts` and events; only
   `bootstrap.py` wires implementations. Import rules are checked in CI.
 - Business logic does not import FastAPI. Routes are thin.
+- Every `/api/v1` route declares access with `Annotated[Principal, Depends(require(Role.X, ...))]`
+  or `Depends(public())`. The app refuses to start if a route has neither (spec 20, `SG-1`).
+- Errors are raised as `suwapath.contracts.errors` types and become problem+json responses; never
+  put user input in an error message.
 - All time comes from the `Clock` port, never `datetime.now()`.
 - Every model call goes through the model gateway, which applies the timeout, retries and the
   cost and latency log. No direct SDK calls elsewhere.
