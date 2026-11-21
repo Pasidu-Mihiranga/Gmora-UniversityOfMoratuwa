@@ -33,6 +33,7 @@ every issue is built against.
 | [16-demo-and-seed.md](16-demo-and-seed.md) | Synthetic world, demo accounts, the Amma scenario |
 | [17-knowledge-retrieval-and-caching.md](17-knowledge-retrieval-and-caching.md) | Knowledge RAG, cost and latency tiers, intent classification, shared and user-scoped caches |
 | [18-programmes-and-private-consult.md](18-programmes-and-private-consult.md) | Programme catalogue, offerings, referrals, enrolment; the private consult |
+| [19-customisable-agents.md](19-customisable-agents.md) | Templates, typed settings in layers, plain-language rules, quotas, guardian suggestions |
 | [ISSUES.md](ISSUES.md) | Work breakdown: waves, dependencies, ownership boundaries, acceptance criteria |
 
 ## Non-negotiable constraints

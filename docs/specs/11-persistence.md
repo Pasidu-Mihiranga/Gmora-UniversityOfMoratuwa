@@ -33,7 +33,7 @@ sends `NOTIFY suwapath_outbox` after commit.
 |---|---|
 | platform | `platform_outbox`, `platform_inbox`, `platform_timers`, `platform_clock`, `platform_flags`, `platform_idempotency_keys` |
 | identity | `identity_users`, `identity_refresh_tokens`, `identity_login_attempts` |
-| consent | `consent_grants`, `consent_rules`, `consent_rule_versions` |
+| consent | `consent_grants`, `consent_rules`, `consent_rule_versions`, `customisation_settings`, `customisation_versions`, `customisation_suggestions` |
 | record | `record_patient_keys`, `record_patients`, `record_practitioners`, `record_conditions`, `record_allergies`, `record_medication_statements`, `record_observations`, `record_provenance`, `record_documents` |
 | booking | `booking_organizations`, `booking_practitioner_roles`, `booking_schedules`, `booking_slots`, `booking_holds`, `booking_appointments` |
 | care | `care_programme_types`, `care_offerings`, `care_referrals`, `care_enrollments`, `care_medication_administrations`, `care_alert_rules` |
@@ -45,7 +45,7 @@ sends `NOTIFY suwapath_outbox` after commit.
 | agents | `agents_jobs`, `agents_messages` |
 | verifier | `verifier_verdicts`, `verifier_reviews` |
 | notifications | `notifications_items` |
-| ops | `ops_model_calls`, `ops_budgets` |
+| ops | `ops_model_calls`, `ops_budgets`, `ops_usage` |
 | audit | `audit_log` |
 
 Column definitions are the SQLAlchemy models in each module's `adapters/models.py`, created in
