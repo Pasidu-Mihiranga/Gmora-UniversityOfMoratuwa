@@ -6,6 +6,7 @@ Usage:
     python main.py worker
     python main.py clock show | advance 4h
     python main.py openapi [--out path]
+    python main.py seed generate [--seed 42] [--out path]
 
 Further commands (worker, agents, migrate, seed, eval, openapi, clock, mcp) are added as their
 components land. See docs/specs/01-architecture.md section 7.
@@ -116,6 +117,22 @@ def _cmd_openapi(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_seed(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from suwapath.seed.generator import generate
+
+    world = generate(args.seed)
+    out = Path(args.out or f"storage/seed/world-{args.seed}.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(world.model_dump_json(indent=1) + "\n")
+    print(
+        f"Wrote {out}: {len(world.patients)} patients, {len(world.practitioners)} doctors, "
+        f"{len(world.schedules)} sessions, {len(world.users)} accounts"
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="main.py", description="SuwaPath command line")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -137,6 +154,13 @@ def build_parser() -> argparse.ArgumentParser:
     clock.add_argument("action", choices=["show", "advance"])
     clock.add_argument("duration", nargs="?", type=_parse_duration, default=None)
     clock.set_defaults(handler=_cmd_clock)
+
+    seed = sub.add_parser("seed", help="synthetic world (spec 16); loading arrives with issue I01")
+    seed_sub = seed.add_subparsers(dest="seed_command", required=True)
+    generate_cmd = seed_sub.add_parser("generate", help="write the deterministic world as JSON")
+    generate_cmd.add_argument("--seed", type=int, default=42)
+    generate_cmd.add_argument("--out", default=None)
+    generate_cmd.set_defaults(handler=_cmd_seed)
 
     openapi = sub.add_parser("openapi", help="write the OpenAPI document for the frontend (API-3)")
     openapi.add_argument("--out", default="frontend/src/shared/api/openapi.json")
