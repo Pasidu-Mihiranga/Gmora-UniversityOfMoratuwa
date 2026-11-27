@@ -79,11 +79,8 @@
   /* Clinical status language (spec 12). Each has a surface, border and text
      tone so states are styled consistently everywhere they appear.
 
-     These were originally very dark and low-chroma: a "forest" green that
-     read grey, a warn brown that read as mud, a danger maroon that looked
-     historic rather than urgent. They have been lifted in chroma so a status
-     chip signals at a glance, and every pairing was re-checked against its
-     own surface rather than assumed:
+     Chroma is high enough that a status chip signals at a glance, and every
+     pairing is measured against its own surface:
 
        ok      #027A48 on #ECFDF3   5.1:1
        warn    #B54708 on #FFFAEB   5.2:1
@@ -179,9 +176,8 @@
                 clinical number. Lab values in a proportional face make
                 "10.2" and "1.02" hard to scan in a column.
 
-     A face declared here but not fetched fails silently: the stack simply
-     falls through to the system UI font and everything still looks broadly
-     fine, which is why it went unnoticed once before. Every face is self-hosted
+     A face declared here but not loaded fails silently: the stack falls
+     through to the system UI font. Every face is self-hosted
      (src/app/fonts.ts imports it); nothing is fetched from a third party (SG-17). */
   /* Body copy: descriptions, labels, everything that is read rather than
      scanned. Nunito Sans has open apertures and a tall x-height, which is

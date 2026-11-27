@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint --deny-warnings src",
     "preview": "vite preview",
-    "gen:api": "openapi-typescript src/shared/api/openapi.json -o src/shared/api/openapi.d.ts"
+    "gen:api": "openapi-typescript src/shared/api/openapi.json -o src/shared/api/openapi.d.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.3.0",
@@ -21,17 +22,20 @@
     "react-router-dom": "^7.18.7"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.11",
     "@types/react": "^19.3.3",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
     "autoprefixer": "^10.7.0",
+    "jsdom": "^29.1.1",
     "openapi-typescript": "^7.13.0",
     "oxlint": "^1.95.0",
     "postcss": "^8.5.34",
     "postcss-import": "^17.0.1",
     "tailwindcss": "^3.4.19",
-    "typescript": "^7.0.2",
-    "vite": "^8.4.0"
+    "typescript": "~5.9",
+    "vite": "^8.4.0",
+    "vitest": "^5.1.2"
   }
 }

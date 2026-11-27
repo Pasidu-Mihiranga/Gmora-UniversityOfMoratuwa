@@ -140,8 +140,8 @@
   .sp-btn-solid-danger:hover:not(:disabled) {
     background: var(--sp-danger-solid-hover);
   }
-  /* Used by the confidential sexual-health pathway to visually distinguish it
-     from the main brand flow, per spec §28's "purple = specialised care". */
+  /* Programme colour (purple = specialised care), used by care programmes and
+     the private consult to stand apart from the main brand flow. */
   .sp-btn-solid-programme {
     background: var(--sp-programme-solid);
     color: #fff;
