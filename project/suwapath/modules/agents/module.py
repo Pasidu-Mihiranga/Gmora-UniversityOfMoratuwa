@@ -8,6 +8,7 @@ retryable (it is never dropped).
 from __future__ import annotations
 
 from suwapath.modules.agents.api.router import router
+from suwapath.modules.agents.application.companion import CompanionAgent
 from suwapath.modules.agents.application.context import Dependencies
 from suwapath.modules.agents.application.guardian import GuardianAgent
 from suwapath.modules.agents.application.runtime import (
@@ -15,7 +16,6 @@ from suwapath.modules.agents.application.runtime import (
     Delivery,
     register_supervisor,
 )
-from suwapath.modules.agents.application.skeleton_agents import CompanionAgent
 from suwapath.platform.registry import ModuleContext
 
 REQUIRED_PORTS = (
@@ -25,6 +25,9 @@ REQUIRED_PORTS = (
     "notifications",
     "agent_directory",
     "care",
+    "safety",
+    "navigation",
+    "booking",
 )
 
 
@@ -51,6 +54,9 @@ def register(container: ModuleContext) -> None:
             missed_doses=None,
             latest_patient_text=ports["cases"].latest_patient_text,
             adherence=ports["care"].adherence,
+            safety=ports["safety"],
+            navigation=ports["navigation"],
+            booking=ports["booking"],
         )
 
     delivery = Delivery(dependencies)
