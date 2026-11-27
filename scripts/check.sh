@@ -30,6 +30,6 @@ $PY -m pytest -q -o addopts=""
 
 if [ -f frontend/package.json ]; then
   echo "== frontend"
-  (cd frontend && npx tsc -b && npm run lint && npm run build)
+  (cd frontend && npx tsc -b && npm run lint && npm test && npm run build)
 fi
 echo "All checks passed."

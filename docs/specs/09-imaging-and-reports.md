@@ -119,8 +119,7 @@ and always ends with a navigation step.
 
 `UPL-1` **Capture in the MVP is upload**: PDF, JPEG or PNG from files, or the phone camera through the
 browser's file input with `capture="environment"` (opens the camera on mobile, no custom scanner).
-An in-app document scanner (edge detection, perspective correction, CLAHE, ported from our
-PneumoScan pipeline) is P1.
+An in-app document scanner (edge detection, perspective correction, CLAHE) is P1.
 
 `UPL-2` Validation on upload, before anything is stored:
 - type by **magic bytes**, not by file name or the browser's content type; only PDF, JPEG, PNG;

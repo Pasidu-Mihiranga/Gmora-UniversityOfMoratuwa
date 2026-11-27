@@ -1,0 +1,52 @@
+/* Global stylesheet. postcss-import inlines these before Tailwind runs:
+   1. tokens.css: CSS custom properties, the single source of truth
+   2. Tailwind base, components and utilities
+   3. components.css: named component classes inside @layer components
+   Utilities come last, so a utility can override a component class when needed. */
+@import "../shared/ui/styles/tokens.css";
+@import "../shared/ui/styles/components.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--sp-canvas);
+    color: var(--sp-ink-900);
+    font-family: var(--sp-font-sans);
+    font-size: var(--sp-body-size);
+    line-height: var(--sp-leading-body);
+    /* A page never scrolls sideways; wide content scrolls in its own container. */
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--sp-ink-900);
+    font-family: var(--sp-font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--sp-brand-500);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

@@ -3,7 +3,7 @@
 ## 1. Stack
 
 `FE-1` Vite, React 19, TypeScript (strict), Tailwind 3, React Router 7, the existing SuwaPath design
-tokens and UI kit (rebuilt from our earlier prototype into the structure below). Added libraries:
+tokens and UI kit in the structure below. Added libraries:
 `@tanstack/react-query` (server state), `openapi-fetch` (typed client), `openapi-typescript` (dev,
 type generation). Anything else needs a pull request that explains why.
 

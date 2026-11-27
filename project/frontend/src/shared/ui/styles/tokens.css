@@ -1,0 +1,310 @@
+/* ==========================================================================
+   SuwaPath design tokens: THE single source of truth for the visual system.
+   --------------------------------------------------------------------------
+   Change a value here and it propagates everywhere: Tailwind utilities (which
+   are mapped to these vars in tailwind.config.js), the component classes in
+   components.css, and the chart palette in src/theme.ts.
+
+   Never hard-code a colour, radius, shadow or font elsewhere in the app.
+
+   The brand ramp is sampled from the actual SuwaPath logo:
+     mark gradient  #12cddb -> #0090b0
+     wordmark navy  #0a2e56
+
+   COLOUR FORMAT: why every colour is defined twice
+   -------------------------------------------------
+   Each colour ships as a space-separated RGB triplet plus an rgb() wrapper:
+
+     --sp-ink-900-rgb: 10 46 86;
+     --sp-ink-900: rgb(var(--sp-ink-900-rgb));
+
+   The triplet is what makes Tailwind opacity modifiers work. Tailwind
+   rewrites `bg-ink-900/50` into `rgb(<colour> / 50%)`, which it can only do
+   when the colour is raw channels: given a plain `var(--sp-ink-900)` it
+   produces an invalid value and the element renders fully transparent
+   (this silently broke every modal backdrop once). tailwind.config.js
+   therefore maps colours to `rgb(var(--sp-…-rgb) / <alpha-value>)`.
+
+   The rgb() wrapper exists so components.css and any plain CSS can keep
+   using `var(--sp-ink-900)` directly without knowing about the triplet.
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------- brand */
+  --sp-brand-50-rgb: 236 253 255;
+  --sp-brand-50: rgb(var(--sp-brand-50-rgb));
+  --sp-brand-100-rgb: 206 247 253;
+  --sp-brand-100: rgb(var(--sp-brand-100-rgb));
+  --sp-brand-200-rgb: 162 238 249;
+  --sp-brand-200: rgb(var(--sp-brand-200-rgb));
+  --sp-brand-300-rgb: 99 224 242;
+  --sp-brand-300: rgb(var(--sp-brand-300-rgb));
+  --sp-brand-400-rgb: 31 203 228;
+  --sp-brand-400: rgb(var(--sp-brand-400-rgb));
+  --sp-brand-500-rgb: 0 176 192; /* logo mid stop */
+  --sp-brand-500: rgb(var(--sp-brand-500-rgb));
+  --sp-brand-600-rgb: 0 144 176; /* logo dark stop: primary action colour */
+  --sp-brand-600: rgb(var(--sp-brand-600-rgb));
+  --sp-brand-700-rgb: 10 116 144;
+  --sp-brand-700: rgb(var(--sp-brand-700-rgb));
+  --sp-brand-800-rgb: 19 94 117;
+  --sp-brand-800: rgb(var(--sp-brand-800-rgb));
+  --sp-brand-900-rgb: 22 78 99;
+  --sp-brand-900: rgb(var(--sp-brand-900-rgb));
+
+  /* ----------------------------------------------------------------- ink */
+  /* Navy scale for text and neutral surfaces; 900 is the wordmark navy. */
+  --sp-ink-50-rgb: 242 246 251;
+  --sp-ink-50: rgb(var(--sp-ink-50-rgb));
+  --sp-ink-100-rgb: 227 235 245;
+  --sp-ink-100: rgb(var(--sp-ink-100-rgb));
+  --sp-ink-200-rgb: 199 215 234;
+  --sp-ink-200: rgb(var(--sp-ink-200-rgb));
+  --sp-ink-300-rgb: 157 184 214;
+  --sp-ink-300: rgb(var(--sp-ink-300-rgb));
+  --sp-ink-400-rgb: 108 147 189;
+  --sp-ink-400: rgb(var(--sp-ink-400-rgb));
+  --sp-ink-500-rgb: 74 117 163;
+  --sp-ink-500: rgb(var(--sp-ink-500-rgb));
+  --sp-ink-600-rgb: 56 93 136;
+  --sp-ink-600: rgb(var(--sp-ink-600-rgb));
+  --sp-ink-700-rgb: 46 75 110;
+  --sp-ink-700: rgb(var(--sp-ink-700-rgb));
+  --sp-ink-800-rgb: 28 59 96;
+  --sp-ink-800: rgb(var(--sp-ink-800-rgb));
+  --sp-ink-900-rgb: 10 46 86;
+  --sp-ink-900: rgb(var(--sp-ink-900-rgb));
+
+  /* -------------------------------------------------------------- status */
+  /* Clinical status language (spec 12). Each has a surface, border and text
+     tone so states are styled consistently everywhere they appear.
+
+     Chroma is high enough that a status chip signals at a glance, and every
+     pairing is measured against its own surface:
+
+       ok      #027A48 on #ECFDF3   5.1:1
+       warn    #B54708 on #FFFAEB   5.2:1
+       danger  #B42318 on #FEF3F2   6.0:1
+       info    #135E75 on #ECFDFF   5.4:1
+       prog    #5B21B6 on #F5F3FF   8.1:1
+
+     All clear WCAG AA (4.5:1) with headroom. Lift any of them further and
+     that headroom is what you spend, so re-measure before changing one. */
+  --sp-ok-surface-rgb: 236 253 243;
+  --sp-ok-surface: rgb(var(--sp-ok-surface-rgb));
+  --sp-ok-border-rgb: 108 233 166;
+  --sp-ok-border: rgb(var(--sp-ok-border-rgb));
+  --sp-ok-text-rgb: 2 122 72;
+  --sp-ok-text: rgb(var(--sp-ok-text-rgb));
+
+  --sp-warn-surface-rgb: 255 250 235;
+  --sp-warn-surface: rgb(var(--sp-warn-surface-rgb));
+  --sp-warn-border-rgb: 254 223 137;
+  --sp-warn-border: rgb(var(--sp-warn-border-rgb));
+  --sp-warn-text-rgb: 181 71 8;
+  --sp-warn-text: rgb(var(--sp-warn-text-rgb));
+
+  --sp-danger-surface-rgb: 254 243 242;
+  --sp-danger-surface: rgb(var(--sp-danger-surface-rgb));
+  --sp-danger-border-rgb: 253 162 155;
+  --sp-danger-border: rgb(var(--sp-danger-border-rgb));
+  --sp-danger-text-rgb: 180 35 24;
+  --sp-danger-text: rgb(var(--sp-danger-text-rgb));
+
+  --sp-programme-surface-rgb: 245 243 255;
+  --sp-programme-surface: rgb(var(--sp-programme-surface-rgb));
+  --sp-programme-border-rgb: 196 181 253;
+  --sp-programme-border: rgb(var(--sp-programme-border-rgb));
+  --sp-programme-text-rgb: 91 33 182;
+  --sp-programme-text: rgb(var(--sp-programme-text-rgb));
+
+  --sp-info-surface-rgb: var(--sp-brand-50-rgb);
+  --sp-info-surface: rgb(var(--sp-info-surface-rgb));
+  --sp-info-border-rgb: var(--sp-brand-200-rgb);
+  --sp-info-border: rgb(var(--sp-info-border-rgb));
+  --sp-info-text-rgb: var(--sp-brand-800-rgb);
+  --sp-info-text: rgb(var(--sp-info-text-rgb));
+
+  /* Maternal pathway accent (distinct from the generic programme purple). */
+  --sp-maternal-surface-rgb: 255 241 245;
+  --sp-maternal-surface: rgb(var(--sp-maternal-surface-rgb));
+  --sp-maternal-border-rgb: 251 207 232;
+  --sp-maternal-border: rgb(var(--sp-maternal-border-rgb));
+  --sp-maternal-text-rgb: 157 23 77;
+  --sp-maternal-text: rgb(var(--sp-maternal-text-rgb));
+
+  /* Solid action colours: for buttons that must read as a single strong
+     colour rather than the tinted surface/border/text triads above: the
+     elderly-pathway jumbo buttons (FE-40) are the main consumer. */
+  --sp-ok-solid-rgb: 22 163 74;
+  --sp-ok-solid: rgb(var(--sp-ok-solid-rgb));
+  --sp-ok-solid-hover-rgb: 21 128 61;
+  --sp-ok-solid-hover: rgb(var(--sp-ok-solid-hover-rgb));
+  --sp-warn-solid-rgb: 234 88 12;
+  --sp-warn-solid: rgb(var(--sp-warn-solid-rgb));
+  --sp-warn-solid-hover-rgb: 194 65 12;
+  --sp-warn-solid-hover: rgb(var(--sp-warn-solid-hover-rgb));
+  --sp-danger-solid-rgb: 220 38 38;
+  --sp-danger-solid: rgb(var(--sp-danger-solid-rgb));
+  --sp-danger-solid-hover-rgb: 185 28 28;
+  --sp-danger-solid-hover: rgb(var(--sp-danger-solid-hover-rgb));
+  --sp-programme-solid-rgb: 124 92 255;
+  --sp-programme-solid: rgb(var(--sp-programme-solid-rgb));
+  --sp-programme-solid-hover-rgb: 105 65 198;
+  --sp-programme-solid-hover: rgb(var(--sp-programme-solid-hover-rgb));
+
+  /* ------------------------------------------------------------ surfaces */
+  --sp-canvas-rgb: 247 249 252;
+  --sp-canvas: rgb(var(--sp-canvas-rgb));
+  --sp-surface-rgb: 255 255 255;
+  --sp-surface: rgb(var(--sp-surface-rgb));
+  --sp-surface-sunken-rgb: var(--sp-ink-50-rgb);
+  --sp-surface-sunken: rgb(var(--sp-surface-sunken-rgb));
+  --sp-border-rgb: 230 236 244;
+  --sp-border: rgb(var(--sp-border-rgb));
+  --sp-border-strong-rgb: var(--sp-ink-200-rgb);
+  --sp-border-strong: rgb(var(--sp-border-strong-rgb));
+
+  /* ---------------------------------------------------------- typography
+     Three faces, each with a job:
+
+       sans     Nunito Sans: body, UI, descriptions, everything by default.
+       display  Nunito Sans: headings and section titles. Geometric and a
+                little wider than the body face, so a heading reads as a
+                heading at the same size instead of relying on weight alone.
+       mono     JetBrains Mono: section labels and, more importantly, any
+                clinical number. Lab values in a proportional face make
+                "10.2" and "1.02" hard to scan in a column.
+
+     A face declared here but not loaded fails silently: the stack falls
+     through to the system UI font. Every face is self-hosted
+     (src/app/fonts.ts imports it); nothing is fetched from a third party (SG-17). */
+  /* Body copy: descriptions, labels, everything that is read rather than
+     scanned. Nunito Sans has open apertures and a tall x-height, which is
+     what keeps small text legible on a phone in daylight. */
+  --sp-font-sans: "Nunito Sans", "Noto Sans Sinhala", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  /* Headings and section titles. Nunito Sans is geometric and slightly wider,
+     so it separates from the body face at a glance without a weight jump. */
+  --sp-font-display: "Nunito Sans", "Noto Sans Sinhala", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --sp-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code",
+    Menlo, monospace;
+
+  --sp-text-xs: 0.75rem;
+  --sp-text-sm: 0.875rem;
+  --sp-text-base: 1rem;
+  --sp-text-lg: 1.125rem;
+  --sp-text-xl: 1.375rem;
+  --sp-text-2xl: 1.75rem;
+  --sp-text-3xl: 2.125rem;
+
+  /* Headings sit tighter than body text. Optical, not arbitrary: as type
+     grows, the space between letters looks larger, so it must be reduced. */
+  --sp-tracking-display: -0.022em;
+  --sp-tracking-heading: -0.014em;
+  --sp-tracking-label: 0.14em;
+  --sp-leading-display: 1.1;
+  --sp-leading-heading: 1.25;
+  --sp-leading-body: 1.6;
+
+  /* --------------------------------------------------------------- shape */
+  --sp-radius-sm: 0.5rem;
+  --sp-radius-md: 0.75rem;
+  --sp-radius-lg: 1rem;
+  --sp-radius-xl: 1.25rem;
+  --sp-radius-full: 999px;
+
+  /* ------------------------------------------------------------- shadows
+     Tinted with the ink colour rather than pure black: a neutral-black
+     shadow over a warm surface reads as grey dirt, a hue-matched one reads
+     as depth. */
+  --sp-shadow-xs: 0 1px 2px rgba(10, 46, 86, 0.05);
+  --sp-shadow-sm: 0 1px 2px rgba(10, 46, 86, 0.04),
+    0 2px 8px rgba(10, 46, 86, 0.05);
+  --sp-shadow-md: 0 2px 4px rgba(10, 46, 86, 0.04),
+    0 8px 24px rgba(10, 46, 86, 0.08);
+  --sp-shadow-lg: 0 4px 8px rgba(10, 46, 86, 0.05),
+    0 16px 40px rgba(10, 46, 86, 0.1);
+  /* Brand-tinted lift for primary actions: the element appears to glow
+     with its own colour rather than casting a grey shadow. */
+  --sp-shadow-brand: 0 4px 14px rgba(0, 144, 176, 0.25);
+  --sp-shadow-brand-lg: 0 10px 28px rgba(0, 144, 176, 0.32);
+
+  /* --------------------------------------------------------- expression
+     The brand gradient. SuwaPath's mark already runs teal→cyan, so this is
+     the logo's own colour ramp reused as an interface signature rather than
+     a new colour introduced for decoration. */
+  --sp-gradient-brand: linear-gradient(
+    135deg,
+    rgb(var(--sp-brand-600-rgb)),
+    rgb(var(--sp-brand-500-rgb))
+  );
+  --sp-gradient-brand-soft: linear-gradient(
+    135deg,
+    rgba(var(--sp-brand-600-rgb), 0.12),
+    rgba(var(--sp-brand-500-rgb), 0.05)
+  );
+  /* Very low-opacity dot grid. Felt rather than seen; stops large empty
+     surfaces reading as flat dead space. */
+  --sp-texture-dots: radial-gradient(
+    circle at 1px 1px,
+    rgba(var(--sp-ink-900-rgb), 0.055) 1px,
+    transparent 0
+  );
+  --sp-texture-dots-size: 22px 22px;
+
+  /* --------------------------------------------------------------- misc */
+  --sp-ring: 0 0 0 3px rgba(0, 144, 176, 0.18);
+  --sp-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* A gentle overshoot for things that appear, so motion feels physical
+     rather than mechanical. */
+  --sp-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --sp-transition-lift: 220ms var(--sp-ease-out);
+
+  /* Layout metrics referenced by the app shell. */
+  --sp-sidebar-w: 16rem;
+  --sp-topbar-h: 3.75rem;
+  --sp-bottomnav-h: 4.25rem;
+
+  /* Control sizing. The elderly pathway scales these up rather than
+     overriding individual components. */
+  --sp-control-h: 2.625rem;
+  --sp-control-px: 1rem;
+  --sp-body-size: 1rem;
+  /* FE-20: patient and guardian targets are at least 48 px; icons and spacing between targets. */
+  --sp-tap: 3rem;
+  --sp-tap-gap: 0.75rem;
+  --sp-icon: 1.25rem;
+}
+
+/* Simple mode for older users (FE-40, FE-41). Same colours, faces, icons and components; only
+   sizes change, so the product looks the same everywhere. Set on <html data-mode="simple">. */
+:root[data-mode="simple"] {
+  --sp-body-size: 1.375rem; /* 22 px */
+  --sp-text-xs: 1rem;
+  --sp-text-sm: 1.125rem;
+  --sp-text-base: 1.375rem;
+  --sp-text-lg: 1.5rem;
+  --sp-text-xl: 1.75rem;
+  --sp-text-2xl: 2.125rem;
+  --sp-text-3xl: 2.5rem;
+  --sp-control-h: 3.5rem;
+  --sp-control-px: 1.5rem;
+  --sp-tap: 3.5rem; /* 56 px */
+  --sp-tap-gap: 1rem; /* 16 px between targets */
+  --sp-icon: 2rem; /* 32 px */
+  /* Higher contrast for secondary text. */
+  --sp-ink-500-rgb: 46 75 110;
+  --sp-ink-500: rgb(var(--sp-ink-500-rgb));
+  --sp-ink-400-rgb: 56 93 136;
+  --sp-ink-400: rgb(var(--sp-ink-400-rgb));
+}
+
+/* Text size chosen by the person, independent of simple mode (FE-43). */
+:root[data-text-size="large"] {
+  font-size: 112.5%;
+}
+:root[data-text-size="xlarge"] {
+  font-size: 125%;
+}

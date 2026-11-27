@@ -85,3 +85,9 @@ type = "forbidden"
 source_modules = ["suwapath.modules"]
 forbidden_modules = ["suwapath.bootstrap"]
 allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "The seed generator builds contract objects only"
+type = "forbidden"
+source_modules = ["suwapath.seed"]
+forbidden_modules = ["suwapath.platform", "suwapath.modules", "suwapath.bootstrap"]

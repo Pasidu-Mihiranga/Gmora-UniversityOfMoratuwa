@@ -54,6 +54,7 @@ def install_error_handlers(app: FastAPI) -> None:
             405: "method_not_allowed",
             413: "payload_too_large",
             429: "rate_limited",
+            501: "not_implemented",
         }.get(exc.status_code, "http_error")
         detail = exc.detail if isinstance(exc.detail, str) else None
         return problem(exc.status_code, code, code.replace("_", " ").capitalize(), detail)
