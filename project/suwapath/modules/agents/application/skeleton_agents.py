@@ -18,7 +18,7 @@ from suwapath.contracts.agents import (
 )
 from suwapath.contracts.enums import AgentKind, DataCategory, Language, Purpose, Role
 from suwapath.contracts.ids import MessageId, PatientId
-from suwapath.modules.agents.application.runtime import AgentContext
+from suwapath.modules.agents.application.context import AgentContext
 
 MISSED_DOSE_WINDOW = timedelta(hours=48)
 CONCERNING_MISSED = 2
@@ -131,8 +131,8 @@ class CompanionAgent:
             request = await ctx.message(MessageId(UUID(data["message_id"])))
             if request is None or request.intent is not MessageIntent.CHECK_IN_WITH_PATIENT:
                 return AgentResult(status="done", reason="unsupported_request")
-            patient = ctx.deps.directory.case_patient(request.case_id)
-            language = ctx.deps.directory.language(patient)
+            patient = await ctx.deps.directory.case_patient(request.case_id)
+            language = await ctx.deps.directory.language(patient)
             await ctx.deps.cases.deliver_communication(
                 request.case_id, "patient", CHECK_IN_TEXT[language], False
             )

@@ -60,18 +60,24 @@ class World:
     nimal: UserId = field(default_factory=lambda: UserId(uuid4()))
     cases: InMemoryCaseService | None = None
 
-    def patient_user(self, patient_id: PatientId) -> UserId:
+    async def patient_user(self, patient_id: PatientId) -> UserId:
         return self.amma_user
 
-    def guardians(self, patient_id: PatientId) -> list[UserId]:
+    async def guardians(self, patient_id: PatientId) -> list[UserId]:
         return [self.nimal]
 
-    def case_patient(self, case_id: CaseId) -> PatientId:
+    async def case_patient(self, case_id: CaseId) -> PatientId:
         assert self.cases is not None
         return self.cases.states[case_id].patient_id
 
-    def language(self, patient_id: PatientId) -> Language:
+    async def language(self, patient_id: PatientId) -> Language:
         return Language.SI
+
+    async def practitioner_user(self, practitioner_role_id: object) -> UserId | None:
+        return None
+
+    async def doctor_case(self, patient_id: PatientId) -> None:
+        return None
 
 
 @dataclass(frozen=True)
