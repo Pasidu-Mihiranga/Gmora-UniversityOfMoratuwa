@@ -24,8 +24,9 @@ Port signatures do not change. Code that owns a use case still opens `uow_factor
 ## Consequences
 
 Cross-module use cases are atomic without passing sessions through ports. A service must not keep
-a unit of work beyond one call. Concurrent tasks each get their own context, so a background task
-does not join a request's transaction by accident.
+a unit of work beyond one call. An asyncio task copies the context it was created in, so a task
+started inside an open unit of work would join it: work that must commit on its own is started with
+a fresh context (`asyncio.create_task(..., context=contextvars.Context())`) or outside the block.
 
 ## Alternatives considered
 
