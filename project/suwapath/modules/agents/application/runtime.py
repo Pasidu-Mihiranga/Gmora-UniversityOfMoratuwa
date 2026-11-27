@@ -31,6 +31,7 @@ from suwapath.contracts.errors import InvalidTransition, NotFound, VersionConfli
 from suwapath.contracts.events import EventEnvelope
 from suwapath.contracts.events.catalog import (
     AgentMessageSent,
+    AlertRuleFired,
     AppointmentBooked,
     CaseOpened,
     DoctorDecisionRecorded,
@@ -91,6 +92,11 @@ PURPOSE_OF: dict[AgentKind, Purpose] = {
     AgentKind.GUARDIAN_AGENT: Purpose.GUARDIAN_MONITORING,
     AgentKind.DOCTOR_ASSISTANT: Purpose.DOCTOR_BRIEF,
     AgentKind.SINGLE_AGENT_BASELINE: Purpose.EVALUATION,
+}
+RECIPIENT_ROLE: dict[AgentKind, Role] = {
+    AgentKind.PATIENT_COMPANION: Role.PATIENT,
+    AgentKind.GUARDIAN_AGENT: Role.GUARDIAN,
+    AgentKind.DOCTOR_ASSISTANT: Role.DOCTOR,
 }
 DepsSource = Dependencies | Callable[[], Dependencies]
 
@@ -362,7 +368,7 @@ class Delivery:
         if not message.needs_verification:
             await self._route(uow, message, envelope)
             return
-        access = await self._recipient_access(message)
+        access = await self._recipient_access(uow, message)
         verdict = await self.deps.verifier.check(
             message, VerificationContext(recipient_access=access)
         )
@@ -400,9 +406,9 @@ class Delivery:
             return False
         return await self._deliver_to_person(uow, message, (MessageStatus.ESCALATED,))
 
-    async def _recipient_access(self, message: AgentMessage) -> AccessDecision:
+    async def _recipient_access(self, uow: UnitOfWork, message: AgentMessage) -> AccessDecision:
         patient = await self.deps.directory.case_patient(message.case_id)
-        principal = await self._recipient_principal(message, patient)
+        principal = await self._recipient_principal(uow, message, patient)
         for category in message.consent_scope:
             decision = await self.deps.policy.decide(
                 AccessRequest(
@@ -420,7 +426,10 @@ class Delivery:
             allowed=True, reason="all_categories_allowed", policy_version="runtime"
         )
 
-    async def _recipient_principal(self, message: AgentMessage, patient: PatientId) -> Principal:
+    async def _recipient_principal(
+        self, uow: UnitOfWork, message: AgentMessage, patient: PatientId
+    ) -> Principal:
+        """Who receives the message, acting for whom: consent is checked for that person."""
         trace = TraceId(message.trace_id)
         if message.recipient == Role.GUARDIAN.value:
             return Principal(
@@ -431,23 +440,15 @@ class Delivery:
                 purpose=Purpose.GUARDIAN_MONITORING,
                 trace_id=trace,
             )
-        if message.recipient == AgentKind.PATIENT_COMPANION.value:
-            return Principal(
-                kind=PrincipalKind.AGENT,
-                agent_kind=AgentKind.PATIENT_COMPANION,
-                role=Role.PATIENT,
-                acting_for=await self.deps.directory.patient_user(patient),
-                patient_scope=patient,
-                purpose=Purpose.CARE_NAVIGATION,
-                trace_id=trace,
-            )
+        recipient = AgentKind(message.recipient)
         return Principal(
             kind=PrincipalKind.AGENT,
-            agent_kind=AgentKind(message.recipient),
-            role=Role.GUARDIAN,
-            acting_for=message.acting_for,
+            agent_kind=recipient,
+            role=RECIPIENT_ROLE.get(recipient),
+            # the human the receiving agent acts for, never the sender's person
+            acting_for=await self._recipient_human(uow, message, patient),
             patient_scope=patient,
-            purpose=Purpose.GUARDIAN_MONITORING,
+            purpose=PURPOSE_OF.get(recipient, Purpose.CARE_NAVIGATION),
             trace_id=trace,
         )
 
@@ -484,7 +485,7 @@ class Delivery:
     async def _deliver_to_person(
         self, uow: UnitOfWork, message: AgentMessage, only_from: tuple[MessageStatus, ...]
     ) -> bool:
-        access = await self._recipient_access(message)  # SEC-13: re-checked at delivery time
+        access = await self._recipient_access(uow, message)  # SEC-13: re-checked at delivery
         if not access.allowed:
             await messages.mark(uow, message.message_id, MessageStatus.BLOCKED, only_from)
             return False
@@ -601,6 +602,32 @@ class Supervisor:
                 purpose=Purpose.EMERGENCY,
             )
 
+    async def on_alert_rule(self, envelope: EventEnvelope, uow: UnitOfWork) -> None:
+        """CARE-8: a guardian's rule triggers the guardian agent; it never messages directly."""
+        payload = envelope.payload
+        assert isinstance(payload, AlertRuleFired)
+        if payload.rule_type == "red_flag":
+            return  # red flags reach the guardian agent through cases.red_flag_raised
+        guardians = (
+            [payload.guardian_id]
+            if payload.guardian_id
+            else await self.deps.directory.guardians(payload.patient_id)
+        )
+        for guardian in guardians:
+            self._enqueue(
+                uow,
+                envelope,
+                AgentKind.GUARDIAN_AGENT,
+                acting_for=guardian,
+                case_id=None,
+                patient_id=payload.patient_id,
+                data={
+                    "trigger": "alert_rule",
+                    "rule_type": payload.rule_type,
+                    "rule_id": str(payload.rule_id),
+                },
+            )
+
     async def on_appointment_booked(self, envelope: EventEnvelope, uow: UnitOfWork) -> None:
         payload = envelope.payload
         assert isinstance(payload, AppointmentBooked)
@@ -702,7 +729,8 @@ class Supervisor:
     async def _checkin_followup(
         self, envelope: EventEnvelope, uow: UnitOfWork, payload: TimerFired
     ) -> None:
-        """Timer payload: patient_id, guardian_id and case_id, set by the guardian agent."""
+        """Timer payload: patient_id, guardian_id, case_id and request_id, set by the guardian
+        agent when a check-in passed its deadline unanswered."""
         timer = (
             await uow.session.execute(
                 select(TimerRow.payload).where(TimerRow.id == payload.timer_id)
@@ -717,7 +745,7 @@ class Supervisor:
             acting_for=UserId(UUID(timer["guardian_id"])),
             case_id=CaseId(UUID(timer["case_id"])) if timer.get("case_id") else None,
             patient_id=PatientId(UUID(timer["patient_id"])),
-            data={"trigger": "checkin_followup"},
+            data={"trigger": "checkin_followup", "request_id": timer.get("request_id")},
         )
 
     def register(self, subscribers: SubscriberRegistry) -> None:
@@ -730,6 +758,7 @@ class Supervisor:
         )
         add("care.dose_missed", self.on_dose_missed, name="agents.guardian_on_dose_missed")
         add("cases.red_flag_raised", self.on_red_flag, name="agents.guardian_on_red_flag")
+        add("care.alert_rule_fired", self.on_alert_rule, name="agents.guardian_on_alert_rule")
         add(
             "booking.appointment_booked",
             self.on_appointment_booked,
