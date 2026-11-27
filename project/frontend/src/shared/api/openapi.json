@@ -349,6 +349,23 @@
       "OpenQuestion": {
         "additionalProperties": false,
         "properties": {
+          "answer_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "yes_no",
+                  "choice",
+                  "number",
+                  "duration"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer Type"
+          },
           "asked_at": {
             "format": "date-time",
             "title": "Asked At",
@@ -356,6 +373,14 @@
           },
           "asked_by": {
             "$ref": "#/components/schemas/AgentKind"
+          },
+          "choices": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Choices",
+            "type": "array"
           },
           "for_role": {
             "default": "patient",
@@ -369,6 +394,22 @@
           "key": {
             "title": "Key",
             "type": "string"
+          },
+          "question_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Key"
+          },
+          "red_flag_screen": {
+            "default": false,
+            "title": "Red Flag Screen",
+            "type": "boolean"
           }
         },
         "required": [
