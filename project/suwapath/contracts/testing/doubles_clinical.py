@@ -208,9 +208,10 @@ _STATUS_BY_EVENT: dict[CaseEventKind, CaseStatus] = {
 
 def _apply(state: CaseState, draft: CaseEventDraft) -> CaseState:
     update: dict[str, Any] = {"version": state.version + 1}
-    if (
-        status := _STATUS_BY_EVENT.get(draft.kind)
-    ) is not None and state.status is not CaseStatus.EMERGENCY:
+    leaves_emergency = draft.kind in (CaseEventKind.CASE_CLOSED, CaseEventKind.HANDED_TO_HUMAN)
+    if (status := _STATUS_BY_EVENT.get(draft.kind)) is not None and (
+        state.status is not CaseStatus.EMERGENCY or leaves_emergency
+    ):
         update["status"] = status
     if draft.kind is CaseEventKind.RED_FLAG_RAISED:
         update["status"] = CaseStatus.EMERGENCY

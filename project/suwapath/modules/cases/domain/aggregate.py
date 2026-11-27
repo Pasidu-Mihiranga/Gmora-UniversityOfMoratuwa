@@ -17,7 +17,7 @@ brief updates) are allowed in every active state; routes only before or during c
 from __future__ import annotations
 
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Literal
 
 from pydantic import Field, ValidationError
@@ -56,6 +56,7 @@ K = CaseEventKind
 S = CaseStatus
 CODE = r"^[a-z][a-z0-9_]{0,39}$"
 UNVERSIONED = "unversioned"
+APPROVAL_TIMEOUT = timedelta(hours=4)  # spec 03 section 6, `approval_timeout`
 
 
 # ----- Event data (IDs and codes only; patient text lives in communications) --------------------
@@ -70,6 +71,7 @@ class OpenedData(_Data):
     language: Language
     opened_by: Literal["patient", "guardian_agent", "system"]
     reason: str | None = Field(default=None, pattern=CODE)
+    communication_id: ResourceId | None = None  # the patient's first message, if any
 
 
 class EmptyData(_Data):
@@ -233,6 +235,8 @@ def apply(
     target = TRANSITIONS[kind].get(state.status)
     if target is None:
         raise InvalidTransition("event not allowed in this state", kind=kind.value)
+    if kind is K.DOCTOR_APPROVAL_REQUESTED and data.get("due_at") is None:
+        data = {**data, "due_at": (at + APPROVAL_TIMEOUT).isoformat()}
     parsed = parse(kind, data)
     changes = _changes(case, kind, parsed, at)
     changes["state"] = state.model_copy(

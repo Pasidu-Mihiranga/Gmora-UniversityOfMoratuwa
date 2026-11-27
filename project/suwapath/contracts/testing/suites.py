@@ -240,12 +240,21 @@ class CaseServiceContract:
         state = await cases.open(
             me, me.patient_scope, UntrustedText(value="x", source="patient_message"), Language.EN
         )
+        # Spec 02 section 5: a case closes from replied, emergency or handed_to_human.
         state = await cases.append(
             me,
             state.id,
-            [CaseEventDraft(kind=CaseEventKind.CASE_CLOSED, actor="patient")],
+            [
+                CaseEventDraft(
+                    kind=CaseEventKind.RED_FLAG_RAISED,
+                    data={"rule_ids": ["RF-NEURO-001"]},
+                    actor="safety",
+                ),
+                CaseEventDraft(kind=CaseEventKind.CASE_CLOSED, actor="patient"),
+            ],
             state.version,
         )
+        assert state.status.value == "closed"
         with pytest.raises(InvalidTransition):
             await cases.append(
                 me,

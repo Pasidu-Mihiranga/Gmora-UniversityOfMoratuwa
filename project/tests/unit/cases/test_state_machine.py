@@ -253,6 +253,12 @@ def test_timeout_after_a_decision_is_refused() -> None:
         _step(case, K.APPROVAL_TIMED_OUT)
 
 
+def test_approval_is_due_four_hours_later_by_default() -> None:
+    case = _step(_at(S.IN_CARE), K.DOCTOR_APPROVAL_REQUESTED, due_at=None)
+    assert case.state.pending_approval is not None
+    assert case.state.pending_approval.due_at == AT + timedelta(hours=4)
+
+
 def test_timeout_returns_to_care_and_clears_the_approval() -> None:
     case = _step(_at(S.AWAITING_DOCTOR), K.APPROVAL_TIMED_OUT)
     assert case.state.status is S.IN_CARE

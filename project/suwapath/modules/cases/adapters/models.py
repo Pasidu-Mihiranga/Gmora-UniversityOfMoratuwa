@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Boolean, Index, Integer, String, UniqueConstraint, text
+from sqlalchemy import BigInteger, Boolean, Identity, Index, Integer, String, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -42,15 +42,23 @@ class CaseEventRow(UuidKey, Base):
 
 
 class TimelineRow(UuidKey, Base):
+    """One item per case event or delivered communication. `category` is the data category a
+    viewer needs to see it; `seq` gives a stable order and the page cursor."""
+
     __tablename__ = "cases_timeline"
     case_id: Mapped[UUID]
+    seq: Mapped[int] = mapped_column(BigInteger, Identity(always=True), unique=True)
+    category: Mapped[str] = mapped_column(String(40))
     at: Mapped[datetime] = mapped_column(TZ)
     kind: Mapped[str] = mapped_column(String(20))
     actor: Mapped[str] = mapped_column(String(40))
     summary_key: Mapped[str] = mapped_column(String(80))
     params: Mapped[dict[str, Any]] = mapped_column(JSONB, server_default=text("'{}'::jsonb"))
     simulated: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
-    __table_args__ = (Index("ix_cases_timeline_case_at", "case_id", "at"),)
+    __table_args__ = (
+        Index("ix_cases_timeline_case_at", "case_id", "at"),
+        Index("ix_cases_timeline_case_seq", "case_id", "seq"),
+    )
 
 
 class CommunicationRow(UuidKey, Base):
