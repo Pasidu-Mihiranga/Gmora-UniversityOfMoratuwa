@@ -1,6 +1,295 @@
 {
   "components": {
     "schemas": {
+      "AgentKind": {
+        "enum": [
+          "patient_companion",
+          "guardian_agent",
+          "doctor_assistant",
+          "verifier",
+          "single_agent_baseline"
+        ],
+        "title": "AgentKind",
+        "type": "string"
+      },
+      "BudgetUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_seconds": {
+            "default": 0.0,
+            "title": "Agent Seconds",
+            "type": "number"
+          },
+          "cost_usd": {
+            "default": 0.0,
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "model_calls": {
+            "default": 0,
+            "title": "Model Calls",
+            "type": "integer"
+          }
+        },
+        "title": "BudgetUsage",
+        "type": "object"
+      },
+      "CaseFact": {
+        "additionalProperties": false,
+        "description": "A structured finding with provenance. `key` is a navigation concept or a fact key.",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "present": {
+            "default": true,
+            "title": "Present",
+            "type": "boolean"
+          },
+          "provenance_ids": {
+            "default": [],
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "source": {
+            "default": "patient_reported",
+            "enum": [
+              "patient_reported",
+              "record",
+              "report",
+              "imaging",
+              "doctor"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "CaseFact",
+        "type": "object"
+      },
+      "CaseState": {
+        "additionalProperties": false,
+        "properties": {
+          "appointments": {
+            "default": [],
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Appointments",
+            "type": "array"
+          },
+          "brief_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brief Id"
+          },
+          "budget_used": {
+            "$ref": "#/components/schemas/BudgetUsage",
+            "default": {
+              "agent_seconds": 0.0,
+              "cost_usd": 0.0,
+              "model_calls": 0
+            }
+          },
+          "facts": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CaseFact"
+            },
+            "title": "Facts",
+            "type": "array"
+          },
+          "guardian_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GuardianBranchState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "open_questions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/OpenQuestion"
+            },
+            "title": "Open Questions",
+            "type": "array"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "pending_approval": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PendingApproval"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "red_flags": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RedFlagHit"
+            },
+            "title": "Red Flags",
+            "type": "array"
+          },
+          "simulated": {
+            "default": false,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          },
+          "suggested_route": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RouteSuggestion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "urgency": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Urgency"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "urgency_floor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Urgency"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "version": {
+            "minimum": 0.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "patient_id",
+          "status",
+          "language",
+          "version"
+        ],
+        "title": "CaseState",
+        "type": "object"
+      },
+      "CaseStatus": {
+        "enum": [
+          "open",
+          "intake",
+          "assessed",
+          "emergency",
+          "in_care",
+          "awaiting_doctor",
+          "replied",
+          "handed_to_human",
+          "closed"
+        ],
+        "title": "CaseStatus",
+        "type": "string"
+      },
+      "GuardianBranchState": {
+        "additionalProperties": false,
+        "properties": {
+          "last_alert_level": {
+            "anyOf": [
+              {
+                "enum": [
+                  "info",
+                  "concern",
+                  "urgent",
+                  "emergency"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Alert Level"
+          },
+          "status": {
+            "enum": [
+              "idle",
+              "checking_in",
+              "alerted",
+              "escalated"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "updated_at"
+        ],
+        "title": "GuardianBranchState",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -13,6 +302,342 @@
         },
         "title": "HTTPValidationError",
         "type": "object"
+      },
+      "Language": {
+        "enum": [
+          "si",
+          "en"
+        ],
+        "title": "Language",
+        "type": "string"
+      },
+      "MessageAccepted": {
+        "additionalProperties": false,
+        "properties": {
+          "communication_id": {
+            "format": "uuid",
+            "title": "Communication Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "communication_id"
+        ],
+        "title": "MessageAccepted",
+        "type": "object"
+      },
+      "OpenCase": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "language"
+        ],
+        "title": "OpenCase",
+        "type": "object"
+      },
+      "OpenQuestion": {
+        "additionalProperties": false,
+        "properties": {
+          "asked_at": {
+            "format": "date-time",
+            "title": "Asked At",
+            "type": "string"
+          },
+          "asked_by": {
+            "$ref": "#/components/schemas/AgentKind"
+          },
+          "for_role": {
+            "default": "patient",
+            "enum": [
+              "patient",
+              "doctor"
+            ],
+            "title": "For Role",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "asked_by",
+          "asked_at"
+        ],
+        "title": "OpenQuestion",
+        "type": "object"
+      },
+      "Page_CaseState_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CaseState"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Page[CaseState]",
+        "type": "object"
+      },
+      "Page_TimelineItem_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Page[TimelineItem]",
+        "type": "object"
+      },
+      "PatientMessage": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "PatientMessage",
+        "type": "object"
+      },
+      "PendingApproval": {
+        "additionalProperties": false,
+        "properties": {
+          "draft_id": {
+            "format": "uuid",
+            "title": "Draft Id",
+            "type": "string"
+          },
+          "due_at": {
+            "format": "date-time",
+            "title": "Due At",
+            "type": "string"
+          },
+          "practitioner_id": {
+            "format": "uuid",
+            "title": "Practitioner Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "draft_id",
+          "practitioner_id",
+          "due_at"
+        ],
+        "title": "PendingApproval",
+        "type": "object"
+      },
+      "RedFlagHit": {
+        "additionalProperties": false,
+        "properties": {
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rules_version": {
+            "title": "Rules Version",
+            "type": "string"
+          },
+          "urgency": {
+            "$ref": "#/components/schemas/Urgency"
+          }
+        },
+        "required": [
+          "rule_id",
+          "urgency",
+          "rules_version"
+        ],
+        "title": "RedFlagHit",
+        "type": "object"
+      },
+      "RouteSuggestion": {
+        "additionalProperties": false,
+        "properties": {
+          "alternatives": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Specialty"
+            },
+            "title": "Alternatives",
+            "type": "array"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "kb_version": {
+            "title": "Kb Version",
+            "type": "string"
+          },
+          "low_confidence": {
+            "title": "Low Confidence",
+            "type": "boolean"
+          },
+          "primary_specialty": {
+            "$ref": "#/components/schemas/Specialty"
+          },
+          "urgency": {
+            "$ref": "#/components/schemas/Urgency"
+          }
+        },
+        "required": [
+          "urgency",
+          "primary_specialty",
+          "confidence",
+          "low_confidence",
+          "kb_version"
+        ],
+        "title": "RouteSuggestion",
+        "type": "object"
+      },
+      "Specialty": {
+        "description": "Specialty catalog (NAV-3).",
+        "enum": [
+          "general_medicine",
+          "cardiology",
+          "endocrinology",
+          "nephrology",
+          "neurology",
+          "respiratory",
+          "gastroenterology",
+          "orthopaedics",
+          "rheumatology",
+          "dermatology",
+          "ent",
+          "ophthalmology",
+          "psychiatry",
+          "obstetrics_gynaecology",
+          "paediatrics",
+          "general_surgery",
+          "urology",
+          "venereology"
+        ],
+        "title": "Specialty",
+        "type": "string"
+      },
+      "TimelineItem": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "patient_message",
+              "agent_message",
+              "event",
+              "booking",
+              "alert",
+              "decision"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "simulated": {
+            "default": false,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "summary_key": {
+            "title": "Summary Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "case_id",
+          "at",
+          "kind",
+          "actor",
+          "summary_key",
+          "params"
+        ],
+        "title": "TimelineItem",
+        "type": "object"
+      },
+      "Urgency": {
+        "description": "Ordered: routine < soon_72h < urgent_24h < emergency (CON-5).",
+        "enum": [
+          "routine",
+          "soon_72h",
+          "urgent_24h",
+          "emergency"
+        ],
+        "title": "Urgency",
+        "type": "string"
       },
       "ValidationError": {
         "properties": {
@@ -413,17 +1038,73 @@
     "/api/v1/cases": {
       "get": {
         "operationId": "cases_get_cases",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CaseStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Page_CaseState_"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M10)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "My cases",
@@ -433,17 +1114,36 @@
       },
       "post": {
         "operationId": "cases_post_cases",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenCase"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CaseState"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M10)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Open a case with the first message",
@@ -461,6 +1161,7 @@
             "name": "case_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Case Id",
               "type": "string"
             }
@@ -470,7 +1171,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CaseState"
+                }
               }
             },
             "description": "Successful Response"
@@ -484,9 +1187,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M10)"
           }
         },
         "summary": "Case state",
@@ -504,16 +1204,29 @@
             "name": "case_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Case Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientMessage"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
+          "202": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MessageAccepted"
+                }
               }
             },
             "description": "Successful Response"
@@ -527,9 +1240,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M10)"
           }
         },
         "summary": "Send a message",
@@ -590,8 +1300,38 @@
             "name": "case_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Case Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           }
         ],
@@ -599,7 +1339,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Page_TimelineItem_"
+                }
               }
             },
             "description": "Successful Response"
@@ -613,9 +1355,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M10)"
           }
         },
         "summary": "Case timeline",
