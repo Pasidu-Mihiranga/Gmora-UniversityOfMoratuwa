@@ -18,7 +18,7 @@ New decisions get the next number in a new file (no edits to accepted records; s
 | [0011](0011-per-patient-envelope-encryption.md) | Per-patient envelope encryption | Accepted |
 | [0012](0012-consent-as-attribute-based-access-at-the-data-access-layer.md) | Consent as attribute-based access at the data-access layer | Accepted |
 | [0013](0013-rest-with-generated-typescript-types-and-sse.md) | REST with generated TypeScript types and SSE | Accepted |
-| [0014](0014-frontend-rebuilt-on-our-earlier-design-system.md) | Frontend rebuilt on our earlier design system | Accepted |
+| [0014](0014-frontend-on-a-token-design-system.md) | Frontend on a token-based design system with a typed data layer | Accepted |
 | [0015](0015-risk-based-testing-and-a-lean-ci.md) | Risk-based testing and a lean CI | Accepted |
 | [0016](0016-mcp-shaped-tools-mcp-server-as-p2.md) | MCP-shaped tools; MCP server as P2 | Accepted |
 | [0017](0017-two-pneumonia-models-selected-by-age.md) | Two pneumonia models selected by age, unvalidated until measured | Superseded by 0021 |

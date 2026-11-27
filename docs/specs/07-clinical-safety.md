@@ -31,7 +31,7 @@ script, English). The model MAY add concepts it detects; it MUST NOT remove lexi
 urgency, rationale, and the specialty to route to. The rule set is versioned (`rules_version`)
 and recorded with every assessment.
 
-Rule set v1 (ported from our earlier prototype, reviewed, with two elder-care additions):
+Rule set v1 (reviewed, including two elder-care rules):
 
 | ID | Label | Urgency |
 |---|---|---|

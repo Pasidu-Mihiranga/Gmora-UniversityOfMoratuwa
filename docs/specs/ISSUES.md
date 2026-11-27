@@ -81,7 +81,7 @@ fixtures.)
 | W0.6 | Model gateway core: ports, pipeline (budget, capability check, timeout and retry, usage log), offline provider with Amma fixtures | 06 |
 | W0.7 | Initial migration `0001_initial`: every table and index in `11-persistence.md` | 11 |
 | W0.8 | Composition root and module stubs: every module package with `register()`, routers mounted with 501 stubs and real response models, so the full OpenAPI exists | 01, 10 |
-| W0.9 | Frontend foundation: design tokens and UI kit brought across, AppShell, all routes declared with placeholders, auth flow, TanStack Query, typed client from OpenAPI, i18n scaffold, badges, simple mode tokens, `SafeMarkdown`, banned-API lint rules | 12, 20 |
+| W0.9 | Frontend foundation: design tokens and UI kit, AppShell, all routes declared with placeholders, auth flow, TanStack Query, typed client from OpenAPI, i18n scaffold, badges, simple mode tokens, `SafeMarkdown`, banned-API lint rules | 12, 20 |
 | W0.10 | CI workflow, PR and issue templates, `ready.yml` | 14 |
 | W0.11 | Seed generator (JSON fixtures only, no loader yet) | 16 |
 
@@ -114,7 +114,7 @@ Every Wave 1 issue: implements its port, passes the shared contract suite for th
 | M03 | P0 | consent: access policy and grants | W0 | critical | `AccessPolicy.decide` per `SEC-10` rules 1 to 7; grants API; narrow-only validation; property test "no principal sees a field outside its grant"; revocation effective next request |
 | M04 | P0 | crypto: envelope encryption | W0 | critical | `LocalKeyProvider`; AES-GCM with AAD; encrypted column types; DEK cache TTL; crypto-shred; tests for AAD swap rejection and nonce uniqueness (`SEC-20` to `SEC-26`) |
 | M05 | P0 | record: FHIR-shaped record | M03, M04 | critical | resources of `02` table stored with encrypted fields; every read through `AccessPolicy` with field filtering; provenance; FHIR Bundle export; IDOR tests |
-| M06 | P0 | safety: lexicon, red flags, wording, clashes | W0 | critical | rules v1 ported with firing and near-miss tests in si and en; floor logic `SAF-3`; banned wording files with tests; clash checker with demo formulary and allergy classes |
+| M06 | P0 | safety: lexicon, red flags, wording, clashes | W0 | critical | rules v1 from spec 07 with firing and near-miss tests in si and en; floor logic `SAF-3`; banned wording files with tests; clash checker with demo formulary and allergy classes |
 | M07 | P0 | navigation engine | W0, D08 | critical | knowledge graph loader with versions; findings extraction; ambiguity check; Bayes scoring; information-gain question choice; stop and decide rules `NAV-1` to `NAV-9`; red-flag screen never capped; tests per safeguard |
 | M17 | P0 | navigation: doctor matching, direct channelling, trips | W0 | important | `find_doctors` ranking `NAV-10` with no commercial input; bounding box; same-day filter and slot extraction `NAV-13`; `plan_trip` bounded search (P1 part) |
 | M08 | P0 | booking: sessions, holds, appointments | W0 | critical | holds with TTL timer; confirm idempotent; partial unique index prevents double booking (concurrency test with 20 parallel confirms); `SafetyStop` in emergency; hospital views |

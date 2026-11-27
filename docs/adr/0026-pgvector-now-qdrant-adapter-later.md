@@ -6,8 +6,8 @@ Status: Accepted (28 Nov 2026). Refines ADR-0018.
 
 The team asked whether the knowledge corpus should live in Qdrant instead of pgvector. The corpus is
 about 60 curated documents (a few thousand chunks). Retrieval combines vector and full-text search,
-and the shared and user caches live next to it. The earlier prototype used an embedded vector index
-that was lost on every rebuild and had to be re-ingested at startup.
+and the shared and user caches live next to it. An embedded, in-process vector index would be lost
+on every rebuild and have to be re-ingested at startup.
 
 ## Decision
 
@@ -28,4 +28,4 @@ The Qdrant path stays open at the cost of one adapter and a re-ingest.
 ## Alternatives considered
 
 Qdrant now (a second store to keep in sync with Postgres, extra container, key and backups, with no
-benefit at this scale), an in-process index (lost on rebuild, as in the earlier prototype).
+benefit at this scale), an in-process index (lost on every rebuild).
