@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
 
-from suwapath.contracts.enums import Language, Role
+from suwapath.contracts.enums import Language, Purpose, Role
 from suwapath.contracts.ids import PatientId, UserId
 from suwapath.contracts.ports.identity import UserAccount
 from suwapath.contracts.principal import Principal
@@ -31,6 +31,10 @@ async def verifier(token: str) -> UserAccount:
 
 
 PatientOnly = Annotated[Principal, Depends(require(Role.PATIENT))]
+Shared = Annotated[
+    Principal,
+    Depends(require(Role.PATIENT, Role.DOCTOR, purposes={Role.DOCTOR: Purpose.TREATMENT})),
+]
 
 
 class Note(BaseModel):
@@ -43,6 +47,10 @@ def _router() -> APIRouter:
     @router.get("/mine")
     async def mine(principal: PatientOnly) -> dict[str, str]:
         return {"scope": str(principal.patient_scope)}
+
+    @router.get("/purpose")
+    async def purpose(principal: Shared) -> dict[str, str]:
+        return {"purpose": principal.purpose.value}
 
     @router.post("/note")
     async def note(body: Note, _: PatientOnly) -> dict[str, int]:
@@ -148,3 +156,12 @@ def test_rate_limiter_refills_over_time() -> None:
     assert limiter.allow("auth", "ip", now=0.0)
     assert not limiter.allow("auth", "ip", now=0.0)
     assert limiter.allow("auth", "ip", now=30.0)
+
+
+def test_a_shared_route_sets_the_purpose_per_role(client: TestClient) -> None:
+    def purpose(token: str) -> str:
+        response = client.get("/api/v1/test/purpose", headers={"Authorization": f"Bearer {token}"})
+        return str(response.json()["purpose"])
+
+    assert purpose("patient-token") == "self_access"
+    assert purpose("doctor-token") == "treatment"

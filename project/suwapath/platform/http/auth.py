@@ -6,7 +6,7 @@ runs at startup and refuses to start otherwise (SG-1).
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Iterator
+from collections.abc import Awaitable, Callable, Iterator, Mapping
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -27,11 +27,17 @@ CSRF_HEADER = "x-suwapath-request"
 class RoleGuard:
     """Dependency that authenticates the caller and checks the route's roles."""
 
-    def __init__(self, roles: frozenset[Role], purpose: Purpose) -> None:
+    def __init__(
+        self,
+        roles: frozenset[Role],
+        purpose: Purpose,
+        purposes: Mapping[Role, Purpose] | None = None,
+    ) -> None:
         if not roles:
             raise ValueError("a guarded route needs at least one role")
         self.roles = roles
         self.purpose = purpose
+        self.purposes = dict(purposes or {})
 
     async def __call__(self, request: Request) -> Principal:
         header = request.headers.get("authorization", "")
@@ -53,7 +59,7 @@ class RoleGuard:
             role=account.role,
             acting_for=account.id,
             patient_scope=account.patient_id if account.role is Role.PATIENT else None,
-            purpose=self.purpose,
+            purpose=self.purposes.get(account.role, self.purpose),
             trace_id=TraceId(current_trace_id()),
         )
         request.state.principal = principal
@@ -67,8 +73,13 @@ class PublicMarker:
         return None
 
 
-def require(*roles: Role, purpose: Purpose = Purpose.SELF_ACCESS) -> RoleGuard:
-    return RoleGuard(frozenset(roles), purpose)
+def require(
+    *roles: Role,
+    purpose: Purpose = Purpose.SELF_ACCESS,
+    purposes: Mapping[Role, Purpose] | None = None,
+) -> RoleGuard:
+    """`purposes` sets a different purpose per role, for routes several roles share."""
+    return RoleGuard(frozenset(roles), purpose, purposes)
 
 
 def public() -> PublicMarker:
