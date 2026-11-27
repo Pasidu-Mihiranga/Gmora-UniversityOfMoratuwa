@@ -16,7 +16,8 @@ export default defineConfig({
   build: {
     target: "es2022",
     sourcemap: false,
-    // FE-16: routes are lazy; keep the initial bundle small.
-    chunkSizeWarningLimit: 250,
+    // FE-16 budget is 200 KB gzipped for the initial load (about 120 KB today); this raw-size
+    // warning limit only flags unexpected growth.
+    chunkSizeWarningLimit: 450,
   },
 });

@@ -1,0 +1,3240 @@
+{
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "SuwaPath API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/admin/offerings": {
+      "get": {
+        "operationId": "care_get_admin_offerings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Offerings waiting for approval",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/admin/offerings/{offering_id}/decision": {
+      "post": {
+        "operationId": "care_post_admin_offerings_offering_id_decision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offering_id",
+            "required": true,
+            "schema": {
+              "title": "Offering Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Approve or reject",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/admin/programmes": {
+      "get": {
+        "operationId": "care_get_admin_programmes",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Programme catalogue admin",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/admin/programmes/{programme_key}": {
+      "put": {
+        "operationId": "care_put_admin_programmes_programme_key",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "programme_key",
+            "required": true,
+            "schema": {
+              "title": "Programme Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Enable or disable a programme",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/audit": {
+      "get": {
+        "operationId": "audit_get_audit",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M02)"
+          }
+        },
+        "summary": "Search the audit log",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "identity_post_auth_login",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M01)"
+          }
+        },
+        "summary": "Sign in",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "identity_post_auth_logout",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M01)"
+          }
+        },
+        "summary": "Sign out",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "identity_post_auth_refresh",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M01)"
+          }
+        },
+        "summary": "Rotate the refresh token (cookie, CSRF checked)",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/bookings": {
+      "get": {
+        "operationId": "booking_get_bookings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M08)"
+          }
+        },
+        "summary": "My appointments",
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/api/v1/bookings/holds": {
+      "post": {
+        "operationId": "booking_post_bookings_holds",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M08)"
+          }
+        },
+        "summary": "Hold a slot",
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/api/v1/bookings/holds/{hold_id}/confirm": {
+      "post": {
+        "operationId": "booking_post_bookings_holds_hold_id_confirm",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hold_id",
+            "required": true,
+            "schema": {
+              "title": "Hold Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M08)"
+          }
+        },
+        "summary": "Confirm a booking",
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/api/v1/bookings/{appointment_id}": {
+      "delete": {
+        "operationId": "booking_delete_bookings_appointment_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "appointment_id",
+            "required": true,
+            "schema": {
+              "title": "Appointment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M08)"
+          }
+        },
+        "summary": "Cancel",
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/api/v1/cases": {
+      "get": {
+        "operationId": "cases_get_cases",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M10)"
+          }
+        },
+        "summary": "My cases",
+        "tags": [
+          "cases"
+        ]
+      },
+      "post": {
+        "operationId": "cases_post_cases",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M10)"
+          }
+        },
+        "summary": "Open a case with the first message",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}": {
+      "get": {
+        "operationId": "cases_get_cases_case_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M10)"
+          }
+        },
+        "summary": "Case state",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}/messages": {
+      "post": {
+        "operationId": "cases_post_cases_case_id_messages",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M10)"
+          }
+        },
+        "summary": "Send a message",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}/stream": {
+      "get": {
+        "operationId": "cases_get_cases_case_id_stream",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M10)"
+          }
+        },
+        "summary": "Case events (SSE)",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/cases/{case_id}/timeline": {
+      "get": {
+        "operationId": "cases_get_cases_case_id_timeline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M10)"
+          }
+        },
+        "summary": "Case timeline",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
+    "/api/v1/dev/clock": {
+      "get": {
+        "operationId": "dev_get_dev_clock",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Simulated clock (dev and demo)",
+        "tags": [
+          "dev"
+        ]
+      }
+    },
+    "/api/v1/dev/clock/advance": {
+      "post": {
+        "operationId": "dev_post_dev_clock_advance",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Advance the clock (dev and demo)",
+        "tags": [
+          "dev"
+        ]
+      }
+    },
+    "/api/v1/dev/scenario/reset": {
+      "post": {
+        "operationId": "dev_post_dev_scenario_reset",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Reset the demo world (dev and demo)",
+        "tags": [
+          "dev"
+        ]
+      }
+    },
+    "/api/v1/doctor/approvals": {
+      "get": {
+        "operationId": "agents_get_doctor_approvals",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (A05)"
+          }
+        },
+        "summary": "Drafts waiting for approval",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/doctor/approvals/{draft_id}": {
+      "post": {
+        "operationId": "agents_post_doctor_approvals_draft_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (A05)"
+          }
+        },
+        "summary": "Approve, edit or reject",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/doctor/cases/{case_id}/brief": {
+      "get": {
+        "operationId": "agents_get_doctor_cases_case_id_brief",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (A05)"
+          }
+        },
+        "summary": "Sourced brief",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/doctor/cases/{case_id}/notes": {
+      "post": {
+        "operationId": "agents_post_doctor_cases_case_id_notes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (A05)"
+          }
+        },
+        "summary": "Notes for the reply",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/doctor/cases/{case_id}/request-fact": {
+      "post": {
+        "operationId": "agents_post_doctor_cases_case_id_request_fact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (A05)"
+          }
+        },
+        "summary": "Ask for a missing fact",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/doctor/queue": {
+      "get": {
+        "operationId": "agents_get_doctor_queue",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (A05)"
+          }
+        },
+        "summary": "Today's patients",
+        "tags": [
+          "agents"
+        ]
+      }
+    },
+    "/api/v1/doctor/referrals": {
+      "post": {
+        "operationId": "care_post_doctor_referrals",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Refer a patient to a programme",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/doctor/sources/{provenance_id}": {
+      "get": {
+        "operationId": "record_get_doctor_sources_provenance_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provenance_id",
+            "required": true,
+            "schema": {
+              "title": "Provenance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M05)"
+          }
+        },
+        "summary": "Source behind a brief line",
+        "tags": [
+          "record"
+        ]
+      }
+    },
+    "/api/v1/doctors": {
+      "get": {
+        "operationId": "navigation_get_doctors",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M17)"
+          }
+        },
+        "summary": "Search doctors",
+        "tags": [
+          "navigation"
+        ]
+      }
+    },
+    "/api/v1/doctors/{practitioner_role_id}/slots": {
+      "get": {
+        "operationId": "booking_get_doctors_practitioner_role_id_slots",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "practitioner_role_id",
+            "required": true,
+            "schema": {
+              "title": "Practitioner Role Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M08)"
+          }
+        },
+        "summary": "Free slots",
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/api/v1/guardian/alerts": {
+      "get": {
+        "operationId": "care_get_guardian_alerts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Alerts",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/guardian/alerts/{alert_id}/ack": {
+      "post": {
+        "operationId": "care_post_guardian_alerts_alert_id_ack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "title": "Alert Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Acknowledge an alert",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/guardian/dependents": {
+      "get": {
+        "operationId": "care_get_guardian_dependents",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Linked patients",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/guardian/rules": {
+      "get": {
+        "operationId": "care_get_guardian_rules",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Alert rules",
+        "tags": [
+          "care"
+        ]
+      },
+      "post": {
+        "operationId": "care_post_guardian_rules",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Create an alert rule",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "description": "Liveness: the process is up and serving requests.",
+        "operationId": "live_api_v1_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Live Api V1 Health Live Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Live",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/hospital/offerings": {
+      "get": {
+        "operationId": "care_get_hospital_offerings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "My hospital's offerings",
+        "tags": [
+          "care"
+        ]
+      },
+      "post": {
+        "operationId": "care_post_hospital_offerings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Create an offering",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/hospital/offerings/{offering_id}": {
+      "patch": {
+        "operationId": "care_patch_hospital_offerings_offering_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offering_id",
+            "required": true,
+            "schema": {
+              "title": "Offering Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Edit or submit an offering",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/hospital/sessions": {
+      "get": {
+        "operationId": "booking_get_hospital_sessions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M08)"
+          }
+        },
+        "summary": "Sessions with counts",
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/api/v1/hospital/sessions/{schedule_id}/appointments": {
+      "get": {
+        "operationId": "booking_get_hospital_sessions_schedule_id_appointments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schedule_id",
+            "required": true,
+            "schema": {
+              "title": "Schedule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M08)"
+          }
+        },
+        "summary": "Session appointments",
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/api/v1/imaging/{study_id}": {
+      "get": {
+        "operationId": "imaging_get_imaging_study_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "study_id",
+            "required": true,
+            "schema": {
+              "title": "Study Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M14)"
+          }
+        },
+        "summary": "Screening status or result",
+        "tags": [
+          "imaging"
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "identity_get_me",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M01)"
+          }
+        },
+        "summary": "My profile",
+        "tags": [
+          "identity"
+        ]
+      },
+      "patch": {
+        "operationId": "identity_patch_me",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M01)"
+          }
+        },
+        "summary": "Update my profile",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/me/stream": {
+      "get": {
+        "operationId": "notifications_get_me_stream",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M11)"
+          }
+        },
+        "summary": "My events (SSE)",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/memory": {
+      "get": {
+        "operationId": "memory_get_memory",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (ME01)"
+          }
+        },
+        "summary": "What is remembered for me",
+        "tags": [
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/{item_id}": {
+      "delete": {
+        "operationId": "memory_delete_memory_item_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (ME01)"
+          }
+        },
+        "summary": "Forget an item",
+        "tags": [
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/memory/{item_id}/decision": {
+      "post": {
+        "operationId": "memory_post_memory_item_id_decision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (ME01)"
+          }
+        },
+        "summary": "Confirm or decline",
+        "tags": [
+          "memory"
+        ]
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "operationId": "notifications_get_notifications",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M11)"
+          }
+        },
+        "summary": "My notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/read-all": {
+      "post": {
+        "operationId": "notifications_post_notifications_read_all",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M11)"
+          }
+        },
+        "summary": "Mark all read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/{notification_id}/read": {
+      "post": {
+        "operationId": "notifications_post_notifications_notification_id_read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notification_id",
+            "required": true,
+            "schema": {
+              "title": "Notification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M11)"
+          }
+        },
+        "summary": "Mark read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/ops/budgets": {
+      "get": {
+        "operationId": "ops_get_ops_budgets",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Budgets",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/ops/budgets/{scope}": {
+      "put": {
+        "operationId": "ops_put_ops_budgets_scope",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "title": "Scope",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Set a budget",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/ops/dead-letters": {
+      "get": {
+        "operationId": "ops_get_ops_dead_letters",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Dead letters",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/ops/dead-letters/{delivery_id}/replay": {
+      "post": {
+        "operationId": "ops_post_ops_dead_letters_delivery_id_replay",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Replay",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/ops/flags": {
+      "get": {
+        "operationId": "ops_get_ops_flags",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Feature flags",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/ops/flags/{key}": {
+      "put": {
+        "operationId": "ops_put_ops_flags_key",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Set a flag",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/ops/model-calls": {
+      "get": {
+        "operationId": "ops_get_ops_model_calls",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "Model call ledger",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/ops/overview": {
+      "get": {
+        "operationId": "ops_get_ops_overview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (U08)"
+          }
+        },
+        "summary": "AI operations overview",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/adherence": {
+      "get": {
+        "operationId": "care_get_patients_patient_id_adherence",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Adherence summary",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/consents": {
+      "get": {
+        "operationId": "consent_get_patients_patient_id_consents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Grants per guardian and doctor",
+        "tags": [
+          "consent"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/consents/{grantee_id}": {
+      "delete": {
+        "operationId": "consent_delete_patients_patient_id_consents_grantee_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "grantee_id",
+            "required": true,
+            "schema": {
+              "title": "Grantee Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Revoke access",
+        "tags": [
+          "consent"
+        ]
+      },
+      "put": {
+        "operationId": "consent_put_patients_patient_id_consents_grantee_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "grantee_id",
+            "required": true,
+            "schema": {
+              "title": "Grantee Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Set what a person may see",
+        "tags": [
+          "consent"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/doses": {
+      "get": {
+        "operationId": "care_get_patients_patient_id_doses",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Doses for a day",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/doses/{dose_id}/taken": {
+      "post": {
+        "operationId": "care_post_patients_patient_id_doses_dose_id_taken",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "dose_id",
+            "required": true,
+            "schema": {
+              "title": "Dose Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Mark a dose taken",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/enrollments": {
+      "get": {
+        "operationId": "care_get_patients_patient_id_enrollments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Enrolments",
+        "tags": [
+          "care"
+        ]
+      },
+      "post": {
+        "operationId": "care_post_patients_patient_id_enrollments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Join a programme",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/fhir/export": {
+      "get": {
+        "operationId": "record_get_patients_patient_id_fhir_export",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M05)"
+          }
+        },
+        "summary": "FHIR R4 Bundle",
+        "tags": [
+          "record"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/imaging": {
+      "post": {
+        "operationId": "imaging_post_patients_patient_id_imaging",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M14)"
+          }
+        },
+        "summary": "Upload an X-ray",
+        "tags": [
+          "imaging"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/referrals": {
+      "get": {
+        "operationId": "care_get_patients_patient_id_referrals",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "My referrals",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/reports": {
+      "get": {
+        "operationId": "reports_get_patients_patient_id_reports",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M15)"
+          }
+        },
+        "summary": "Reports",
+        "tags": [
+          "reports"
+        ]
+      },
+      "post": {
+        "operationId": "reports_post_patients_patient_id_reports",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M15)"
+          }
+        },
+        "summary": "Upload a report",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/resources": {
+      "get": {
+        "operationId": "record_get_patients_patient_id_resources",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M05)"
+          }
+        },
+        "summary": "Resources of one type",
+        "tags": [
+          "record"
+        ]
+      }
+    },
+    "/api/v1/patients/{patient_id}/summary": {
+      "get": {
+        "operationId": "record_get_patients_patient_id_summary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M05)"
+          }
+        },
+        "summary": "Record summary filtered by access",
+        "tags": [
+          "record"
+        ]
+      }
+    },
+    "/api/v1/private/sessions": {
+      "post": {
+        "operationId": "private_post_private_sessions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (PC1)"
+          }
+        },
+        "summary": "Start a private consult",
+        "tags": [
+          "private"
+        ]
+      }
+    },
+    "/api/v1/private/sessions/{session_id}": {
+      "delete": {
+        "operationId": "private_delete_private_sessions_session_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (PC1)"
+          }
+        },
+        "summary": "Delete now",
+        "tags": [
+          "private"
+        ]
+      }
+    },
+    "/api/v1/private/sessions/{session_id}/messages": {
+      "get": {
+        "operationId": "private_get_private_sessions_session_id_messages",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (PC1)"
+          }
+        },
+        "summary": "Encrypted history",
+        "tags": [
+          "private"
+        ]
+      },
+      "put": {
+        "operationId": "private_put_private_sessions_session_id_messages",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (PC1)"
+          }
+        },
+        "summary": "Store encrypted history",
+        "tags": [
+          "private"
+        ]
+      }
+    },
+    "/api/v1/private/sessions/{session_id}/turns": {
+      "post": {
+        "operationId": "private_post_private_sessions_session_id_turns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (PC1)"
+          }
+        },
+        "summary": "One turn",
+        "tags": [
+          "private"
+        ]
+      }
+    },
+    "/api/v1/programmes": {
+      "get": {
+        "operationId": "care_get_programmes",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Programme catalogue",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/programmes/{programme_key}/offerings": {
+      "get": {
+        "operationId": "care_get_programmes_programme_key_offerings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "programme_key",
+            "required": true,
+            "schema": {
+              "title": "Programme Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Approved offerings nearby",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/referrals/{referral_id}/accept": {
+      "post": {
+        "operationId": "care_post_referrals_referral_id_accept",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "referral_id",
+            "required": true,
+            "schema": {
+              "title": "Referral Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Accept a referral",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/referrals/{referral_id}/decline": {
+      "post": {
+        "operationId": "care_post_referrals_referral_id_decline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "referral_id",
+            "required": true,
+            "schema": {
+              "title": "Referral Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M09)"
+          }
+        },
+        "summary": "Decline a referral",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/api/v1/reports/{report_id}": {
+      "get": {
+        "operationId": "reports_get_reports_report_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M15)"
+          }
+        },
+        "summary": "Report with explanation",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/reviews": {
+      "get": {
+        "operationId": "verifier_get_reviews",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M16)"
+          }
+        },
+        "summary": "Messages waiting for my review",
+        "tags": [
+          "verifier"
+        ]
+      }
+    },
+    "/api/v1/reviews/{review_id}": {
+      "post": {
+        "operationId": "verifier_post_reviews_review_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "title": "Review Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M16)"
+          }
+        },
+        "summary": "Send, edit or discard",
+        "tags": [
+          "verifier"
+        ]
+      }
+    },
+    "/api/v1/rules": {
+      "get": {
+        "operationId": "consent_get_rules",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "My rules",
+        "tags": [
+          "consent"
+        ]
+      },
+      "post": {
+        "operationId": "consent_post_rules",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Confirm a rule",
+        "tags": [
+          "consent"
+        ]
+      }
+    },
+    "/api/v1/rules/parse": {
+      "post": {
+        "operationId": "consent_post_rules_parse",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Plain-language rule to a proposal",
+        "tags": [
+          "consent"
+        ]
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "operationId": "consent_get_settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "My assistant settings",
+        "tags": [
+          "consent"
+        ]
+      },
+      "patch": {
+        "operationId": "consent_patch_settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Change settings",
+        "tags": [
+          "consent"
+        ]
+      }
+    },
+    "/api/v1/settings/suggestions": {
+      "post": {
+        "operationId": "consent_post_settings_suggestions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Suggest a setting to a patient",
+        "tags": [
+          "consent"
+        ]
+      }
+    },
+    "/api/v1/settings/suggestions/{suggestion_id}": {
+      "post": {
+        "operationId": "consent_post_settings_suggestions_suggestion_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "501": {
+            "description": "Not implemented yet (M03)"
+          }
+        },
+        "summary": "Accept or decline a suggestion",
+        "tags": [
+          "consent"
+        ]
+      }
+    },
+    "/api/v1/specialties": {
+      "get": {
+        "operationId": "navigation_get_specialties",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M17)"
+          }
+        },
+        "summary": "Specialty catalog",
+        "tags": [
+          "navigation"
+        ]
+      }
+    },
+    "/api/v1/stream-tickets": {
+      "post": {
+        "operationId": "identity_post_stream_tickets",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M01)"
+          }
+        },
+        "summary": "One-time SSE ticket",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/trips/plan": {
+      "post": {
+        "operationId": "navigation_post_trips_plan",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "501": {
+            "description": "Not implemented yet (M17)"
+          }
+        },
+        "summary": "Plan several doctors in one trip",
+        "tags": [
+          "navigation"
+        ]
+      }
+    }
+  }
+}
