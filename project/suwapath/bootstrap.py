@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import importlib
+import os
+import signal
+import socket
+from contextlib import suppress
 from dataclasses import dataclass, field
 from types import ModuleType
 from typing import Any
@@ -16,6 +20,7 @@ from suwapath.platform.db import Database
 from suwapath.platform.events.subscribers import SubscriberRegistry
 from suwapath.platform.http.app import create_app
 from suwapath.platform.http.auth import TokenVerifier
+from suwapath.platform.tools import ToolRegistry
 from suwapath.platform.uow import UnitOfWorkFactory
 
 MODULES: tuple[str, ...] = (
@@ -76,6 +81,7 @@ class Container:
     shared_clock: SharedClock | None
     uow_factory: UnitOfWorkFactory
     subscribers: SubscriberRegistry = field(default_factory=SubscriberRegistry)
+    tools: ToolRegistry = field(default_factory=ToolRegistry)
     routers: list[APIRouter] = field(default_factory=list)
     ports: dict[str, Any] = field(default_factory=dict)  # port name -> implementation
     token_verifier: TokenVerifier | None = None
@@ -107,3 +113,32 @@ def create_api(settings: Settings | None = None) -> FastAPI:
     )
     app.state.container = container
     return app
+
+
+async def run_agent_worker(container: Container) -> None:
+    """`python main.py agents`: one agent worker with the gateway and the LangGraph checkpointer."""
+    import asyncio
+
+    from suwapath.modules.agents.adapters.checkpoints import postgres_checkpointer
+    from suwapath.modules.agents.application.runtime import AgentRunner
+    from suwapath.modules.agents.application.worker import AgentWorker
+    from suwapath.platform.gateway.factory import build_gateway
+
+    gateway = build_gateway(
+        container.settings, clock=container.clock, ops=container.ports.get("ops")
+    )
+    async with postgres_checkpointer(container.settings.database_url) as checkpointer:
+        runner = AgentRunner(
+            container.uow_factory,
+            container.ports["agent_registry"],
+            container.ports["agent_dependencies"],
+            tools=container.tools,
+            gateway=gateway,
+            checkpointer=checkpointer,
+        )
+        worker = AgentWorker(runner, f"{socket.gethostname()}:{os.getpid()}")
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            with suppress(NotImplementedError):
+                loop.add_signal_handler(sig, worker.stop)
+        await worker.run()
