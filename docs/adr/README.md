@@ -33,6 +33,7 @@ New decisions get the next number in a new file (no edits to accepted records; s
 | [0026](0026-pgvector-now-qdrant-adapter-later.md) | pgvector now; Qdrant as a later adapter behind the same interface | Accepted |
 | [0027](0027-offline-mode-and-test-double-naming.md) | "Offline mode" and "test doubles" instead of "fake" | Accepted |
 | [0028](0028-governed-memory-behind-a-port.md) | Governed memory behind a port, with deterministic case summaries | Accepted |
+| [0029](0029-services-join-the-callers-unit-of-work.md) | Services join the caller's unit of work | Accepted |
 
 ## Template
 

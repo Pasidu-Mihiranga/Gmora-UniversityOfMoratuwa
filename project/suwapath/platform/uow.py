@@ -7,11 +7,17 @@
         await uow.commit()
 
 Leaving the block without `commit()` rolls everything back.
+
+A service that implements a port opens its writes with `uow_factory.join()` (ADR-0029): inside a
+caller's unit of work it joins that transaction under a savepoint, so the caller's commit saves
+both; with no unit of work open it starts and commits its own.
 """
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
+from contextlib import asynccontextmanager
+from contextvars import ContextVar, Token
 from datetime import datetime
 from types import TracebackType
 from typing import Any
@@ -32,6 +38,8 @@ from suwapath.platform.tracing import current_trace_id
 AuditWriter = Callable[[AsyncSession, AuditEntryDraft], Awaitable[None]]
 OUTBOX_CHANNEL = "suwapath_outbox"
 
+_current: ContextVar[UnitOfWork | None] = ContextVar("suwapath_unit_of_work", default=None)
+
 
 class UnitOfWork:
     def __init__(self, db: Database, clock: Clock, audit_writer: AuditWriter | None = None) -> None:
@@ -42,6 +50,7 @@ class UnitOfWork:
         self._published: list[EventEnvelope] = []
         self.unwritten_audit: list[AuditEntryDraft] = []  # used only when no writer is bound
         self._committed = False
+        self._token: Token[UnitOfWork | None] | None = None
 
     @property
     def session(self) -> AsyncSession:
@@ -50,12 +59,18 @@ class UnitOfWork:
         return self._session
 
     @property
+    def joinable(self) -> bool:
+        """True between `async with` entry and commit: a service may join this transaction."""
+        return self._session is not None and not self._committed
+
+    @property
     def published(self) -> list[EventEnvelope]:
         return list(self._published)
 
     async def __aenter__(self) -> UnitOfWork:
         self._session = self._db.sessions()
         await self._session.begin()
+        self._token = _current.set(self)
         return self
 
     async def __aexit__(
@@ -71,6 +86,9 @@ class UnitOfWork:
         finally:
             await session.close()
             self._session = None
+            if self._token is not None:
+                _current.reset(self._token)
+                self._token = None
 
     def publish(
         self,
@@ -171,3 +189,18 @@ class UnitOfWorkFactory:
 
     def __call__(self) -> UnitOfWork:
         return UnitOfWork(self.db, self.clock, self.audit_writer)
+
+    @asynccontextmanager
+    async def join(self) -> AsyncIterator[UnitOfWork]:
+        """The caller's open unit of work under a savepoint, or a new one committed on success.
+
+        A failure inside a joined block rolls back only that block; the caller decides the rest.
+        """
+        active = _current.get()
+        if active is not None and active.joinable:
+            async with active.session.begin_nested():
+                yield active
+            return
+        async with self() as uow:
+            yield uow
+            await uow.commit()
