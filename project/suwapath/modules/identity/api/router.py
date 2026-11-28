@@ -15,7 +15,7 @@ from pydantic import Field
 
 from suwapath.contracts.common import Contract
 from suwapath.contracts.enums import Language, Role
-from suwapath.contracts.errors import AccessDenied
+from suwapath.contracts.errors import AccessDenied, NotFound
 from suwapath.contracts.ids import UserId
 from suwapath.contracts.ports.identity import IssuedTokens, StreamTicket, UserAccount
 from suwapath.contracts.principal import Principal
@@ -123,22 +123,24 @@ def build_router(service: SqlIdentityService, demo_password: str | None = None) 
             response, await service.authenticate(body.login, body.password, client)
         )
 
-    if demo_password:
-
-        @router.get(
-            "/auth/demo-accounts",
-            summary="Demo accounts (development and demo only)",
-            operation_id="identity_get_auth_demo_accounts",
-            dependencies=[Depends(public())],
-        )
-        async def demo_accounts() -> list[DemoAccount]:
-            accounts = await service.accounts_by_login(DEMO_LOGINS)
-            return [
-                DemoAccount(
-                    role=a.role, login=login, display_name=a.display_name, password=demo_password
-                )
-                for login, a in accounts
-            ]
+    @router.get(
+        "/auth/demo-accounts",
+        summary="Demo accounts (development and demo only)",
+        operation_id="identity_get_auth_demo_accounts",
+        dependencies=[Depends(public())],
+    )
+    async def demo_accounts() -> list[DemoAccount]:
+        """404 unless demo sign-ins are on (development or demo, with DEMO_PASSWORD). Always
+        mounted, so the API schema is the same in every environment."""
+        if not demo_password:
+            raise NotFound()
+        accounts = await service.accounts_by_login(DEMO_LOGINS)
+        return [
+            DemoAccount(
+                role=a.role, login=login, display_name=a.display_name, password=demo_password
+            )
+            for login, a in accounts
+        ]
 
     @router.post(
         "/auth/refresh",

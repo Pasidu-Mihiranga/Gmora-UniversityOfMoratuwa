@@ -96,7 +96,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Demo accounts (development and demo only) */
+        /**
+         * Demo accounts (development and demo only)
+         * @description 404 unless demo sign-ins are on (development or demo, with DEMO_PASSWORD). Always
+         *     mounted, so the API schema is the same in every environment.
+         */
         get: operations["identity_get_auth_demo_accounts"];
         put?: never;
         post?: never;

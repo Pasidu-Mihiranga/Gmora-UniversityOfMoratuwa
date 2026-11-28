@@ -1408,6 +1408,7 @@
     },
     "/api/v1/auth/demo-accounts": {
       "get": {
+        "description": "404 unless demo sign-ins are on (development or demo, with DEMO_PASSWORD). Always\nmounted, so the API schema is the same in every environment.",
         "operationId": "identity_get_auth_demo_accounts",
         "responses": {
           "200": {
