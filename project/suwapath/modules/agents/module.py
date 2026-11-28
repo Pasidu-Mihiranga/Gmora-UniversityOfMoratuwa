@@ -7,9 +7,10 @@ retryable (it is never dropped).
 
 from __future__ import annotations
 
-from suwapath.modules.agents.api.router import router
+from suwapath.modules.agents.api.router import build_router, queue_stub
 from suwapath.modules.agents.application.companion import CompanionAgent
 from suwapath.modules.agents.application.context import Dependencies
+from suwapath.modules.agents.application.doctor_assistant import DoctorAssistant
 from suwapath.modules.agents.application.guardian import GuardianAgent
 from suwapath.modules.agents.application.runtime import (
     AgentRegistry,
@@ -28,6 +29,7 @@ REQUIRED_PORTS = (
     "safety",
     "navigation",
     "booking",
+    "record",
 )
 
 
@@ -38,7 +40,7 @@ class DependencyMissing(RuntimeError):
 
 
 def register(container: ModuleContext) -> None:
-    registry = AgentRegistry([GuardianAgent(), CompanionAgent()])
+    registry = AgentRegistry([GuardianAgent(), CompanionAgent(), DoctorAssistant()])
 
     def dependencies() -> Dependencies:
         ports = container.ports
@@ -53,14 +55,16 @@ def register(container: ModuleContext) -> None:
             directory=ports["agent_directory"],
             missed_doses=None,
             latest_patient_text=ports["cases"].latest_patient_text,
+            latest_patient_message=ports["cases"].latest_patient_message,
             adherence=ports["care"].adherence,
             safety=ports["safety"],
             navigation=ports["navigation"],
             booking=ports["booking"],
+            record=ports["record"],
         )
 
     delivery = Delivery(dependencies)
     register_supervisor(container.subscribers, dependencies, delivery, registry.kinds())
     container.ports["agent_registry"] = registry
     container.ports["agent_dependencies"] = dependencies
-    container.routers.append(router)
+    container.routers.extend([build_router(container.uow_factory, dependencies), queue_stub()])

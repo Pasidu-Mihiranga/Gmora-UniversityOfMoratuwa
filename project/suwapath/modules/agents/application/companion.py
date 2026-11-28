@@ -52,7 +52,7 @@ from suwapath.contracts.errors import (
     SafetyStop,
     SlotUnavailable,
 )
-from suwapath.contracts.ids import MessageId
+from suwapath.contracts.ids import MessageId, ResourceId
 from suwapath.contracts.ports.navigation import (
     DoctorOption,
     DoctorQuery,
@@ -94,9 +94,21 @@ class Turn:
         self.events: list[CaseEventDraft] = []
         self.messages: list[AgentMessageDraft] = []
         self.reasons: list[str] = []
+        self.source: ResourceId | None = None
 
     def event(self, kind: CaseEventKind, **data: Any) -> None:
         self.events.append(CaseEventDraft(kind=kind, data=data, actor="patient_companion"))
+
+    def fact(self, key: str, *, value: Any, present: bool = True) -> None:
+        """A fact the patient reported, with the message it came from as its source (CON-9)."""
+        self.event(
+            K.FACT_RECORDED,
+            key=key,
+            present=present,
+            value=value,
+            source="patient_reported",
+            provenance_ids=[str(self.source)] if self.source else [],
+        )
 
     async def reply(self, kind: str, text: str, suggestions: tuple[Suggestion, ...] = ()) -> None:
         assert self.ctx.case_id is not None
@@ -138,7 +150,9 @@ class CompanionAgent:
                 "cases.append",
             }
         ),
-        may_message=frozenset({AgentKind.GUARDIAN_AGENT.value, Role.GUARDIAN.value}),
+        may_message=frozenset(
+            {AgentKind.GUARDIAN_AGENT.value, AgentKind.DOCTOR_ASSISTANT.value, Role.GUARDIAN.value}
+        ),
         max_steps=8,
         max_wall_seconds=30,
         prompt_version="companion-1",
@@ -156,12 +170,25 @@ class CompanionAgent:
 
     async def _on_request(self, ctx: AgentContext, message_id: MessageId) -> AgentResult:
         request = await ctx.message(message_id)
-        if request is None or request.intent is not MessageIntent.CHECK_IN_WITH_PATIENT:
+        if request is None or request.intent not in (
+            MessageIntent.CHECK_IN_WITH_PATIENT,
+            MessageIntent.CONFIRM_MISSING_FACT,
+        ):
             return AgentResult(status="done", reason="unsupported_request")
         turn = Turn(ctx, await ctx.cases.get())
         if turn.state.status is CaseStatus.EMERGENCY:
             return turn.done()  # no routine questions during an emergency (SAF-10)
         lang = turn.language
+        if request.intent is MessageIntent.CONFIRM_MISSING_FACT:
+            # The doctor's question, asked as the doctor's assistant's request: never guessed.
+            fact_key = str(request.body["fact_key"])
+            question = NavigationQuestion(
+                concept=fact_key,
+                question_key=str(request.body["question_key"]),
+                answer_type="number",
+            )
+            await self._ask(turn, question)
+            return turn.done("waiting")
         await turn.reply(
             "check_in",
             copy.text("check_in.ask", lang),
@@ -185,18 +212,18 @@ class CompanionAgent:
         if assessment.emergency or turn.state.status is CaseStatus.EMERGENCY:
             await self._emergency(turn, profile, assessment)
             return turn.done()
+        turn.source = await ctx.patient_message_id()
         for flag in assessment.red_flags:
-            turn.event(
-                K.FACT_RECORDED,
-                key=f"{RED_FLAG_FACT}{flag.rule_id}",
-                value=flag.urgency.value,
-                source="patient_reported",
-            )
+            turn.fact(f"{RED_FLAG_FACT}{flag.rule_id}", value=flag.urgency.value)
         check_in = await ctx.pending_request(MessageIntent.CHECK_IN_WITH_PATIENT)
         if check_in is not None:
             unwell = await self._answer_check_in(turn, check_in, said, assessment)
             if not unwell:
                 return turn.done()
+        asked_fact = await ctx.pending_request(MessageIntent.CONFIRM_MISSING_FACT)
+        if asked_fact is not None:
+            await self._answer_missing_fact(turn, asked_fact, said)
+            return turn.done()
         if turn.state.status in INTAKE_STATES:
             await self._intake(turn, said, context, assessment, profile)
         else:
@@ -300,6 +327,43 @@ class CompanionAgent:
             return False
         return patient_ok == "no"
 
+    # ----- a fact the doctor asked for (spec 16 steps 5 and 6) -----------------------------------
+
+    async def _answer_missing_fact(
+        self, turn: Turn, request: AgentMessage, said: UntrustedText
+    ) -> None:
+        fact_key = str(request.body["fact_key"])
+        parsed = parse_answer(said.value, "number")
+        if parsed is None or parsed.label == "unsure":
+            question = NavigationQuestion(
+                concept=fact_key,
+                question_key=str(request.body["question_key"]),
+                answer_type="number",
+            )
+            if parsed is None:
+                await self._ask(turn, question, clarify=True)
+                return
+        answered = parsed is not None and parsed.label != "unsure"
+        value = parsed.value if answered and parsed is not None else None
+        if answered:
+            turn.fact(fact_key, value=value)
+        turn.messages.append(
+            AgentMessageDraft(
+                intent=MessageIntent.MISSING_FACT_ANSWER,
+                recipient=AgentKind.DOCTOR_ASSISTANT.value,
+                in_reply_to=request.message_id,
+                body={
+                    "fact_key": fact_key,
+                    "answered": answered,
+                    "value": value,
+                    "communication_id": str(turn.source) if turn.source else None,
+                },
+                consent_scope=frozenset({DataCategory.OBSERVATIONS}),
+                dedupe_hint=f"fact-answer:{request.message_id}",
+            )
+        )
+        await turn.reply("info", copy.text("fact.thanks", turn.language))
+
     # ----- intake -------------------------------------------------------------------------------
 
     async def _intake(
@@ -328,13 +392,7 @@ class CompanionAgent:
             if parsed is None:
                 await self._ask(turn, asked, clarify=True)
                 return
-            turn.event(
-                K.FACT_RECORDED,
-                key=asked.concept,
-                present=parsed.label != "no",
-                value=parsed.label,
-                source="patient_reported",
-            )
+            turn.fact(asked.concept, present=parsed.label != "no", value=parsed.label)
             step = await navigation.answer(principal, case_id, asked.concept, parsed.value)
         await self._step(turn, step, assessment, profile)
 

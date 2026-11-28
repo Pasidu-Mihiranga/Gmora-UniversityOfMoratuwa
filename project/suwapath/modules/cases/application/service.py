@@ -254,6 +254,27 @@ class SqlCaseService:
             ).scalar()
         return UntrustedText(value=row.decode(), source="patient_message") if row else None
 
+    async def latest_patient_message(
+        self, case_id: CaseId
+    ) -> tuple[ResourceId, UntrustedText] | None:
+        """The latest patient message and its communication ID, the source of what it says."""
+        async with self._uow.join() as uow:
+            row = (
+                await uow.session.execute(
+                    select(CommunicationRow.id, CommunicationRow.payload_enc)
+                    .where(
+                        CommunicationRow.case_id == case_id, CommunicationRow.sender == "patient"
+                    )
+                    .order_by(CommunicationRow.created_at.desc(), CommunicationRow.id.desc())
+                    .limit(1)
+                )
+            ).first()
+        if row is None:
+            return None
+        return ResourceId(row.id), UntrustedText(
+            value=row.payload_enc.decode(), source="patient_message"
+        )
+
     async def patient_of(self, case_id: CaseId) -> PatientId:
         async with self._uow.join() as uow:
             patient = (

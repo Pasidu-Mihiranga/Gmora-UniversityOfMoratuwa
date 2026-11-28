@@ -28,13 +28,22 @@ from suwapath.contracts.common import Contract, UntrustedText
 from suwapath.contracts.enums import AgentKind, DataCategory, Language
 from suwapath.contracts.errors import AccessDenied, ConsentDenied, NotFound, ValidationFailed
 from suwapath.contracts.fhir.base import GeoPoint
-from suwapath.contracts.ids import CaseId, MessageId, PatientId, PractitionerRoleId, UserId
+from suwapath.contracts.ids import (
+    CaseId,
+    MessageId,
+    PatientId,
+    PractitionerId,
+    PractitionerRoleId,
+    ResourceId,
+    UserId,
+)
 from suwapath.contracts.ports.booking import BookingService
 from suwapath.contracts.ports.care import AdherenceSummary
 from suwapath.contracts.ports.cases import CaseService
 from suwapath.contracts.ports.consent import AccessPolicy, AccessRequest
 from suwapath.contracts.ports.navigation import NavigationService
 from suwapath.contracts.ports.notifications import NotificationService
+from suwapath.contracts.ports.record import RecordService
 from suwapath.contracts.ports.safety import SafetyService
 from suwapath.contracts.ports.verifier import Verifier
 from suwapath.contracts.principal import Principal
@@ -88,6 +97,10 @@ class Directory(Protocol):
 
     async def profile(self, patient_id: PatientId) -> PatientProfile | None: ...
 
+    async def practitioner_of(self, user_id: UserId) -> PractitionerId | None:
+        """The practitioner record of a doctor user (approval requests name the practitioner)."""
+        ...
+
 
 @dataclass
 class Dependencies:
@@ -100,6 +113,11 @@ class Dependencies:
     latest_patient_text: Callable[[CaseId], Awaitable[UntrustedText | None]]
     # CareService.adherence: the care module checks the principal's access itself (CARE-6).
     adherence: Callable[[Principal, PatientId, int], Awaitable[AdherenceSummary]] | None = None
+    # The latest patient message with its communication ID, the source of facts read from it.
+    latest_patient_message: (
+        Callable[[CaseId], Awaitable[tuple[ResourceId, UntrustedText] | None]] | None
+    ) = None
+    record: RecordService | None = None
     safety: SafetyService | None = None
     navigation: NavigationService | None = None
     booking: BookingService | None = None
@@ -324,6 +342,13 @@ class AgentContext:
 
     async def has_answer(self, request_id: MessageId) -> bool:
         return await messages.has_answer(self.uow, request_id)
+
+    async def patient_message_id(self) -> ResourceId | None:
+        """The communication the patient's latest words came from (a fact's provenance)."""
+        if self.case_id is None or self.deps.latest_patient_message is None:
+            return None
+        found = await self.deps.latest_patient_message(self.case_id)
+        return found[0] if found else None
 
     async def patient_text(self) -> UntrustedText | None:
         """The patient's latest message in this case, as quoted data (invariant 7)."""

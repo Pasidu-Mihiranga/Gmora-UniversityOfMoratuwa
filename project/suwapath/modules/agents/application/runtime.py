@@ -105,6 +105,10 @@ RECIPIENT_ROLE: dict[AgentKind, Role] = {
     AgentKind.GUARDIAN_AGENT: Role.GUARDIAN,
     AgentKind.DOCTOR_ASSISTANT: Role.DOCTOR,
 }
+PERSON_PURPOSE: dict[str, Purpose] = {
+    Role.GUARDIAN.value: Purpose.GUARDIAN_MONITORING,
+    Role.DOCTOR.value: Purpose.TREATMENT,
+}
 DepsSource = Dependencies | Callable[[], Dependencies]
 
 
@@ -372,6 +376,8 @@ class Delivery:
         message = await messages.load(uow, payload.message_id)
         if message is None or message.status is not MessageStatus.DRAFTED:
             return
+        if message.intent is MessageIntent.REPLY_DRAFT:
+            return  # AGT-30: only the doctor's approval flow can deliver a reply draft
         if not message.needs_verification:
             await self._route(uow, message, envelope)
             return
@@ -416,7 +422,7 @@ class Delivery:
     async def _recipient_access(self, uow: UnitOfWork, message: AgentMessage) -> AccessDecision:
         """Allowed when at least one receiving person (or the receiving agent) may see it."""
         patient = await self.deps.directory.case_patient(message.case_id)
-        if message.recipient == Role.GUARDIAN.value:
+        if message.recipient in PERSON_PURPOSE:
             targets = await self._allowed_people(message, patient)
             if targets:
                 return AccessDecision(
@@ -449,21 +455,22 @@ class Delivery:
         )
 
     async def _allowed_people(self, message: AgentMessage, patient: PatientId) -> list[UserId]:
-        """Guardian recipients, each checked for themselves. The emergency alert goes to every
-        guardian under the emergency purpose (SEC-10 rule 7); other alerts go to the guardian the
-        sending agent acts for."""
+        """Person recipients, each checked for themselves. The emergency alert goes to every
+        guardian under the emergency purpose (SEC-10 rule 7); other messages go to the person the
+        sending agent acts for (the guardian for an alert, the doctor for a brief)."""
+        role = Role(message.recipient)
         if message.intent is MessageIntent.EMERGENCY_ALERT:
             people = await self.deps.directory.guardians(patient)
             purpose = Purpose.EMERGENCY
         else:
             people = [message.acting_for] if message.acting_for else []
-            purpose = Purpose.GUARDIAN_MONITORING
+            purpose = PERSON_PURPOSE[message.recipient]
         allowed = []
         for person in people:
             principal = Principal(
                 kind=PrincipalKind.USER,
                 user_id=person,
-                role=Role.GUARDIAN,
+                role=role,
                 acting_for=person,
                 purpose=purpose,
                 trace_id=TraceId(message.trace_id),
