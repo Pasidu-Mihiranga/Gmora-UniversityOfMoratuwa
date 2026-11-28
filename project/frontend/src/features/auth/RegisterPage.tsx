@@ -43,7 +43,7 @@ export default function RegisterPage() {
     <AuthLayout title={t("register.title")} subtitle={t("register.subtitle")}>
       <form className="space-y-4" onSubmit={(e) => void submit(e)}>
         <fieldset>
-          <legend className="sp-label mb-1">{t("register.as")}</legend>
+          <legend className="mb-1 block text-sm font-semibold text-ink-700">{t("register.as")}</legend>
           <div className="grid grid-cols-2 gap-2">
             {KINDS.map((kind) => (
               <button key={kind.role} type="button" aria-pressed={form.role === kind.role} onClick={() => set("role", kind.role)}
@@ -58,23 +58,23 @@ export default function RegisterPage() {
           {form.role === "guardian" ? <p className="mt-2 text-sm text-ink-500">{t("register.guardian_note")}</p> : null}
         </fieldset>
         <label className="sp-field block">
-          <span className="sp-label">{t("register.name")}</span>
+          <span className="mb-1 block text-sm font-semibold text-ink-700">{t("register.name")}</span>
           <input className="sp-input min-h-tap w-full" autoComplete="name" value={form.display_name} maxLength={100}
                  onChange={(e) => set("display_name", e.target.value)} required />
         </label>
         <label className="sp-field block">
-          <span className="sp-label">{t("login.login")}</span>
+          <span className="mb-1 block text-sm font-semibold text-ink-700">{t("login.login")}</span>
           <input className="sp-input min-h-tap w-full" autoComplete="username" value={form.login} maxLength={160}
                  onChange={(e) => set("login", e.target.value)} required />
         </label>
         <label className="sp-field block">
-          <span className="sp-label">{t("login.password")}</span>
+          <span className="mb-1 block text-sm font-semibold text-ink-700">{t("login.password")}</span>
           <input className="sp-input min-h-tap w-full" type="password" autoComplete="new-password" value={form.password}
                  minLength={8} maxLength={200} onChange={(e) => set("password", e.target.value)} required />
           <span className="mt-1 block text-sm text-ink-500">{t("register.password_hint")}</span>
         </label>
         <label className="sp-field block">
-          <span className="sp-label">{t("register.language")}</span>
+          <span className="mb-1 block text-sm font-semibold text-ink-700">{t("register.language")}</span>
           <select className="sp-select min-h-tap w-full" value={form.language}
                   onChange={(e) => set("language", e.target.value as Registration["language"])}>
             <option value="si">සිංහල</option>

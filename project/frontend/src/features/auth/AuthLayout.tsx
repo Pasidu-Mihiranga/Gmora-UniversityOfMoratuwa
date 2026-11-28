@@ -32,7 +32,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
           </div>
         </aside>
 
-        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:justify-center lg:p-10">
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:items-center lg:px-10 lg:py-8">
           <div className="flex h-[26dvh] shrink-0 flex-col items-center px-5 pt-[max(0.75rem,env(safe-area-inset-top))] text-center lg:hidden [@media(max-height:700px)]:h-auto">
             <div className="flex w-full justify-end">{otherLanguage}</div>
             <img src="/brand/mark.png" alt="" aria-hidden className="h-[clamp(40px,7vh,68px)] w-auto object-contain" />
@@ -45,11 +45,11 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
             </div>
           </div>
 
-          <div className="mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain rounded-t-[28px] bg-surface px-[max(1.25rem,calc((100%-24rem)/2))] pb-[max(1rem,env(safe-area-inset-bottom))] pt-5 shadow-[0_-6px_24px_rgba(10,46,86,0.10)] lg:my-auto lg:max-w-sm lg:flex-none lg:overflow-visible lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none">
+          <div className="mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain rounded-t-[28px] bg-surface px-[max(1.25rem,calc((100%-24rem)/2))] pb-[max(1rem,env(safe-area-inset-bottom))] pt-5 shadow-[0_-6px_24px_rgba(10,46,86,0.10)] lg:max-h-full lg:max-w-sm lg:flex-1 lg:overflow-y-auto lg:rounded-none lg:bg-transparent lg:px-1 lg:py-2 lg:shadow-none">
             <div className="mx-auto mb-3 h-1 w-10 shrink-0 rounded-full bg-ink-200 lg:hidden" aria-hidden />
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
-                <h1 className="sp-display text-[clamp(22px,3.4vh,30px)] leading-tight text-brand-900">{title}</h1>
+                <h1 className="sp-display text-[clamp(20px,3vh,28px)] leading-tight text-brand-900">{title}</h1>
                 <p className="mt-1 text-ink-500">{subtitle}</p>
               </div>
               <div className="hidden lg:block">{otherLanguage}</div>
