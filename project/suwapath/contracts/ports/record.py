@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from suwapath.contracts.common import Contract, Page
-from suwapath.contracts.enums import Purpose
-from suwapath.contracts.fhir.base import PatientResource
+from suwapath.contracts.enums import Language, Purpose
+from suwapath.contracts.fhir.base import GeoPoint, PatientResource
 from suwapath.contracts.fhir.resources import (
     AllergyIntolerance,
     Condition,
@@ -38,8 +38,24 @@ class MedicationSchedule(Contract):
     timing: DoseTiming
 
 
+class PatientBasics(Contract):
+    """Only what a patient's own agents need: safety rules (age, sex, conditions), the emergency
+    alert (first name) and distance to doctors (home). No names beyond the first, no NIC."""
+
+    first_name: str
+    age_years: int | None = None
+    sex: Literal["female", "male", "other", "unknown"] = "unknown"
+    language: Language
+    home: GeoPoint | None = None
+    condition_codes: frozenset[str] = frozenset()
+
+
 class RecordService(Protocol):
     async def patient_for_user(self, user_id: UserId) -> PatientId | None: ...
+
+    async def patient_basics(self, patient_id: PatientId) -> PatientBasics | None:
+        """For the agent runtime acting for this patient (the agent directory)."""
+        ...
 
     async def medication_schedules(self, patient_id: PatientId) -> list[MedicationSchedule]:
         """Active, scheduled medicines (care, as a module). Timing only (CARE-2)."""

@@ -403,6 +403,35 @@ class SqlBookingService:
                 await uow.cancel_timer(f"hold:{hold_id}")
             return len(released)
 
+    async def practitioner_for_role(
+        self, practitioner_role_id: PractitionerRoleId
+    ) -> PractitionerId | None:
+        async with self._uow.join() as uow:
+            role = await uow.session.get(PractitionerRoleRow, practitioner_role_id)
+            return PractitionerId(role.practitioner_id) if role else None
+
+    async def booked_case(self, patient_id: PatientId) -> tuple[CaseId, PractitionerId] | None:
+        async with self._uow.join() as uow:
+            found = (
+                await uow.session.execute(
+                    select(AppointmentRow.case_id, PractitionerRoleRow.practitioner_id)
+                    .join(
+                        PractitionerRoleRow,
+                        PractitionerRoleRow.id == AppointmentRow.practitioner_role_id,
+                    )
+                    .where(
+                        AppointmentRow.patient_id == patient_id,
+                        AppointmentRow.status == AppointmentStatus.BOOKED.value,
+                        AppointmentRow.case_id.is_not(None),
+                    )
+                    .order_by(AppointmentRow.created_at.desc())
+                    .limit(1)
+                )
+            ).first()
+        if found is None or found[0] is None:
+            return None
+        return CaseId(found[0]), PractitionerId(found[1])
+
     async def on_red_flag(self, envelope: EventEnvelope, uow: UnitOfWork) -> None:
         payload = envelope.payload
         assert isinstance(payload, RedFlagRaised)

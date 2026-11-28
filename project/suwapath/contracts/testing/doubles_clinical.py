@@ -343,6 +343,12 @@ class InMemoryBookingService:
             items=[a for a in self.appointment_store.values() if a.patient_id == patient_id][:limit]
         )
 
+    async def practitioner_for_role(self, practitioner_role_id: object) -> None:
+        return None
+
+    async def booked_case(self, patient_id: object) -> None:
+        return None
+
     async def release_holds_for_case(self, case_id: CaseId) -> int:
         released = [h for h, hold in self.holds.items() if hold.case_id == case_id]
         for h in released:

@@ -54,6 +54,10 @@ class IdentityService(Protocol):
 
     async def get_user(self, user_id: UserId) -> UserAccount: ...
 
+    async def user_for_patient(self, patient_id: PatientId) -> UserAccount | None:
+        """The patient's own account (the agent directory: who the companion acts for)."""
+        ...
+
     async def user_for_practitioner(self, practitioner_id: PractitionerId) -> UserAccount | None:
         """The doctor's account (booking records who treats whom, SEC-10 rule 4)."""
         ...

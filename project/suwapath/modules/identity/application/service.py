@@ -153,6 +153,17 @@ class SqlIdentityService:
                 raise NotFound()
             return _account(user)
 
+    async def user_for_patient(self, patient_id: PatientId) -> UserAccount | None:
+        async with self._uow.join() as uow:
+            user = (
+                await uow.session.execute(
+                    select(UserRow).where(
+                        UserRow.patient_id == patient_id, UserRow.status == "active"
+                    )
+                )
+            ).scalar()
+            return _account(user) if user is not None else None
+
     async def user_for_practitioner(self, practitioner_id: PractitionerId) -> UserAccount | None:
         async with self._uow.join() as uow:
             user = (

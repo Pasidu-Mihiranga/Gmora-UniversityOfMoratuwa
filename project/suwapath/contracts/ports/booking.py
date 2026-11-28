@@ -13,6 +13,7 @@ from suwapath.contracts.ids import (
     HoldId,
     OrganizationId,
     PatientId,
+    PractitionerId,
     PractitionerRoleId,
     ScheduleId,
     SlotId,
@@ -79,6 +80,14 @@ class BookingService(Protocol):
     ) -> Page[Appointment]: ...
 
     async def release_holds_for_case(self, case_id: CaseId) -> int: ...
+
+    async def practitioner_for_role(
+        self, practitioner_role_id: PractitionerRoleId
+    ) -> PractitionerId | None: ...
+
+    async def booked_case(self, patient_id: PatientId) -> tuple[CaseId, PractitionerId] | None:
+        """The patient's latest booked appointment that belongs to a case (IDs only)."""
+        ...
 
     async def hospital_sessions(
         self, principal: Principal, organization_id: OrganizationId, day: date
