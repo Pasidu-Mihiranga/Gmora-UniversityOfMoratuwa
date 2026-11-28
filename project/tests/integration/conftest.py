@@ -36,6 +36,8 @@ def database_url() -> str:
             ).fetchone()
             if not exists:
                 conn.execute("CREATE DATABASE suwapath_test")
+            # Test data is thrown away, so commits need not wait for the disk (test database only).
+            conn.execute("ALTER DATABASE suwapath_test SET synchronous_commit = off")
     except psycopg.OperationalError:
         pytest.skip("Postgres not reachable; start it with: docker compose up -d db")
     config = Config("alembic.ini")
@@ -48,16 +50,29 @@ def database_url() -> str:
 async def db(database_url: str) -> AsyncIterator[Database]:
     database = Database(database_url, pool_size=10)
     async with database.engine.begin() as conn:
-        tables = (
-            await conn.execute(
-                text(
-                    "SELECT string_agg(quote_ident(tablename), ', ') FROM pg_tables "
-                    "WHERE schemaname = 'public' "
-                    "AND tablename NOT IN ('alembic_version', 'platform_clock')"
-                )
+        # Empty only the tables that hold rows: TRUNCATE rewrites every table it names, which is
+        # slow on a busy disk, and most tests touch only a few tables. Same isolation.
+        await conn.execute(
+            text(
+                """
+                DO $$
+                DECLARE t text; dirty text := ''; has_rows boolean;
+                BEGIN
+                  FOR t IN SELECT quote_ident(tablename) FROM pg_tables
+                           WHERE schemaname = 'public'
+                             AND tablename NOT IN ('alembic_version', 'platform_clock') LOOP
+                    EXECUTE 'SELECT EXISTS (SELECT 1 FROM ' || t || ')' INTO has_rows;
+                    IF has_rows THEN
+                      dirty := dirty || CASE WHEN dirty = '' THEN '' ELSE ', ' END || t;
+                    END IF;
+                  END LOOP;
+                  IF dirty <> '' THEN
+                    EXECUTE 'TRUNCATE ' || dirty || ' RESTART IDENTITY';
+                  END IF;
+                END $$
+                """
             )
-        ).scalar_one()
-        await conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY"))
+        )
         await conn.execute(text("UPDATE platform_clock SET offset_seconds = 0"))
     yield database
     await database.dispose()
