@@ -26,8 +26,9 @@ from suwapath.contracts.agents import (
 from suwapath.contracts.cases import CaseState
 from suwapath.contracts.common import UntrustedText
 from suwapath.contracts.enums import AgentKind, DataCategory, Language
-from suwapath.contracts.errors import AccessDenied, NotFound, ValidationFailed
+from suwapath.contracts.errors import AccessDenied, ConsentDenied, NotFound, ValidationFailed
 from suwapath.contracts.ids import CaseId, MessageId, PatientId, PractitionerRoleId, UserId
+from suwapath.contracts.ports.care import AdherenceSummary
 from suwapath.contracts.ports.cases import CaseService
 from suwapath.contracts.ports.consent import AccessPolicy, AccessRequest
 from suwapath.contracts.ports.notifications import NotificationService
@@ -35,7 +36,13 @@ from suwapath.contracts.ports.verifier import Verifier
 from suwapath.contracts.principal import Principal
 from suwapath.modules.agents.application import messages
 from suwapath.platform.clock import Clock
-from suwapath.platform.gateway.types import ChatMessage, ChatRequest, ChatResponse
+from suwapath.platform.gateway.types import (
+    ChatMessage,
+    ChatRequest,
+    ChatResponse,
+    DecisionResult,
+    Question,
+)
 from suwapath.platform.uow import UnitOfWork
 
 if TYPE_CHECKING:
@@ -73,8 +80,10 @@ class Dependencies:
     verifier: Verifier
     notifications: NotificationService
     directory: Directory
-    missed_doses: Callable[[UnitOfWork, PatientId, timedelta], Awaitable[int]]
+    missed_doses: Callable[[UnitOfWork, PatientId, timedelta], Awaitable[int]] | None
     latest_patient_text: Callable[[CaseId], Awaitable[UntrustedText | None]]
+    # CareService.adherence: the care module checks the principal's access itself (CARE-6).
+    adherence: Callable[[Principal, PatientId, int], Awaitable[AdherenceSummary]] | None = None
 
 
 @dataclass
@@ -152,6 +161,22 @@ class ScopedModelClient:
         # Agent work is care work: a person's chat quota never blocks it (CUS-9a).
         return await self._gateway.generate(
             request, user_id=self._principal.acting_for, care_access=True
+        )
+
+    @property
+    def can_decide(self) -> bool:
+        """True when a decision model (Jev) is configured; otherwise callers use their rules."""
+        return self._gateway is not None and self._gateway.decision is not None
+
+    async def decide(self, state: Sequence[str], questions: dict[str, Question]) -> DecisionResult:
+        if self._gateway is None:
+            raise RuntimeError("no model gateway is bound to the agent runtime")
+        self._steps.take()
+        return await self._gateway.decide(
+            list(state),
+            questions,
+            purpose=self._principal.purpose,
+            case_id=self._cases.case_id,
         )
 
 
@@ -253,9 +278,18 @@ class AgentContext:
                 purpose=self.principal.purpose,
             )
         )
-        if not decision.allowed:
+        if not decision.allowed or self.deps.missed_doses is None:
             return 0
         return await self.deps.missed_doses(self.uow, patient_id, window)
+
+    async def adherence(self, patient_id: PatientId, days: int = 7) -> AdherenceSummary | None:
+        """The week summary as this agent may see it; None without access or without care."""
+        if self.deps.adherence is None:
+            return None
+        try:
+            return await self.deps.adherence(self.principal, patient_id, days)
+        except (AccessDenied, ConsentDenied, NotFound):
+            return None
 
     async def message(self, message_id: MessageId) -> AgentMessage | None:
         """A message of this job's case, or None."""

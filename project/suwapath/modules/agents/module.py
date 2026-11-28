@@ -9,12 +9,13 @@ from __future__ import annotations
 
 from suwapath.modules.agents.api.router import router
 from suwapath.modules.agents.application.context import Dependencies
+from suwapath.modules.agents.application.guardian import GuardianAgent
 from suwapath.modules.agents.application.runtime import (
     AgentRegistry,
     Delivery,
     register_supervisor,
 )
-from suwapath.modules.agents.application.skeleton_agents import CompanionAgent, GuardianAgent
+from suwapath.modules.agents.application.skeleton_agents import CompanionAgent
 from suwapath.platform.registry import ModuleContext
 
 REQUIRED_PORTS = (
@@ -23,7 +24,7 @@ REQUIRED_PORTS = (
     "verifier",
     "notifications",
     "agent_directory",
-    "care_missed_doses",
+    "care",
 )
 
 
@@ -47,8 +48,9 @@ def register(container: ModuleContext) -> None:
             verifier=ports["verifier"],
             notifications=ports["notifications"],
             directory=ports["agent_directory"],
-            missed_doses=ports["care_missed_doses"],
+            missed_doses=None,
             latest_patient_text=ports["cases"].latest_patient_text,
+            adherence=ports["care"].adherence,
         )
 
     delivery = Delivery(dependencies)
