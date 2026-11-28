@@ -10,7 +10,7 @@ Customisation (settings, plain-language rules, suggestions) is issue C01 and ans
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -205,6 +205,34 @@ class SqlConsentService:
                 return  # nothing to revoke: idempotent
             self._announce(uow, principal, patient_id, grantee_id, frozenset(), "revoked")
             await self._audit(uow, principal, patient_id, "consent.revoke", str(ended))
+
+    async def import_grants(self, grants: Sequence[Consent]) -> int:
+        """Seeded grants (the patient's choices in the synthetic world). Idempotent by id."""
+        written = 0
+        async with self._uow.join() as uow:
+            for grant in grants:
+                if await uow.session.get(GrantRow, grant.id) is not None:
+                    continue
+                if grant.grantee_role == "guardian" and grant.categories & SENSITIVE_CATEGORIES:
+                    raise ValidationFailed(
+                        "seed grants sensitive data to family", fields=["categories"]
+                    )
+                uow.session.add(
+                    GrantRow(
+                        id=grant.id,
+                        patient_id=grant.patient_id,
+                        grantee_id=grant.grantee_id,
+                        grantee_role=grant.grantee_role,
+                        categories=sorted(c.value for c in grant.categories),
+                        purposes=sorted(grant.purposes),
+                        status=grant.status,
+                        period_start=grant.period.start or uow.clock.now(),
+                        period_end=grant.period.end,
+                    )
+                )
+                written += 1
+            await uow.session.flush()
+        return written
 
     # ----- who is linked to whom ----------------------------------------------------------------
 
