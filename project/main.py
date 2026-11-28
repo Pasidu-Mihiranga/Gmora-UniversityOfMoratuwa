@@ -136,6 +136,25 @@ def _cmd_openapi(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_seed_load(args: argparse.Namespace) -> int:
+    import asyncio
+
+    from suwapath.bootstrap import build_container, reset_world, seed_world
+
+    async def run() -> dict[str, int]:
+        container = build_container()
+        try:
+            if args.seed_command == "reset":
+                return await reset_world(container, args.seed)
+            return await seed_world(container, args.seed)
+        finally:
+            await container.db.dispose()
+
+    for name, count in asyncio.run(run()).items():
+        print(f"{name}: {count}")
+    return 0
+
+
 def _cmd_seed_accounts(args: argparse.Namespace) -> int:
     import asyncio
 
@@ -205,6 +224,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     accounts_cmd.add_argument("--seed", type=int, default=42)
     accounts_cmd.set_defaults(handler=_cmd_seed_accounts)
+    load_cmd = seed_sub.add_parser(
+        "load", help="load the synthetic world (idempotent; not in production)"
+    )
+    load_cmd.add_argument("--seed", type=int, default=42)
+    load_cmd.set_defaults(handler=_cmd_seed_load)
+    reset_cmd = seed_sub.add_parser(
+        "reset", help="empty the database and load the world again (dev and demo)"
+    )
+    reset_cmd.add_argument("--seed", type=int, default=42)
+    reset_cmd.set_defaults(handler=_cmd_seed_load)
 
     openapi = sub.add_parser("openapi", help="write the OpenAPI document for the frontend (API-3)")
     openapi.add_argument("--out", default="frontend/src/shared/api/openapi.json")
