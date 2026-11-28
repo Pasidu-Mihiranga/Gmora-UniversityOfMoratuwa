@@ -86,6 +86,10 @@ class QuestionData(_Data):
     key: str = Field(pattern=CODE)
     asked_by: AgentKind
     for_role: Literal["patient", "doctor"] = "patient"
+    question_key: str | None = Field(default=None, max_length=80)
+    answer_type: Literal["yes_no", "choice", "number", "duration"] | None = None
+    choices: tuple[str, ...] = Field(default=(), max_length=10)
+    red_flag_screen: bool = False
 
 
 class UrgencyData(_Data):
@@ -296,7 +300,14 @@ def _changes(case: Case, kind: CaseEventKind, data: Contract, at: datetime) -> d
             }
         case QuestionData():
             question = OpenQuestion(
-                key=data.key, asked_by=data.asked_by, asked_at=at, for_role=data.for_role
+                key=data.key,
+                asked_by=data.asked_by,
+                asked_at=at,
+                for_role=data.for_role,
+                question_key=data.question_key,
+                answer_type=data.answer_type,
+                choices=data.choices,
+                red_flag_screen=data.red_flag_screen,
             )
             others = tuple(q for q in state.open_questions if q.key != data.key)
             return {"state": {"open_questions": (*others, question)}}

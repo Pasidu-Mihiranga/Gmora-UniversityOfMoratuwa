@@ -28,8 +28,18 @@ $PY -m alembic check
 echo "== tests"
 $PY -m pytest -q -o addopts=""
 
+echo "== OpenAPI drift (API-3)"
+if [ -f frontend/src/shared/api/openapi.json ]; then
+  generated="$(mktemp)"
+  $PY main.py openapi --out "$generated" >/dev/null
+  diff -u frontend/src/shared/api/openapi.json "$generated" \
+    || { echo "openapi.json is stale: run python main.py openapi, then npm run gen:api"; exit 1; }
+  rm -f "$generated"
+fi
+
 if [ -f frontend/package.json ]; then
   echo "== frontend"
-  (cd frontend && npx tsc -b && npm run lint && npm test && npm run build)
+  (cd frontend && npm run -s gen:api >/dev/null && git diff --exit-code src/shared/api/openapi.d.ts \
+    && npx tsc -b && npm run lint && npm test && npm run build)
 fi
 echo "All checks passed."

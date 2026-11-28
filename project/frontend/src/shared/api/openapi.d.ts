@@ -1652,12 +1652,19 @@ export interface components {
         };
         /** OpenQuestion */
         OpenQuestion: {
+            /** Answer Type */
+            answer_type?: ("yes_no" | "choice" | "number" | "duration") | null;
             /**
              * Asked At
              * Format: date-time
              */
             asked_at: string;
             asked_by: components["schemas"]["AgentKind"];
+            /**
+             * Choices
+             * @default []
+             */
+            choices: string[];
             /**
              * For Role
              * @default patient
@@ -1666,6 +1673,13 @@ export interface components {
             for_role: "patient" | "doctor";
             /** Key */
             key: string;
+            /** Question Key */
+            question_key?: string | null;
+            /**
+             * Red Flag Screen
+             * @default false
+             */
+            red_flag_screen: boolean;
         };
         /** Page[CaseState] */
         Page_CaseState_: {

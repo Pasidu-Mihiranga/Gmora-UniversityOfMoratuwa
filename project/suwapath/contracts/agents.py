@@ -18,6 +18,7 @@ from suwapath.contracts.enums import (
     AgentKind,
     DataCategory,
     DoseSlot,
+    Language,
     MessageKind,
     MessageStatus,
     Purpose,
@@ -34,6 +35,7 @@ from suwapath.contracts.ids import (
     TraceId,
     UserId,
 )
+from suwapath.contracts.suggestions import MAX_SUGGESTIONS, Suggestion
 
 MAX_HOPS = 6  # AGT-12
 MAX_REVISIONS = 2  # VER-8
@@ -290,3 +292,19 @@ class AgentResult(Contract):
     status: Literal["done", "waiting", "handed_to_human", "failed"]
     wait_for: WaitCondition | None = None
     reason: str | None = None  # machine-readable code for handed_to_human or failed
+
+
+# ----- What the companion shows the patient (API-22) --------------------------------------------
+
+
+class CompanionReply(Contract):
+    """One companion message to the patient, stored as JSON in the case communication.
+
+    `text` is complete and human readable on its own; `suggestions` are the chips shown under it.
+    Replies come from reviewed templates, never from free model text (invariant 1).
+    """
+
+    kind: Literal["question", "clarify", "result", "emergency", "check_in", "info"]
+    text: str = Field(min_length=1, max_length=2000)
+    language: Language
+    suggestions: tuple[Suggestion, ...] = Field(default=(), max_length=MAX_SUGGESTIONS)

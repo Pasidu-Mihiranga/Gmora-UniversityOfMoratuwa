@@ -68,6 +68,11 @@ class OpenQuestion(Contract):
     asked_by: AgentKind
     asked_at: datetime
     for_role: Literal["patient", "doctor"] = "patient"
+    # How the question was asked, so the next turn can read the answer (navigation question).
+    question_key: str | None = None
+    answer_type: Literal["yes_no", "choice", "number", "duration"] | None = None
+    choices: tuple[str, ...] = ()
+    red_flag_screen: bool = False
 
 
 class RouteSuggestion(Contract):

@@ -175,3 +175,10 @@ table. Heartbeat comment every 15 s.
 
 `API-21` The API process listens on Postgres `LISTEN suwapath_stream` to fan out to its open streams,
 so any API replica can serve any stream.
+
+`API-22` A companion message to the patient is a `CompanionReply` (`contracts/agents.py`) stored as
+JSON in the case communication and returned in the timeline item's `params.text`:
+`{"kind": "question" | "clarify" | "result" | "emergency" | "check_in" | "info", "text": "...",
+"language": "si" | "en", "suggestions": [Suggestion, ...]}`. `text` is complete and human
+readable on its own; clients show it as the message and the suggestions as chips (`FE-50`).
+Patient messages stay plain text.

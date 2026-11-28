@@ -17,10 +17,17 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from suwapath.contracts.agents import AgentJob, AgentMessage, AgentResult, AgentSpec
+from suwapath.contracts.agents import (
+    AgentJob,
+    AgentMessage,
+    AgentResult,
+    AgentSpec,
+    MessageIntent,
+)
 from suwapath.contracts.cases import CaseEventDraft, CaseEventKind
 from suwapath.contracts.enums import (
     AgentKind,
+    DataCategory,
     MessageStatus,
     PrincipalKind,
     Purpose,
@@ -407,9 +414,24 @@ class Delivery:
         return await self._deliver_to_person(uow, message, (MessageStatus.ESCALATED,))
 
     async def _recipient_access(self, uow: UnitOfWork, message: AgentMessage) -> AccessDecision:
+        """Allowed when at least one receiving person (or the receiving agent) may see it."""
         patient = await self.deps.directory.case_patient(message.case_id)
+        if message.recipient == Role.GUARDIAN.value:
+            targets = await self._allowed_people(message, patient)
+            if targets:
+                return AccessDecision(
+                    allowed=True, reason="recipient_allowed", policy_version="runtime"
+                )
+            return AccessDecision(
+                allowed=False, reason="no_recipient_allowed", policy_version="runtime"
+            )
         principal = await self._recipient_principal(uow, message, patient)
-        for category in message.consent_scope:
+        return await self._decide(principal, patient, message.consent_scope)
+
+    async def _decide(
+        self, principal: Principal, patient: PatientId, scope: frozenset[DataCategory]
+    ) -> AccessDecision:
+        for category in sorted(scope):
             decision = await self.deps.policy.decide(
                 AccessRequest(
                     principal=principal,
@@ -426,20 +448,35 @@ class Delivery:
             allowed=True, reason="all_categories_allowed", policy_version="runtime"
         )
 
+    async def _allowed_people(self, message: AgentMessage, patient: PatientId) -> list[UserId]:
+        """Guardian recipients, each checked for themselves. The emergency alert goes to every
+        guardian under the emergency purpose (SEC-10 rule 7); other alerts go to the guardian the
+        sending agent acts for."""
+        if message.intent is MessageIntent.EMERGENCY_ALERT:
+            people = await self.deps.directory.guardians(patient)
+            purpose = Purpose.EMERGENCY
+        else:
+            people = [message.acting_for] if message.acting_for else []
+            purpose = Purpose.GUARDIAN_MONITORING
+        allowed = []
+        for person in people:
+            principal = Principal(
+                kind=PrincipalKind.USER,
+                user_id=person,
+                role=Role.GUARDIAN,
+                acting_for=person,
+                purpose=purpose,
+                trace_id=TraceId(message.trace_id),
+            )
+            if (await self._decide(principal, patient, message.consent_scope)).allowed:
+                allowed.append(person)
+        return allowed
+
     async def _recipient_principal(
         self, uow: UnitOfWork, message: AgentMessage, patient: PatientId
     ) -> Principal:
         """Who receives the message, acting for whom: consent is checked for that person."""
         trace = TraceId(message.trace_id)
-        if message.recipient == Role.GUARDIAN.value:
-            return Principal(
-                kind=PrincipalKind.USER,
-                user_id=message.acting_for,
-                role=Role.GUARDIAN,
-                acting_for=message.acting_for,
-                purpose=Purpose.GUARDIAN_MONITORING,
-                trace_id=trace,
-            )
         recipient = AgentKind(message.recipient)
         return Principal(
             kind=PrincipalKind.AGENT,
@@ -485,22 +522,26 @@ class Delivery:
     async def _deliver_to_person(
         self, uow: UnitOfWork, message: AgentMessage, only_from: tuple[MessageStatus, ...]
     ) -> bool:
-        access = await self._recipient_access(uow, message)  # SEC-13: re-checked at delivery
-        if not access.allowed:
+        patient = await self.deps.directory.case_patient(message.case_id)
+        people = await self._allowed_people(message, patient)  # SEC-13: checked at delivery
+        if not people:
             await messages.mark(uow, message.message_id, MessageStatus.BLOCKED, only_from)
             return False
         if not await messages.mark(uow, message.message_id, MessageStatus.DELIVERED, only_from):
             return False
-        assert message.acting_for is not None
-        await self.deps.notifications.notify(
-            NotificationDraft(
-                user_id=message.acting_for,
-                kind=message.intent.value,
-                template_key=f"{message.intent.value}.v1",
-                params=message.body,
-                urgency="urgent" if message.body.get("level") == "urgent" else "normal",
-            )
+        urgent = (
+            message.intent is MessageIntent.EMERGENCY_ALERT or message.body.get("level") == "urgent"
         )
+        for person in people:
+            await self.deps.notifications.notify(
+                NotificationDraft(
+                    user_id=person,
+                    kind=message.intent.value,
+                    template_key=f"{message.intent.value}.v1",
+                    params=message.body,
+                    urgency="urgent" if urgent else "normal",
+                )
+            )
         return True
 
 

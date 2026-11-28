@@ -235,8 +235,18 @@ class Home:
             while await self.runner.run_once("test-worker"):
                 busy += 1
             if not busy:
+                await self.no_job_errors()
                 return
         raise AssertionError("system did not settle")
+
+    async def no_job_errors(self) -> None:
+        """Green must mean green: no agent job failed and retried behind the result."""
+        async with self.uow_factory() as uow:
+            query = select(AgentJobRow.agent_kind, AgentJobRow.error_code).where(
+                (AgentJobRow.status != "done") | (AgentJobRow.attempts > 1)
+            )
+            failed = (await uow.session.execute(query)).all()
+        assert not failed, failed
 
     async def later(self, delta: timedelta) -> None:
         self.clock.advance(delta)

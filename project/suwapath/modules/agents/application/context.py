@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass, field
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 from pydantic import BaseModel, ValidationError
 
@@ -24,14 +24,18 @@ from suwapath.contracts.agents import (
     MessageIntent,
 )
 from suwapath.contracts.cases import CaseState
-from suwapath.contracts.common import UntrustedText
+from suwapath.contracts.common import Contract, UntrustedText
 from suwapath.contracts.enums import AgentKind, DataCategory, Language
 from suwapath.contracts.errors import AccessDenied, ConsentDenied, NotFound, ValidationFailed
+from suwapath.contracts.fhir.base import GeoPoint
 from suwapath.contracts.ids import CaseId, MessageId, PatientId, PractitionerRoleId, UserId
+from suwapath.contracts.ports.booking import BookingService
 from suwapath.contracts.ports.care import AdherenceSummary
 from suwapath.contracts.ports.cases import CaseService
 from suwapath.contracts.ports.consent import AccessPolicy, AccessRequest
+from suwapath.contracts.ports.navigation import NavigationService
 from suwapath.contracts.ports.notifications import NotificationService
+from suwapath.contracts.ports.safety import SafetyService
 from suwapath.contracts.ports.verifier import Verifier
 from suwapath.contracts.principal import Principal
 from suwapath.modules.agents.application import messages
@@ -58,6 +62,16 @@ class JobLimit(Exception):  # noqa: N818  (a stop signal, not an error)
         self.code = code
 
 
+class PatientProfile(Contract):
+    """The little the companion needs about its patient. Directory data, never sent to a model."""
+
+    first_name: str
+    age_years: int | None = None
+    sex: Literal["female", "male", "other", "unknown"] = "unknown"
+    chronic_codes: frozenset[str] = frozenset()
+    home: GeoPoint | None = None
+
+
 class Directory(Protocol):
     """Who is who. Bound at composition from identity, consent, booking and cases."""
 
@@ -72,6 +86,8 @@ class Directory(Protocol):
         """The patient's active case with a booked doctor, and that doctor's user."""
         ...
 
+    async def profile(self, patient_id: PatientId) -> PatientProfile | None: ...
+
 
 @dataclass
 class Dependencies:
@@ -84,6 +100,9 @@ class Dependencies:
     latest_patient_text: Callable[[CaseId], Awaitable[UntrustedText | None]]
     # CareService.adherence: the care module checks the principal's access itself (CARE-6).
     adherence: Callable[[Principal, PatientId, int], Awaitable[AdherenceSummary]] | None = None
+    safety: SafetyService | None = None
+    navigation: NavigationService | None = None
+    booking: BookingService | None = None
 
 
 @dataclass
