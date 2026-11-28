@@ -632,10 +632,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Alert rules */
+        /** My alert rules */
         get: operations["care_get_guardian_rules"];
         put?: never;
-        /** Create an alert rule */
+        /** Create or change an alert rule */
         post: operations["care_post_guardian_rules"];
         delete?: never;
         options?: never;
@@ -1081,7 +1081,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Doses for a day */
+        /** Doses of one day */
         get: operations["care_get_patients_patient_id_doses"];
         put?: never;
         post?: never;
@@ -1573,11 +1573,69 @@ export interface components {
             /** Text */
             text?: string | null;
         };
+        /** AdherenceDay */
+        AdherenceDay: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** Missed */
+            missed: number;
+            /**
+             * Missed Slots
+             * @default []
+             */
+            missed_slots: components["schemas"]["DoseSlot"][];
+            /** Pending */
+            pending: number;
+            /** Taken */
+            taken: number;
+        };
+        /** AdherenceSummary */
+        AdherenceSummary: {
+            /** Current Streak Days */
+            current_streak_days: number;
+            /** Days */
+            days: components["schemas"]["AdherenceDay"][];
+            /** Missed By Slot */
+            missed_by_slot: {
+                [key: string]: number;
+            };
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+        };
         /**
          * AgentKind
          * @enum {string}
          */
         AgentKind: "patient_companion" | "guardian_agent" | "doctor_assistant" | "verifier" | "single_agent_baseline";
+        /** AlertRule */
+        AlertRule: {
+            /** Active */
+            active: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Rule Type */
+            rule_type: string;
+            /** Version */
+            version: number;
+        };
         /** AllergyIntolerance */
         AllergyIntolerance: {
             code: components["schemas"]["CodeableConcept"];
@@ -1937,6 +1995,31 @@ export interface components {
             /** Text */
             text?: string | null;
             timing: components["schemas"]["DoseTiming"];
+        };
+        /** DoseItem */
+        DoseItem: {
+            /** Administration Id */
+            administration_id?: string | null;
+            /** Dose Id */
+            dose_id: string;
+            /** Medication Display */
+            medication_display: string;
+            /**
+             * Scheduled At
+             * Format: date-time
+             */
+            scheduled_at: string;
+            slot: components["schemas"]["DoseSlot"] | null;
+            /**
+             * Statement Id
+             * Format: uuid
+             */
+            statement_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "taken" | "missed";
         };
         /**
          * DoseSlot
@@ -2411,6 +2494,23 @@ export interface components {
             low_confidence: boolean;
             primary_specialty: components["schemas"]["Specialty"];
             urgency: components["schemas"]["Urgency"];
+        };
+        /** RuleRequest */
+        RuleRequest: {
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /**
+             * Rule Type
+             * @enum {string}
+             */
+            rule_type: "missed_doses" | "no_checkin_response";
         };
         /** Session */
         Session: {
@@ -3672,15 +3772,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AlertRule"][];
                 };
-            };
-            /** @description Not implemented yet (M09) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -3691,7 +3784,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -3699,15 +3796,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AlertRule"];
                 };
             };
-            /** @description Not implemented yet (M09) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -4454,7 +4553,9 @@ export interface operations {
     };
     care_get_patients_patient_id_adherence: {
         parameters: {
-            query?: never;
+            query?: {
+                days?: number;
+            };
             header?: never;
             path: {
                 patient_id: string;
@@ -4469,7 +4570,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AdherenceSummary"];
                 };
             };
             /** @description Validation Error */
@@ -4480,13 +4581,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M09) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -4591,7 +4685,9 @@ export interface operations {
     };
     care_get_patients_patient_id_doses: {
         parameters: {
-            query?: never;
+            query?: {
+                date?: string | null;
+            };
             header?: never;
             path: {
                 patient_id: string;
@@ -4606,7 +4702,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["DoseItem"][];
                 };
             };
             /** @description Validation Error */
@@ -4618,19 +4714,14 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Not implemented yet (M09) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
     care_post_patients_patient_id_doses_dose_id_taken: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 patient_id: string;
                 dose_id: string;
@@ -4645,7 +4736,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["DoseItem"];
                 };
             };
             /** @description Validation Error */
@@ -4656,13 +4747,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M09) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
