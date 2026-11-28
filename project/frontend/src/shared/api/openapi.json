@@ -453,6 +453,110 @@
         "title": "CaseStatus",
         "type": "string"
       },
+      "Consent": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/DataCategory"
+            },
+            "title": "Categories",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "grantee_id": {
+            "format": "uuid",
+            "title": "Grantee Id",
+            "type": "string"
+          },
+          "grantee_role": {
+            "enum": [
+              "guardian",
+              "doctor"
+            ],
+            "title": "Grantee Role",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "period": {
+            "$ref": "#/components/schemas/Period"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "purposes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Purposes",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "status": {
+            "enum": [
+              "active",
+              "inactive",
+              "rejected"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "default": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "grantee_id",
+          "grantee_role",
+          "categories",
+          "purposes",
+          "period",
+          "status"
+        ],
+        "title": "Consent",
+        "type": "object"
+      },
+      "DataCategory": {
+        "enum": [
+          "demographics",
+          "contact",
+          "conditions",
+          "allergies",
+          "medications",
+          "adherence",
+          "observations",
+          "reports",
+          "imaging",
+          "appointments",
+          "conversations",
+          "sensitive_sexual_health",
+          "sensitive_mental_health"
+        ],
+        "title": "DataCategory",
+        "type": "string"
+      },
       "Decision": {
         "additionalProperties": false,
         "properties": {
@@ -526,6 +630,30 @@
           "fact_key"
         ],
         "title": "FactRequest",
+        "type": "object"
+      },
+      "GrantChange": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/DataCategory"
+            },
+            "maxItems": 13,
+            "title": "Categories",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "emergency_alert": {
+            "default": true,
+            "title": "Emergency Alert",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "categories"
+        ],
+        "title": "GrantChange",
         "type": "object"
       },
       "GuardianBranchState": {
@@ -628,6 +756,31 @@
           "communication_id"
         ],
         "title": "MessageAccepted",
+        "type": "object"
+      },
+      "Meta": {
+        "additionalProperties": false,
+        "properties": {
+          "last_updated": {
+            "format": "date-time",
+            "title": "Last Updated",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "version_id": {
+            "default": 1,
+            "title": "Version Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "last_updated",
+          "source"
+        ],
+        "title": "Meta",
         "type": "object"
       },
       "Notes": {
@@ -837,6 +990,37 @@
           "due_at"
         ],
         "title": "PendingApproval",
+        "type": "object"
+      },
+      "Period": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          }
+        },
+        "title": "Period",
         "type": "object"
       },
       "ProfileChange": {
@@ -3435,6 +3619,7 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
             }
@@ -3444,7 +3629,13 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Consent"
+                  },
+                  "title": "Response Consent Get Patients Patient Id Consents",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
@@ -3458,9 +3649,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M03)"
           }
         },
         "summary": "Grants per guardian and doctor",
@@ -3478,6 +3666,7 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
             }
@@ -3487,18 +3676,14 @@
             "name": "grantee_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Grantee Id",
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
+          "204": {
             "description": "Successful Response"
           },
           "422": {
@@ -3510,9 +3695,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M03)"
           }
         },
         "summary": "Revoke access",
@@ -3528,6 +3710,7 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
             }
@@ -3537,16 +3720,46 @@
             "name": "grantee_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Grantee Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantChange"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Consent"
+                }
               }
             },
             "description": "Successful Response"
@@ -3560,9 +3773,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M03)"
           }
         },
         "summary": "Set what a person may see",

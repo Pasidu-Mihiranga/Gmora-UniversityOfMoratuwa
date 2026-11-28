@@ -137,6 +137,9 @@ class AgentRegistry:
     def kinds(self) -> set[AgentKind]:
         return set(self._agents)
 
+    def scopes(self) -> dict[str, frozenset[DataCategory]]:
+        return {kind.value: agent.spec.data_scope for kind, agent in self._agents.items()}
+
 
 def _resolve(deps: DepsSource) -> Dependencies:
     return deps if isinstance(deps, Dependencies) else deps()

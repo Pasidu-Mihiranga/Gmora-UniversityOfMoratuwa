@@ -1779,6 +1779,52 @@ export interface components {
          * @enum {string}
          */
         CaseStatus: "open" | "intake" | "assessed" | "emergency" | "in_care" | "awaiting_doctor" | "replied" | "handed_to_human" | "closed";
+        /** Consent */
+        Consent: {
+            /** Categories */
+            categories: components["schemas"]["DataCategory"][];
+            /**
+             * Grantee Id
+             * Format: uuid
+             */
+            grantee_id: string;
+            /**
+             * Grantee Role
+             * @enum {string}
+             */
+            grantee_role: "guardian" | "doctor";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            meta: components["schemas"]["Meta"];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            period: components["schemas"]["Period"];
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            /** Purposes */
+            purposes: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "inactive" | "rejected";
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
+        };
+        /**
+         * DataCategory
+         * @enum {string}
+         */
+        DataCategory: "demographics" | "contact" | "conditions" | "allergies" | "medications" | "adherence" | "observations" | "reports" | "imaging" | "appointments" | "conversations" | "sensitive_sexual_health" | "sensitive_mental_health";
         /** Decision */
         Decision: {
             /**
@@ -1803,6 +1849,16 @@ export interface components {
         FactRequest: {
             /** Fact Key */
             fact_key: string;
+        };
+        /** GrantChange */
+        GrantChange: {
+            /** Categories */
+            categories: components["schemas"]["DataCategory"][];
+            /**
+             * Emergency Alert
+             * @default true
+             */
+            emergency_alert: boolean;
         };
         /** GuardianBranchState */
         GuardianBranchState: {
@@ -1843,6 +1899,21 @@ export interface components {
              * Format: uuid
              */
             communication_id: string;
+        };
+        /** Meta */
+        Meta: {
+            /**
+             * Last Updated
+             * Format: date-time
+             */
+            last_updated: string;
+            /** Source */
+            source: string;
+            /**
+             * Version Id
+             * @default 1
+             */
+            version_id: number;
         };
         /** Notes */
         Notes: {
@@ -1922,6 +1993,13 @@ export interface components {
              * Format: uuid
              */
             practitioner_id: string;
+        };
+        /** Period */
+        Period: {
+            /** End */
+            end?: string | null;
+            /** Start */
+            start?: string | null;
         };
         /** ProfileChange */
         ProfileChange: {
@@ -4078,7 +4156,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Consent"][];
                 };
             };
             /** @description Validation Error */
@@ -4090,26 +4168,25 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Not implemented yet (M03) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
     consent_put_patients_patient_id_consents_grantee_id: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 patient_id: string;
                 grantee_id: string;
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantChange"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -4117,7 +4194,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Consent"];
                 };
             };
             /** @description Validation Error */
@@ -4128,13 +4205,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M03) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -4151,13 +4221,11 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -4167,13 +4235,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M03) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
