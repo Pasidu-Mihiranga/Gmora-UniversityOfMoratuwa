@@ -1,4 +1,6 @@
+import re
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -34,8 +36,12 @@ def _message(**overrides: object) -> AgentMessage:
 
 
 def test_catalog_matches_spec_05_intents() -> None:
+    """AGT-13: the code catalog and the spec 05 intent table name the same intents."""
+    spec = (Path(__file__).parents[4] / "docs/specs/05-agents-and-verifier.md").read_text()
+    table = spec.split("### Intent catalog (v1)")[1].split("`AGT-13`")[0]
+    in_spec = set(re.findall(r"^\| `([a-z_]+)` \|", table, re.MULTILINE))
     assert set(INTENTS) == set(MessageIntent)
-    assert len(INTENTS) == 9
+    assert {i.value for i in INTENTS} == in_spec
 
 
 def test_valid_check_in_request() -> None:

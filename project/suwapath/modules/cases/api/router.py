@@ -19,7 +19,7 @@ from suwapath.contracts.errors import NotFound
 from suwapath.contracts.ids import CaseId, ResourceId
 from suwapath.contracts.ports.cases import TimelineItem
 from suwapath.contracts.principal import Principal
-from suwapath.modules.cases.application.service import SqlCaseService
+from suwapath.modules.cases.application.service import QUESTION_SOURCE, SqlCaseService
 from suwapath.modules.cases.application.stream import case_events, parse_last_event_id
 from suwapath.platform.http.auth import require, require_stream
 
@@ -115,6 +115,22 @@ def build_router(service: SqlCaseService) -> APIRouter:
     ) -> MessageAccepted:
         communication_id = await service.add_patient_message(
             principal, case_id, UntrustedText(value=body.text, source="patient_message")
+        )
+        return MessageAccepted(communication_id=communication_id)
+
+    @router.post(
+        "/cases/{case_id}/doctor-questions",
+        status_code=202,
+        summary="Ask my doctor",
+        operation_id="cases_post_cases_case_id_doctor_questions",
+    )
+    async def ask_doctor(
+        case_id: CasePath, body: PatientMessage, principal: Patient
+    ) -> MessageAccepted:
+        """The patient's question for the treating doctor. It goes through the same safety check
+        as every message first; the doctor answers through the approval flow (AGT-30)."""
+        communication_id = await service.add_patient_message(
+            principal, case_id, UntrustedText(value=body.text, source=QUESTION_SOURCE)
         )
         return MessageAccepted(communication_id=communication_id)
 

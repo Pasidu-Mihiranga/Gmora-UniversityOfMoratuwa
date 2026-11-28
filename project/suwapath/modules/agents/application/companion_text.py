@@ -68,6 +68,14 @@ TEXT: dict[str, T] = {
         EN: "Thank you. I have passed this to your doctor.",
         SI: "ස්තූතියි. මම මෙය ඔබගේ වෛද්‍යවරයාට යොමු කළා.",
     },
+    "question.sent": {
+        EN: "I have sent your question to your doctor. Your doctor's answer will appear here.",
+        SI: "මම ඔබේ ප්‍රශ්නය ඔබගේ වෛද්‍යවරයාට යැව්වා. වෛද්‍යවරයාගේ පිළිතුර මෙහි පෙනෙනු ඇත.",
+    },
+    "question.no_doctor": {
+        EN: "You do not have a doctor for this yet. Book a doctor first, then you can ask them.",
+        SI: "මේ සඳහා ඔබට තවම වෛද්‍යවරයෙකු නැහැ. පළමුව වෛද්‍යවරයෙකු වෙන්කරවා ගන්න, පසුව ඔවුන්ගෙන් අහන්න.",
+    },
     "after_result": {
         EN: "I can book a doctor for you, or show you other doctors.",
         SI: "මට ඔබට වෛද්‍යවරයෙකු වෙන්කරවා දීමට, හෝ වෙනත් වෛද්‍යවරුන් පෙන්වීමට හැක.",
@@ -114,6 +122,7 @@ CHIPS: dict[str, T] = {
     "book": {EN: "Book {time}", SI: "{time} වෙන් කරන්න"},
     "show_doctors": {EN: "Show other doctors", SI: "වෙනත් වෛද්‍යවරුන්"},
     "feel_ok": {EN: "I feel all right", SI: "මට සනීපයි"},
+    "ask_doctor": {EN: "Ask my doctor", SI: "වෛද්‍යවරයාගෙන් අහන්න"},
     "not_well": {EN: "I am not well", SI: "මට අසනීපයි"},
 }
 

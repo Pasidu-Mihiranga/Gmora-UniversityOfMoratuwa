@@ -524,7 +524,12 @@ class Delivery:
         if message.recipient == AgentKind.PATIENT_COMPANION.value:
             return await self.deps.directory.patient_user(patient)
         parent = await messages.load(uow, message.in_reply_to) if message.in_reply_to else None
-        return parent.acting_for if parent else None
+        if parent is not None:
+            return parent.acting_for
+        if message.recipient == AgentKind.DOCTOR_ASSISTANT.value:  # a patient question
+            found = await self.deps.directory.doctor_case(patient)
+            return found[1] if found and found[0] == message.case_id else None
+        return None
 
     async def _deliver_to_person(
         self, uow: UnitOfWork, message: AgentMessage, only_from: tuple[MessageStatus, ...]

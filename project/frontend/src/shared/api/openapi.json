@@ -1700,6 +1700,60 @@
         ]
       }
     },
+    "/api/v1/cases/{case_id}/doctor-questions": {
+      "post": {
+        "description": "The patient's question for the treating doctor. It goes through the same safety check\nas every message first; the doctor answers through the approval flow (AGT-30).",
+        "operationId": "cases_post_cases_case_id_doctor_questions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientMessage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ask my doctor",
+        "tags": [
+          "cases"
+        ]
+      }
+    },
     "/api/v1/cases/{case_id}/messages": {
       "post": {
         "operationId": "cases_post_cases_case_id_messages",
