@@ -564,6 +564,29 @@
         "title": "Language",
         "type": "string"
       },
+      "Login": {
+        "additionalProperties": false,
+        "properties": {
+          "login": {
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Login",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ],
+        "title": "Login",
+        "type": "object"
+      },
       "MessageAccepted": {
         "additionalProperties": false,
         "properties": {
@@ -788,6 +811,19 @@
         "title": "PendingApproval",
         "type": "object"
       },
+      "ProfileChange": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          }
+        },
+        "required": [
+          "language"
+        ],
+        "title": "ProfileChange",
+        "type": "object"
+      },
       "RedFlagHit": {
         "additionalProperties": false,
         "properties": {
@@ -810,6 +846,17 @@
         ],
         "title": "RedFlagHit",
         "type": "object"
+      },
+      "Role": {
+        "enum": [
+          "patient",
+          "guardian",
+          "doctor",
+          "hospital_admin",
+          "system_admin"
+        ],
+        "title": "Role",
+        "type": "string"
       },
       "RouteSuggestion": {
         "additionalProperties": false,
@@ -853,6 +900,30 @@
         "title": "RouteSuggestion",
         "type": "object"
       },
+      "Session": {
+        "additionalProperties": false,
+        "properties": {
+          "access_expires_at": {
+            "format": "date-time",
+            "title": "Access Expires At",
+            "type": "string"
+          },
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserAccount"
+          }
+        },
+        "required": [
+          "access_token",
+          "access_expires_at",
+          "user"
+        ],
+        "title": "Session",
+        "type": "object"
+      },
       "Specialty": {
         "description": "Specialty catalog (NAV-3).",
         "enum": [
@@ -877,6 +948,47 @@
         ],
         "title": "Specialty",
         "type": "string"
+      },
+      "StreamTicket": {
+        "additionalProperties": false,
+        "description": "SEC-5: SSE cannot send headers, so a stream opens with a one-use ticket.",
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "stream": {
+            "title": "Stream",
+            "type": "string"
+          },
+          "ticket": {
+            "title": "Ticket",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticket",
+          "stream",
+          "expires_at"
+        ],
+        "title": "StreamTicket",
+        "type": "object"
+      },
+      "TicketRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "stream": {
+            "pattern": "^(me|case:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+            "title": "Stream",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stream"
+        ],
+        "title": "TicketRequest",
+        "type": "object"
       },
       "TimelineItem": {
         "additionalProperties": false,
@@ -948,6 +1060,79 @@
         ],
         "title": "Urgency",
         "type": "string"
+      },
+      "UserAccount": {
+        "additionalProperties": false,
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "linked_patient_ids": {
+            "default": [],
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Linked Patient Ids",
+            "type": "array"
+          },
+          "organization_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Id"
+          },
+          "patient_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          },
+          "practitioner_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practitioner Id"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "display_name",
+          "language"
+        ],
+        "title": "UserAccount",
+        "type": "object"
       },
       "ValidationError": {
         "properties": {
@@ -1152,17 +1337,36 @@
     "/api/v1/auth/login": {
       "post": {
         "operationId": "identity_post_auth_login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M01)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Sign in",
@@ -1175,16 +1379,8 @@
       "post": {
         "operationId": "identity_post_auth_logout",
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
+          "204": {
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (M01)"
           }
         },
         "summary": "Sign out",
@@ -1200,13 +1396,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
               }
             },
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (M01)"
           }
         },
         "summary": "Rotate the refresh token (cookie, CSRF checked)",
@@ -2540,13 +2735,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/UserAccount"
+                }
               }
             },
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (M01)"
           }
         },
         "summary": "My profile",
@@ -2556,17 +2750,36 @@
       },
       "patch": {
         "operationId": "identity_patch_me",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileChange"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/UserAccount"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M01)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Update my profile",
@@ -4344,17 +4557,36 @@
     "/api/v1/stream-tickets": {
       "post": {
         "operationId": "identity_post_stream_tickets",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/StreamTicket"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M01)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "One-time SSE ticket",

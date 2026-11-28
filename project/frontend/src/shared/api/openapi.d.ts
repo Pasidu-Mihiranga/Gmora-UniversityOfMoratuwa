@@ -1781,6 +1781,13 @@ export interface components {
          * @enum {string}
          */
         Language: "si" | "en";
+        /** Login */
+        Login: {
+            /** Login */
+            login: string;
+            /** Password */
+            password: string;
+        };
         /** MessageAccepted */
         MessageAccepted: {
             /**
@@ -1868,6 +1875,10 @@ export interface components {
              */
             practitioner_id: string;
         };
+        /** ProfileChange */
+        ProfileChange: {
+            language: components["schemas"]["Language"];
+        };
         /** RedFlagHit */
         RedFlagHit: {
             /** Rule Id */
@@ -1876,6 +1887,11 @@ export interface components {
             rules_version: string;
             urgency: components["schemas"]["Urgency"];
         };
+        /**
+         * Role
+         * @enum {string}
+         */
+        Role: "patient" | "guardian" | "doctor" | "hospital_admin" | "system_admin";
         /** RouteSuggestion */
         RouteSuggestion: {
             /**
@@ -1892,12 +1908,43 @@ export interface components {
             primary_specialty: components["schemas"]["Specialty"];
             urgency: components["schemas"]["Urgency"];
         };
+        /** Session */
+        Session: {
+            /**
+             * Access Expires At
+             * Format: date-time
+             */
+            access_expires_at: string;
+            /** Access Token */
+            access_token: string;
+            user: components["schemas"]["UserAccount"];
+        };
         /**
          * Specialty
          * @description Specialty catalog (NAV-3).
          * @enum {string}
          */
         Specialty: "general_medicine" | "cardiology" | "endocrinology" | "nephrology" | "neurology" | "respiratory" | "gastroenterology" | "orthopaedics" | "rheumatology" | "dermatology" | "ent" | "ophthalmology" | "psychiatry" | "obstetrics_gynaecology" | "paediatrics" | "general_surgery" | "urology" | "venereology";
+        /**
+         * StreamTicket
+         * @description SEC-5: SSE cannot send headers, so a stream opens with a one-use ticket.
+         */
+        StreamTicket: {
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Stream */
+            stream: string;
+            /** Ticket */
+            ticket: string;
+        };
+        /** TicketRequest */
+        TicketRequest: {
+            /** Stream */
+            stream: string;
+        };
         /** TimelineItem */
         TimelineItem: {
             /** Actor */
@@ -1937,6 +1984,29 @@ export interface components {
          * @enum {string}
          */
         Urgency: "routine" | "soon_72h" | "urgent_24h" | "emergency";
+        /** UserAccount */
+        UserAccount: {
+            /** Display Name */
+            display_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            language: components["schemas"]["Language"];
+            /**
+             * Linked Patient Ids
+             * @default []
+             */
+            linked_patient_ids: string[];
+            /** Organization Id */
+            organization_id?: string | null;
+            /** Patient Id */
+            patient_id?: string | null;
+            /** Practitioner Id */
+            practitioner_id?: string | null;
+            role: components["schemas"]["Role"];
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -2123,7 +2193,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Login"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -2131,15 +2205,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Session"];
                 };
             };
-            /** @description Not implemented yet (M01) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -2153,16 +2229,7 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Not implemented yet (M01) */
-            501: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2185,15 +2252,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Session"];
                 };
-            };
-            /** @description Not implemented yet (M01) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -3333,15 +3393,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UserAccount"];
                 };
-            };
-            /** @description Not implemented yet (M01) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -3352,7 +3405,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileChange"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -3360,15 +3417,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UserAccount"];
                 };
             };
-            /** @description Not implemented yet (M01) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -5073,7 +5132,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TicketRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -5081,15 +5144,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["StreamTicket"];
                 };
             };
-            /** @description Not implemented yet (M01) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };

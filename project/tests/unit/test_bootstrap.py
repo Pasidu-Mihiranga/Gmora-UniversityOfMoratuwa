@@ -23,13 +23,17 @@ def test_full_api_builds_and_every_route_has_roles() -> None:
 def test_stubs_still_require_authentication_and_roles() -> None:
     client = TestClient(create_api(DEV))
     assert client.get("/api/v1/audit").status_code == 401
-    assert client.post("/api/v1/auth/login").status_code == 501  # public stub answers 501
-    assert "M01" in client.post("/api/v1/auth/login").json()["detail"]
+    assert client.get("/api/v1/doctor/queue").status_code == 401  # a stub still needs sign in
+    # Login is implemented (M01): an empty body is refused by validation, not by a stub.
+    assert client.post("/api/v1/auth/login").status_code == 422
 
 
 def test_dev_routes_are_not_mounted_in_production() -> None:
     prod = Settings(
-        _env_file=None, suwapath_env="production", jwt_secret="s", suwapath_master_key="k"
+        _env_file=None,
+        suwapath_env="production",
+        jwt_secret="test-only-secret-not-used-anywhere-0123456789",
+        suwapath_master_key="k",
     )
     table = route_role_table(create_api(prod))
     assert not any("/dev/" in route for route in table)
