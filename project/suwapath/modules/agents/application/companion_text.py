@@ -64,6 +64,10 @@ TEXT: dict[str, T] = {
         EN: "Tap below to see doctors you can book.",
         SI: "වෙන්කරවා ගත හැකි වෛද්‍යවරුන් බැලීමට පහත තට්ටු කරන්න.",
     },
+    "fact.thanks": {
+        EN: "Thank you. I have passed this to your doctor.",
+        SI: "ස්තූතියි. මම මෙය ඔබගේ වෛද්‍යවරයාට යොමු කළා.",
+    },
     "after_result": {
         EN: "I can book a doctor for you, or show you other doctors.",
         SI: "මට ඔබට වෛද්‍යවරයෙකු වෙන්කරවා දීමට, හෝ වෙනත් වෛද්‍යවරුන් පෙන්වීමට හැක.",
@@ -95,6 +99,10 @@ QUESTIONS: dict[str, T] = {
         SI: "ඔබේ මුහුණේ එක් පැත්තක් දුර්වල හෝ එල්ලා වැටී තිබේද?",
     },
     "q.fall": {EN: "Have you fallen recently?", SI: "ඔබ මෑතකදී වැටුණාද?"},
+    "q.home_glucose_reading": {
+        EN: "Your doctor asks: what was your last home sugar (glucose) reading?",
+        SI: "ඔබගේ වෛද්‍යවරයා අසයි: ඔබගේ අවසන් නිවසේ සීනි (ග්ලූකෝස්) මිනුම කීයද?",
+    },
 }
 
 CHIPS: dict[str, T] = {
