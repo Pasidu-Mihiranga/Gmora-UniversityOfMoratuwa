@@ -2065,6 +2065,49 @@ export interface components {
             password: string;
             role: components["schemas"]["Role"];
         };
+        /** DoctorOption */
+        DoctorOption: {
+            /**
+             * Continuity
+             * @default false
+             */
+            continuity: boolean;
+            /** Display Name */
+            display_name: string;
+            /** Distance Km */
+            distance_km: number;
+            /** Fee Lkr */
+            fee_lkr: number;
+            /**
+             * Languages
+             * @default []
+             */
+            languages: components["schemas"]["Language"][];
+            /** Next Slot At */
+            next_slot_at: string | null;
+            /** Next Slot Id */
+            next_slot_id: string | null;
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /** Organization Name */
+            organization_name: string;
+            /**
+             * Practitioner Id
+             * Format: uuid
+             */
+            practitioner_id: string;
+            /**
+             * Practitioner Role Id
+             * Format: uuid
+             */
+            practitioner_role_id: string;
+            /** Reason Key */
+            reason_key: string;
+            specialty: components["schemas"]["Specialty"];
+        };
         /** Dosage */
         Dosage: {
             /** Text */
@@ -2217,6 +2260,20 @@ export interface components {
             given?: string[];
             /** Text */
             text?: string | null;
+        };
+        /** Itinerary */
+        Itinerary: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** Stops */
+            stops: components["schemas"]["TripStop"][];
+            /** Total Travel Minutes */
+            total_travel_minutes: number;
+            /** Total Wait Minutes */
+            total_wait_minutes: number;
         };
         /**
          * Language
@@ -2398,6 +2455,13 @@ export interface components {
         Page_CaseState_: {
             /** Items */
             items: components["schemas"]["CaseState"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[DoctorOption] */
+        Page_DoctorOption_: {
+            /** Items */
+            items: components["schemas"]["DoctorOption"][];
             /** Next Cursor */
             next_cursor?: string | null;
         };
@@ -2856,6 +2920,40 @@ export interface components {
             simulated: boolean;
             /** Summary Key */
             summary_key: string;
+        };
+        /** TripRequest */
+        TripRequest: {
+            /**
+             * Date From
+             * Format: date
+             */
+            date_from: string;
+            /**
+             * Date To
+             * Format: date
+             */
+            date_to: string;
+            near: components["schemas"]["GeoPoint"];
+            /** Specialties */
+            specialties: components["schemas"]["Specialty"][];
+        };
+        /** TripStop */
+        TripStop: {
+            /**
+             * Practitioner Role Id
+             * Format: uuid
+             */
+            practitioner_role_id: string;
+            /**
+             * Slot Id
+             * Format: uuid
+             */
+            slot_id: string;
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
         };
         /**
          * Urgency
@@ -3914,7 +4012,19 @@ export interface operations {
     };
     navigation_get_doctors: {
         parameters: {
-            query?: never;
+            query: {
+                specialty: components["schemas"]["Specialty"];
+                lat: number;
+                lng: number;
+                date_from: string;
+                date_to: string;
+                language?: components["schemas"]["Language"] | null;
+                time_of_day?: "morning" | "afternoon" | "evening" | "any";
+                max_km?: number;
+                name?: string | null;
+                cursor?: string | null;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3927,15 +4037,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Page_DoctorOption_"];
                 };
             };
-            /** @description Not implemented yet (M17) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -6013,15 +6125,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Specialty"][];
                 };
-            };
-            /** @description Not implemented yet (M17) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -6065,7 +6170,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TripRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -6073,15 +6182,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Itinerary"][];
                 };
             };
-            /** @description Not implemented yet (M17) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };

@@ -13,16 +13,17 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from suwapath.contracts.common import Page
-from suwapath.contracts.enums import DataCategory, PrincipalKind, Purpose, Role
+from suwapath.contracts.enums import DataCategory, Language, PrincipalKind, Purpose, Role
 from suwapath.contracts.errors import AccessDenied, NotFound, ValidationFailed, VersionConflict
 from suwapath.contracts.events.catalog import ResourceWritten
 from suwapath.contracts.fhir.base import Meta, PatientResource, Reference
@@ -37,11 +38,16 @@ from suwapath.contracts.fhir.resources import (
     Provenance,
     ProvenanceEntity,
 )
-from suwapath.contracts.ids import PatientId, ResourceId, TraceId, UserId
+from suwapath.contracts.ids import PatientId, PractitionerId, ResourceId, TraceId, UserId
 from suwapath.contracts.ports.audit import AuditEntryDraft
 from suwapath.contracts.ports.consent import AccessDecision, AccessPolicy, AccessRequest
 from suwapath.contracts.ports.crypto import PatientCipher
-from suwapath.contracts.ports.record import MedicationSchedule, PatientBasics, RecordSummary
+from suwapath.contracts.ports.record import (
+    MedicationSchedule,
+    PatientBasics,
+    PractitionerCard,
+    RecordSummary,
+)
 from suwapath.contracts.principal import Principal
 from suwapath.modules.record.adapters.models import (
     AllergyRow,
@@ -54,6 +60,9 @@ from suwapath.modules.record.adapters.models import (
 )
 from suwapath.platform.ids import new_id
 from suwapath.platform.uow import UnitOfWork, UnitOfWorkFactory
+
+LANGUAGES = {lang.value for lang in Language}
+NAME_MATCH = 0.3  # pg_trgm similarity for a name match (direct channelling, NAV-13)
 
 
 @dataclass(frozen=True)
@@ -131,6 +140,40 @@ class SqlRecordService:
                 )
             ).scalar()
         return PatientId(found) if found else None
+
+    async def practitioner_cards(
+        self, practitioner_ids: list[PractitionerId]
+    ) -> list[PractitionerCard]:
+        if not practitioner_ids:
+            return []
+        async with self._uow.join() as uow:
+            rows = (
+                await uow.session.execute(
+                    select(PractitionerRow).where(PractitionerRow.id.in_(practitioner_ids))
+                )
+            ).scalars()
+            return [
+                PractitionerCard(
+                    practitioner_id=PractitionerId(r.id),
+                    display_name=r.search_name,
+                    languages=tuple(Language(x) for x in r.languages if x in LANGUAGES),
+                )
+                for r in rows
+            ]
+
+    async def search_practitioners(self, name: str, limit: int = 10) -> list[PractitionerId]:
+        wanted = re.sub(r"^(dr|doctor)\.?\s+", "", name.strip(), flags=re.IGNORECASE)[:120]
+        if len(wanted) < 3:
+            return []
+        score = func.similarity(PractitionerRow.search_name, wanted)
+        async with self._uow.join() as uow:
+            rows = await uow.session.execute(
+                select(PractitionerRow.id)
+                .where(score > NAME_MATCH)
+                .order_by(score.desc(), PractitionerRow.id)
+                .limit(max(1, min(limit, 50)))
+            )
+            return [PractitionerId(r) for r in rows.scalars()]
 
     async def patient_basics(self, patient_id: PatientId) -> PatientBasics | None:
         async with self._uow.join() as uow:

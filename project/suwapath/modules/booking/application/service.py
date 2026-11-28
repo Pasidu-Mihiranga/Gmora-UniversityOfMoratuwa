@@ -22,7 +22,13 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 
 from suwapath.contracts.common import Page
-from suwapath.contracts.enums import AppointmentStatus, DataCategory, PrincipalKind, Role
+from suwapath.contracts.enums import (
+    AppointmentStatus,
+    DataCategory,
+    PrincipalKind,
+    Role,
+    Specialty,
+)
 from suwapath.contracts.errors import AccessDenied, NotFound, SafetyStop, SlotUnavailable
 from suwapath.contracts.events import EventEnvelope
 from suwapath.contracts.events.catalog import (
@@ -32,7 +38,7 @@ from suwapath.contracts.events.catalog import (
     SlotHeld,
     TimerFired,
 )
-from suwapath.contracts.fhir.base import Meta
+from suwapath.contracts.fhir.base import GeoPoint, Meta
 from suwapath.contracts.fhir.resources import Appointment, Organization, PractitionerRole, Schedule
 from suwapath.contracts.ids import (
     AppointmentId,
@@ -45,7 +51,15 @@ from suwapath.contracts.ids import (
     ScheduleId,
     SlotId,
 )
-from suwapath.contracts.ports.booking import Hold, HospitalAppointmentRow, SessionSummary, SlotView
+from suwapath.contracts.ports.booking import (
+    MAX_CANDIDATE_SLOTS,
+    BoundingBox,
+    DoctorCandidate,
+    Hold,
+    HospitalAppointmentRow,
+    SessionSummary,
+    SlotView,
+)
 from suwapath.contracts.ports.consent import AccessRequest
 from suwapath.contracts.principal import Principal
 from suwapath.modules.booking.adapters.models import (
@@ -402,6 +416,74 @@ class SqlBookingService:
             for hold_id in released:
                 await uow.cancel_timer(f"hold:{hold_id}")
             return len(released)
+
+    async def doctor_candidates(
+        self,
+        specialty: Specialty,
+        box: BoundingBox,
+        date_from: date,
+        date_to: date,
+        organization_id: OrganizationId | None = None,
+    ) -> list[DoctorCandidate]:
+        begin = datetime.combine(date_from, datetime.min.time(), tzinfo=COLOMBO)
+        end = datetime.combine(date_to + timedelta(days=1), datetime.min.time(), tzinfo=COLOMBO)
+        async with self._uow.join() as uow:
+            now = uow.clock.now()
+            query = (
+                select(PractitionerRoleRow, OrganizationRow)
+                .join(OrganizationRow, OrganizationRow.id == PractitionerRoleRow.organization_id)
+                .where(
+                    PractitionerRoleRow.specialty == specialty.value,
+                    OrganizationRow.lat.between(box.south, box.north),
+                    OrganizationRow.lng.between(box.west, box.east),
+                )
+            )
+            if organization_id is not None:
+                query = query.where(OrganizationRow.id == organization_id)
+            pairs = list((await uow.session.execute(query)).all())
+            slots = list(
+                (
+                    await uow.session.execute(
+                        select(SlotRow)
+                        .where(
+                            SlotRow.practitioner_role_id.in_([r.id for r, _ in pairs]),
+                            SlotRow.starts_at >= max(begin, now),
+                            SlotRow.starts_at < end,
+                        )
+                        .order_by(SlotRow.starts_at)
+                    )
+                ).scalars()
+            )
+            taken = await _taken(uow, [s.id for s in slots], now)
+            free: dict[Any, list[SlotView]] = {}
+            for slot in slots:
+                if slot.id in taken:
+                    continue
+                views = free.setdefault(slot.practitioner_role_id, [])
+                if len(views) < MAX_CANDIDATE_SLOTS:
+                    views.append(
+                        SlotView(
+                            slot_id=SlotId(slot.id),
+                            schedule_id=ScheduleId(slot.schedule_id),
+                            practitioner_role_id=PractitionerRoleId(slot.practitioner_role_id),
+                            number=slot.number,
+                            start=slot.starts_at,
+                            free=True,
+                        )
+                    )
+            return [
+                DoctorCandidate(
+                    practitioner_role_id=PractitionerRoleId(role.id),
+                    practitioner_id=PractitionerId(role.practitioner_id),
+                    specialty=specialty,
+                    organization_id=OrganizationId(org.id),
+                    organization_name=org.name,
+                    location=GeoPoint(lat=org.lat, lng=org.lng),
+                    fee_lkr=role.fee_lkr,
+                    free_slots=tuple(free.get(role.id, ())),
+                )
+                for role, org in pairs
+            ]
 
     async def practitioner_for_role(
         self, practitioner_role_id: PractitionerRoleId
