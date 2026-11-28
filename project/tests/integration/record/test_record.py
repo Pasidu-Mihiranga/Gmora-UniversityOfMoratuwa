@@ -268,8 +268,12 @@ async def test_a_doctors_write_gets_a_source_a_version_and_an_event(clinic: Clin
     with pytest.raises(VersionConflict):  # a stale copy cannot overwrite the newer one
         await clinic.record.write_resource(doctor, stored)
     async with clinic.uow_factory() as uow:
-        events = [r for r in (await uow.session.execute(select(OutboxRow.type))).scalars()]
-    assert events.count("record.resource_written") == 2
+        events = (
+            await uow.session.execute(
+                select(OutboxRow.type).where(OutboxRow.aggregate_id == str(new.id))
+            )
+        ).scalars()
+        assert list(events) == ["record.resource_written"] * 2  # one per write of this resource
 
 
 async def test_a_patient_cannot_write_clinical_facts(clinic: Clinic) -> None:

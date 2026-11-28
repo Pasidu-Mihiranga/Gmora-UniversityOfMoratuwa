@@ -29,6 +29,7 @@ from suwapath.contracts.fhir.base import Meta, PatientResource, Reference
 from suwapath.contracts.fhir.resources import (
     AllergyIntolerance,
     Condition,
+    DoseTiming,
     MedicationStatement,
     Observation,
     Patient,
@@ -39,7 +40,7 @@ from suwapath.contracts.ids import PatientId, ResourceId, TraceId, UserId
 from suwapath.contracts.ports.audit import AuditEntryDraft
 from suwapath.contracts.ports.consent import AccessDecision, AccessPolicy, AccessRequest
 from suwapath.contracts.ports.crypto import PatientCipher
-from suwapath.contracts.ports.record import RecordSummary
+from suwapath.contracts.ports.record import MedicationSchedule, RecordSummary
 from suwapath.contracts.principal import Principal
 from suwapath.modules.record.adapters.models import (
     AllergyRow,
@@ -128,6 +129,21 @@ class SqlRecordService:
                 )
             ).scalar()
         return PatientId(found) if found else None
+
+    async def medication_schedules(self, patient_id: PatientId) -> list[MedicationSchedule]:
+        async with self._uow.join() as uow:
+            rows = (
+                await uow.session.execute(
+                    select(MedicationStatementRow.id, MedicationStatementRow.timing).where(
+                        MedicationStatementRow.patient_id == patient_id,
+                        MedicationStatementRow.status == "active",
+                    )
+                )
+            ).all()
+        return [
+            MedicationSchedule(statement_id=ResourceId(i), timing=DoseTiming.model_validate(t))
+            for i, t in rows
+        ]
 
     async def summary(
         self, principal: Principal, patient_id: PatientId, purpose: Purpose
@@ -328,6 +344,15 @@ class SqlRecordService:
                     )
                     resource = resource.model_copy(update={"provenance_ids": [provenance]})
                 await self._store(uow, kind, resource, patient)
+                uow.publish(  # care schedules doses from imported medicines too
+                    ResourceWritten(
+                        resource_type=kind.model.resource_type,
+                        resource_id=resource.id,
+                        patient_id=patient,
+                    ),
+                    aggregate_id=str(resource.id),
+                    patient_id=patient,
+                )
                 written += 1
         return written
 

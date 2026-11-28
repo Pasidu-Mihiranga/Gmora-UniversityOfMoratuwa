@@ -81,3 +81,4 @@ class AlertRuleRow(UuidKey, Timestamps, Base):
     params: Mapped[dict[str, Any]] = mapped_column(JSONB)
     version: Mapped[int] = mapped_column(Integer, server_default="1")
     active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
+    last_fired_at: Mapped[datetime | None] = mapped_column(TZ)  # fire once per window

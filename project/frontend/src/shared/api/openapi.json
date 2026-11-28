@@ -55,6 +55,83 @@
         "title": "Address",
         "type": "object"
       },
+      "AdherenceDay": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "format": "date",
+            "title": "Day",
+            "type": "string"
+          },
+          "missed": {
+            "title": "Missed",
+            "type": "integer"
+          },
+          "missed_slots": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DoseSlot"
+            },
+            "title": "Missed Slots",
+            "type": "array"
+          },
+          "pending": {
+            "title": "Pending",
+            "type": "integer"
+          },
+          "taken": {
+            "title": "Taken",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "taken",
+          "missed",
+          "pending"
+        ],
+        "title": "AdherenceDay",
+        "type": "object"
+      },
+      "AdherenceSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "current_streak_days": {
+            "title": "Current Streak Days",
+            "type": "integer"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AdherenceDay"
+            },
+            "title": "Days",
+            "type": "array"
+          },
+          "missed_by_slot": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/DoseSlot"
+            },
+            "title": "Missed By Slot",
+            "type": "object"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "patient_id",
+          "days",
+          "missed_by_slot",
+          "current_streak_days"
+        ],
+        "title": "AdherenceSummary",
+        "type": "object"
+      },
       "AgentKind": {
         "enum": [
           "patient_companion",
@@ -65,6 +142,48 @@
         ],
         "title": "AgentKind",
         "type": "string"
+      },
+      "AlertRule": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "rule_type": {
+            "title": "Rule Type",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "patient_id",
+          "rule_type",
+          "params",
+          "version",
+          "active"
+        ],
+        "title": "AlertRule",
+        "type": "object"
       },
       "AllergyIntolerance": {
         "additionalProperties": false,
@@ -903,6 +1022,70 @@
           "timing"
         ],
         "title": "Dosage",
+        "type": "object"
+      },
+      "DoseItem": {
+        "additionalProperties": false,
+        "properties": {
+          "administration_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Administration Id"
+          },
+          "dose_id": {
+            "title": "Dose Id",
+            "type": "string"
+          },
+          "medication_display": {
+            "title": "Medication Display",
+            "type": "string"
+          },
+          "scheduled_at": {
+            "format": "date-time",
+            "title": "Scheduled At",
+            "type": "string"
+          },
+          "slot": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DoseSlot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement_id": {
+            "format": "uuid",
+            "title": "Statement Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "taken",
+              "missed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dose_id",
+          "statement_id",
+          "medication_display",
+          "slot",
+          "scheduled_at",
+          "status"
+        ],
+        "title": "DoseItem",
         "type": "object"
       },
       "DoseSlot": {
@@ -2180,6 +2363,36 @@
           "kb_version"
         ],
         "title": "RouteSuggestion",
+        "type": "object"
+      },
+      "RuleRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "rule_type": {
+            "enum": [
+              "missed_doses",
+              "no_checkin_response"
+            ],
+            "title": "Rule Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "patient_id",
+          "rule_type",
+          "params"
+        ],
+        "title": "RuleRequest",
         "type": "object"
       },
       "Session": {
@@ -3823,36 +4036,58 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AlertRule"
+                  },
+                  "title": "Response Care Get Guardian Rules",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (M09)"
           }
         },
-        "summary": "Alert rules",
+        "summary": "My alert rules",
         "tags": [
           "care"
         ]
       },
       "post": {
         "operationId": "care_post_guardian_rules",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRule"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M09)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
-        "summary": "Create an alert rule",
+        "summary": "Create or change an alert rule",
         "tags": [
           "care"
         ]
@@ -4602,8 +4837,21 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "maximum": 31,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
             }
           }
         ],
@@ -4611,7 +4859,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AdherenceSummary"
+                }
               }
             },
             "description": "Successful Response"
@@ -4625,9 +4875,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M09)"
           }
         },
         "summary": "Adherence summary",
@@ -4816,8 +5063,26 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date"
             }
           }
         ],
@@ -4825,7 +5090,13 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DoseItem"
+                  },
+                  "title": "Response Care Get Patients Patient Id Doses",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
@@ -4839,12 +5110,9 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M09)"
           }
         },
-        "summary": "Doses for a day",
+        "summary": "Doses of one day",
         "tags": [
           "care"
         ]
@@ -4859,6 +5127,7 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
             }
@@ -4868,8 +5137,26 @@
             "name": "dose_id",
             "required": true,
             "schema": {
+              "maxLength": 200,
               "title": "Dose Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -4877,7 +5164,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DoseItem"
+                }
               }
             },
             "description": "Successful Response"
@@ -4891,9 +5180,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M09)"
           }
         },
         "summary": "Mark a dose taken",

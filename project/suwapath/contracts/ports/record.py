@@ -10,6 +10,7 @@ from suwapath.contracts.fhir.base import PatientResource
 from suwapath.contracts.fhir.resources import (
     AllergyIntolerance,
     Condition,
+    DoseTiming,
     MedicationStatement,
     Observation,
     Patient,
@@ -30,8 +31,19 @@ class RecordSummary(Contract):
     hidden_categories_count: int = 0
 
 
+class MedicationSchedule(Contract):
+    """When a medicine is due: timing only, no name or dose (care schedules doses from this)."""
+
+    statement_id: ResourceId
+    timing: DoseTiming
+
+
 class RecordService(Protocol):
     async def patient_for_user(self, user_id: UserId) -> PatientId | None: ...
+
+    async def medication_schedules(self, patient_id: PatientId) -> list[MedicationSchedule]:
+        """Active, scheduled medicines (care, as a module). Timing only (CARE-2)."""
+        ...
 
     async def summary(
         self, principal: Principal, patient_id: PatientId, purpose: Purpose

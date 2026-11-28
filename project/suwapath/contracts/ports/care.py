@@ -20,6 +20,7 @@ from suwapath.contracts.principal import Principal
 
 
 class DoseItem(Contract):
+    dose_id: str  # opaque: identifies (statement, scheduled time) for "mark taken"
     statement_id: ResourceId
     medication_display: str  # visible only to principals allowed `medications`
     slot: DoseSlot | None
