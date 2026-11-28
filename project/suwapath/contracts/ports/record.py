@@ -16,7 +16,7 @@ from suwapath.contracts.fhir.resources import (
     Patient,
     Provenance,
 )
-from suwapath.contracts.ids import PatientId, ResourceId, UserId
+from suwapath.contracts.ids import PatientId, PractitionerId, ResourceId, UserId
 from suwapath.contracts.principal import Principal
 
 
@@ -50,8 +50,24 @@ class PatientBasics(Contract):
     condition_codes: frozenset[str] = frozenset()
 
 
+class PractitionerCard(Contract):
+    """Directory data (no PHI): what a doctor card shows (NAV-7)."""
+
+    practitioner_id: PractitionerId
+    display_name: str
+    languages: tuple[Language, ...] = ()
+
+
 class RecordService(Protocol):
     async def patient_for_user(self, user_id: UserId) -> PatientId | None: ...
+
+    async def practitioner_cards(
+        self, practitioner_ids: list[PractitionerId]
+    ) -> list[PractitionerCard]: ...
+
+    async def search_practitioners(self, name: str, limit: int = 10) -> list[PractitionerId]:
+        """Trigram match on the doctor's name, best first (direct channelling, NAV-13)."""
+        ...
 
     async def patient_basics(self, patient_id: PatientId) -> PatientBasics | None:
         """For the agent runtime acting for this patient (the agent directory)."""
