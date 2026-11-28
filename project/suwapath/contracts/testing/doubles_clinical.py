@@ -349,6 +349,9 @@ class InMemoryBookingService:
     async def booked_case(self, patient_id: object) -> None:
         return None
 
+    async def doctor_candidates(self, *args: object, **kwargs: object) -> list[object]:
+        return []
+
     async def release_holds_for_case(self, case_id: CaseId) -> int:
         released = [h for h, hold in self.holds.items() if hold.case_id == case_id]
         for h in released:
@@ -489,6 +492,12 @@ class InMemoryRecordService:
 
     def put(self, resource: PatientResource) -> None:
         self.resources[resource.id] = resource
+
+    async def practitioner_cards(self, practitioner_ids: object) -> list[object]:
+        return []
+
+    async def search_practitioners(self, name: str, limit: int = 10) -> list[object]:
+        return []
 
     async def _allowed(
         self, principal: Principal, resource: PatientResource, action: Literal["read", "write"]

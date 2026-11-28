@@ -6,6 +6,8 @@ from datetime import date, datetime
 from typing import Protocol
 
 from suwapath.contracts.common import Contract, Page
+from suwapath.contracts.enums import Specialty
+from suwapath.contracts.fhir.base import GeoPoint
 from suwapath.contracts.fhir.resources import Appointment
 from suwapath.contracts.ids import (
     AppointmentId,
@@ -19,6 +21,8 @@ from suwapath.contracts.ids import (
     SlotId,
 )
 from suwapath.contracts.principal import Principal
+
+MAX_CANDIDATE_SLOTS = 60
 
 
 class SlotView(Contract):
@@ -56,6 +60,29 @@ class HospitalAppointmentRow(Contract):
     status: str
 
 
+class BoundingBox(Contract):
+    """NAV-11: the prefilter on indexed latitude and longitude, before exact distance."""
+
+    south: float
+    west: float
+    north: float
+    east: float
+
+
+class DoctorCandidate(Contract):
+    """Directory data (no PHI) for doctor matching (NAV-10): a doctor at a hospital in the box,
+    with the free slots in the date window, earliest first."""
+
+    practitioner_role_id: PractitionerRoleId
+    practitioner_id: PractitionerId
+    specialty: Specialty
+    organization_id: OrganizationId
+    organization_name: str
+    location: GeoPoint
+    fee_lkr: int
+    free_slots: tuple[SlotView, ...] = ()
+
+
 class BookingService(Protocol):
     async def slots(
         self, practitioner_role_id: PractitionerRoleId, date_from: date, date_to: date
@@ -80,6 +107,18 @@ class BookingService(Protocol):
     ) -> Page[Appointment]: ...
 
     async def release_holds_for_case(self, case_id: CaseId) -> int: ...
+
+    async def doctor_candidates(
+        self,
+        specialty: Specialty,
+        box: BoundingBox,
+        date_from: date,
+        date_to: date,
+        organization_id: OrganizationId | None = None,
+    ) -> list[DoctorCandidate]:
+        """Doctors of `specialty` at hospitals inside `box`, each with its free future slots in
+        the window (at most `MAX_CANDIDATE_SLOTS`). No ranking here: navigation ranks (NAV-10)."""
+        ...
 
     async def practitioner_for_role(
         self, practitioner_role_id: PractitionerRoleId

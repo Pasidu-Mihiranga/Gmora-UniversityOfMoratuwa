@@ -197,6 +197,11 @@ the urgency window, then distance (haversine), then fee. **Commissions, booking 
 fees never affect ranking** (proposal 2.3, `NAV-3`).
 
 `NAV-11` Distance uses a bounding-box prefilter on indexed `lat` and `lng`, then exact haversine.
+The directory comes through ports, never another module's tables: `booking.doctor_candidates
+(specialty, box, date_from, date_to, organization_id)` returns the doctors of a specialty at
+hospitals in the box with their free slots in the window (no ranking), and
+`record.practitioner_cards(ids)` and `record.search_practitioners(name)` give the card name, the
+languages and the trigram name match. Navigation filters and ranks.
 
 ### Several doctors in one trip
 
