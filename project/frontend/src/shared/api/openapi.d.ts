@@ -1500,11 +1500,279 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AgentKind
+         * @enum {string}
+         */
+        AgentKind: "patient_companion" | "guardian_agent" | "doctor_assistant" | "verifier" | "single_agent_baseline";
+        /** BudgetUsage */
+        BudgetUsage: {
+            /**
+             * Agent Seconds
+             * @default 0
+             */
+            agent_seconds: number;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /**
+             * Model Calls
+             * @default 0
+             */
+            model_calls: number;
+        };
+        /**
+         * CaseFact
+         * @description A structured finding with provenance. `key` is a navigation concept or a fact key.
+         */
+        CaseFact: {
+            /** Key */
+            key: string;
+            /**
+             * Present
+             * @default true
+             */
+            present: boolean;
+            /**
+             * Provenance Ids
+             * @default []
+             */
+            provenance_ids: string[];
+            /**
+             * Source
+             * @default patient_reported
+             * @enum {string}
+             */
+            source: "patient_reported" | "record" | "report" | "imaging" | "doctor";
+            /** Value */
+            value?: string | number | null;
+        };
+        /** CaseState */
+        CaseState: {
+            /**
+             * Appointments
+             * @default []
+             */
+            appointments: string[];
+            /** Brief Id */
+            brief_id?: string | null;
+            /**
+             * @default {
+             *       "agent_seconds": 0,
+             *       "cost_usd": 0,
+             *       "model_calls": 0
+             *     }
+             */
+            budget_used: components["schemas"]["BudgetUsage"];
+            /**
+             * Facts
+             * @default []
+             */
+            facts: components["schemas"]["CaseFact"][];
+            guardian_status?: components["schemas"]["GuardianBranchState"] | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            language: components["schemas"]["Language"];
+            /**
+             * Open Questions
+             * @default []
+             */
+            open_questions: components["schemas"]["OpenQuestion"][];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            pending_approval?: components["schemas"]["PendingApproval"] | null;
+            /**
+             * Red Flags
+             * @default []
+             */
+            red_flags: components["schemas"]["RedFlagHit"][];
+            /**
+             * Simulated
+             * @default false
+             */
+            simulated: boolean;
+            status: components["schemas"]["CaseStatus"];
+            suggested_route?: components["schemas"]["RouteSuggestion"] | null;
+            urgency?: components["schemas"]["Urgency"] | null;
+            urgency_floor?: components["schemas"]["Urgency"] | null;
+            /** Version */
+            version: number;
+        };
+        /**
+         * CaseStatus
+         * @enum {string}
+         */
+        CaseStatus: "open" | "intake" | "assessed" | "emergency" | "in_care" | "awaiting_doctor" | "replied" | "handed_to_human" | "closed";
+        /** GuardianBranchState */
+        GuardianBranchState: {
+            /** Last Alert Level */
+            last_alert_level?: ("info" | "concern" | "urgent" | "emergency") | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "idle" | "checking_in" | "alerted" | "escalated";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * Language
+         * @enum {string}
+         */
+        Language: "si" | "en";
+        /** MessageAccepted */
+        MessageAccepted: {
+            /**
+             * Communication Id
+             * Format: uuid
+             */
+            communication_id: string;
+        };
+        /** OpenCase */
+        OpenCase: {
+            language: components["schemas"]["Language"];
+            /** Text */
+            text: string;
+        };
+        /** OpenQuestion */
+        OpenQuestion: {
+            /**
+             * Asked At
+             * Format: date-time
+             */
+            asked_at: string;
+            asked_by: components["schemas"]["AgentKind"];
+            /**
+             * For Role
+             * @default patient
+             * @enum {string}
+             */
+            for_role: "patient" | "doctor";
+            /** Key */
+            key: string;
+        };
+        /** Page[CaseState] */
+        Page_CaseState_: {
+            /** Items */
+            items: components["schemas"]["CaseState"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[TimelineItem] */
+        Page_TimelineItem_: {
+            /** Items */
+            items: components["schemas"]["TimelineItem"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** PatientMessage */
+        PatientMessage: {
+            /** Text */
+            text: string;
+        };
+        /** PendingApproval */
+        PendingApproval: {
+            /**
+             * Draft Id
+             * Format: uuid
+             */
+            draft_id: string;
+            /**
+             * Due At
+             * Format: date-time
+             */
+            due_at: string;
+            /**
+             * Practitioner Id
+             * Format: uuid
+             */
+            practitioner_id: string;
+        };
+        /** RedFlagHit */
+        RedFlagHit: {
+            /** Rule Id */
+            rule_id: string;
+            /** Rules Version */
+            rules_version: string;
+            urgency: components["schemas"]["Urgency"];
+        };
+        /** RouteSuggestion */
+        RouteSuggestion: {
+            /**
+             * Alternatives
+             * @default []
+             */
+            alternatives: components["schemas"]["Specialty"][];
+            /** Confidence */
+            confidence: number;
+            /** Kb Version */
+            kb_version: string;
+            /** Low Confidence */
+            low_confidence: boolean;
+            primary_specialty: components["schemas"]["Specialty"];
+            urgency: components["schemas"]["Urgency"];
+        };
+        /**
+         * Specialty
+         * @description Specialty catalog (NAV-3).
+         * @enum {string}
+         */
+        Specialty: "general_medicine" | "cardiology" | "endocrinology" | "nephrology" | "neurology" | "respiratory" | "gastroenterology" | "orthopaedics" | "rheumatology" | "dermatology" | "ent" | "ophthalmology" | "psychiatry" | "obstetrics_gynaecology" | "paediatrics" | "general_surgery" | "urology" | "venereology";
+        /** TimelineItem */
+        TimelineItem: {
+            /** Actor */
+            actor: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "patient_message" | "agent_message" | "event" | "booking" | "alert" | "decision";
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /**
+             * Simulated
+             * @default false
+             */
+            simulated: boolean;
+            /** Summary Key */
+            summary_key: string;
+        };
+        /**
+         * Urgency
+         * @description Ordered: routine < soon_72h < urgent_24h < emergency (CON-5).
+         * @enum {string}
+         */
+        Urgency: "routine" | "soon_72h" | "urgent_24h" | "emergency";
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -1897,7 +2165,11 @@ export interface operations {
     };
     cases_get_cases: {
         parameters: {
-            query?: never;
+            query?: {
+                status?: components["schemas"]["CaseStatus"] | null;
+                cursor?: string | null;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1910,15 +2182,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Page_CaseState_"];
                 };
             };
-            /** @description Not implemented yet (M10) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -1929,23 +2203,29 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenCase"];
+            };
+        };
         responses: {
             /** @description Successful Response */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["CaseState"];
                 };
             };
-            /** @description Not implemented yet (M10) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -1966,7 +2246,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["CaseState"];
                 };
             };
             /** @description Validation Error */
@@ -1977,13 +2257,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M10) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -1996,15 +2269,19 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientMessage"];
+            };
+        };
         responses: {
             /** @description Successful Response */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["MessageAccepted"];
                 };
             };
             /** @description Validation Error */
@@ -2015,13 +2292,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M10) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2065,7 +2335,10 @@ export interface operations {
     };
     cases_get_cases_case_id_timeline: {
         parameters: {
-            query?: never;
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
             header?: never;
             path: {
                 case_id: string;
@@ -2080,7 +2353,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Page_TimelineItem_"];
                 };
             };
             /** @description Validation Error */
@@ -2091,13 +2364,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M10) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
