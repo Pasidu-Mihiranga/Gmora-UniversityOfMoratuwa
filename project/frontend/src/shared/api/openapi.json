@@ -15,6 +15,46 @@
         "title": "Accepted",
         "type": "object"
       },
+      "Address": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "Address",
+        "type": "object"
+      },
       "AgentKind": {
         "enum": [
           "patient_companion",
@@ -25,6 +65,64 @@
         ],
         "title": "AgentKind",
         "type": "string"
+      },
+      "AllergyIntolerance": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/CodeableConcept"
+          },
+          "criticality": {
+            "default": "unable-to-assess",
+            "enum": [
+              "low",
+              "high",
+              "unable-to-assess"
+            ],
+            "title": "Criticality",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "reaction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reaction"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "code"
+        ],
+        "title": "AllergyIntolerance",
+        "type": "object"
       },
       "ApprovalItem": {
         "additionalProperties": false,
@@ -453,6 +551,148 @@
         "title": "CaseStatus",
         "type": "string"
       },
+      "CodeableConcept": {
+        "additionalProperties": false,
+        "properties": {
+          "coding": {
+            "items": {
+              "$ref": "#/components/schemas/Coding"
+            },
+            "title": "Coding",
+            "type": "array"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "CodeableConcept",
+        "type": "object"
+      },
+      "Coding": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "display": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "System"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "Coding",
+        "type": "object"
+      },
+      "Condition": {
+        "additionalProperties": false,
+        "properties": {
+          "clinical_status": {
+            "enum": [
+              "active",
+              "recurrence",
+              "remission",
+              "resolved"
+            ],
+            "title": "Clinical Status",
+            "type": "string"
+          },
+          "code": {
+            "$ref": "#/components/schemas/CodeableConcept"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "onset": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onset"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "recorded_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Reference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "code",
+          "clinical_status"
+        ],
+        "title": "Condition",
+        "type": "object"
+      },
       "Consent": {
         "additionalProperties": false,
         "properties": {
@@ -538,6 +778,30 @@
         "title": "Consent",
         "type": "object"
       },
+      "ContactPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "system": {
+            "enum": [
+              "phone",
+              "email",
+              "sms"
+            ],
+            "title": "System",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system",
+          "value"
+        ],
+        "title": "ContactPoint",
+        "type": "object"
+      },
       "DataCategory": {
         "enum": [
           "demographics",
@@ -617,6 +881,74 @@
         "title": "DemoAccount",
         "type": "object"
       },
+      "Dosage": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/DoseTiming"
+          }
+        },
+        "required": [
+          "timing"
+        ],
+        "title": "Dosage",
+        "type": "object"
+      },
+      "DoseSlot": {
+        "enum": [
+          "morning",
+          "noon",
+          "evening",
+          "night"
+        ],
+        "title": "DoseSlot",
+        "type": "string"
+      },
+      "DoseTiming": {
+        "additionalProperties": false,
+        "properties": {
+          "as_needed": {
+            "default": false,
+            "title": "As Needed",
+            "type": "boolean"
+          },
+          "days_of_week": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Days Of Week",
+            "type": "array"
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/DoseSlot"
+            },
+            "title": "Slots",
+            "type": "array"
+          },
+          "times": {
+            "items": {
+              "format": "time",
+              "type": "string"
+            },
+            "title": "Times",
+            "type": "array"
+          }
+        },
+        "title": "DoseTiming",
+        "type": "object"
+      },
       "FactRequest": {
         "additionalProperties": false,
         "properties": {
@@ -630,6 +962,29 @@
           "fact_key"
         ],
         "title": "FactRequest",
+        "type": "object"
+      },
+      "GeoPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "lat": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat",
+            "type": "number"
+          },
+          "lng": {
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lng",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "title": "GeoPoint",
         "type": "object"
       },
       "GrantChange": {
@@ -712,6 +1067,42 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HumanName": {
+        "additionalProperties": false,
+        "properties": {
+          "family": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family"
+          },
+          "given": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Given",
+            "type": "array"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "HumanName",
+        "type": "object"
+      },
       "Language": {
         "enum": [
           "si",
@@ -741,6 +1132,79 @@
           "password"
         ],
         "title": "Login",
+        "type": "object"
+      },
+      "MedicationStatement": {
+        "additionalProperties": false,
+        "description": "What is prescribed (CON-8).",
+        "properties": {
+          "dosage": {
+            "$ref": "#/components/schemas/Dosage"
+          },
+          "effective": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Period"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "medication": {
+            "$ref": "#/components/schemas/CodeableConcept"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "prescriber": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Reference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "on-hold",
+              "stopped",
+              "completed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "medication",
+          "dosage",
+          "status"
+        ],
+        "title": "MedicationStatement",
         "type": "object"
       },
       "MessageAccepted": {
@@ -797,6 +1261,98 @@
           "text"
         ],
         "title": "Notes",
+        "type": "object"
+      },
+      "Observation": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/CodeableConcept"
+          },
+          "derived_from": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Reference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "effective_at": {
+            "format": "date-time",
+            "title": "Effective At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "interpretation": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "normal",
+                  "high",
+                  "abnormal"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interpretation"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "reference_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReferenceRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "value": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Quantity"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "code",
+          "value",
+          "effective_at"
+        ],
+        "title": "Observation",
         "type": "object"
       },
       "OpenCase": {
@@ -921,6 +1477,34 @@
         "title": "Page[CaseState]",
         "type": "object"
       },
+      "Page_PatientResource_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PatientResource"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Page[PatientResource]",
+        "type": "object"
+      },
       "Page_TimelineItem_": {
         "additionalProperties": false,
         "properties": {
@@ -949,6 +1533,138 @@
         "title": "Page[TimelineItem]",
         "type": "object"
       },
+      "Patient": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "age_band": {
+            "enum": [
+              "0-4",
+              "5-17",
+              "18-39",
+              "40-59",
+              "60-74",
+              "75+"
+            ],
+            "title": "Age Band",
+            "type": "string"
+          },
+          "birth_date": {
+            "format": "date",
+            "title": "Birth Date",
+            "type": "string"
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District"
+          },
+          "gender": {
+            "enum": [
+              "female",
+              "male",
+              "other",
+              "unknown"
+            ],
+            "title": "Gender",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GeoPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "name": {
+            "$ref": "#/components/schemas/HumanName"
+          },
+          "nic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nic"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "telecom": {
+            "items": {
+              "$ref": "#/components/schemas/ContactPoint"
+            },
+            "title": "Telecom",
+            "type": "array"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "name",
+          "birth_date",
+          "age_band",
+          "gender",
+          "language"
+        ],
+        "title": "Patient",
+        "type": "object"
+      },
       "PatientMessage": {
         "additionalProperties": false,
         "properties": {
@@ -963,6 +1679,40 @@
           "text"
         ],
         "title": "PatientMessage",
+        "type": "object"
+      },
+      "PatientResource": {
+        "additionalProperties": false,
+        "description": "A resource that belongs to one patient (partition key, DB-3).",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id"
+        ],
+        "title": "PatientResource",
         "type": "object"
       },
       "PendingApproval": {
@@ -1036,6 +1786,221 @@
         "title": "ProfileChange",
         "type": "object"
       },
+      "Provenance": {
+        "additionalProperties": false,
+        "properties": {
+          "activity": {
+            "enum": [
+              "entered",
+              "extracted",
+              "imported",
+              "inferred",
+              "patient_reported"
+            ],
+            "title": "Activity",
+            "type": "string"
+          },
+          "agent": {
+            "title": "Agent",
+            "type": "string"
+          },
+          "entity": {
+            "$ref": "#/components/schemas/ProvenanceEntity"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/Reference"
+            },
+            "title": "Targets",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "targets",
+          "recorded_at",
+          "agent",
+          "activity",
+          "entity"
+        ],
+        "title": "Provenance",
+        "type": "object"
+      },
+      "ProvenanceEntity": {
+        "additionalProperties": false,
+        "properties": {
+          "communication_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Communication Id"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quote"
+          }
+        },
+        "title": "ProvenanceEntity",
+        "type": "object"
+      },
+      "Quantity": {
+        "additionalProperties": false,
+        "properties": {
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "Quantity",
+        "type": "object"
+      },
+      "RecordSummary": {
+        "additionalProperties": false,
+        "description": "Only the parts the principal may see; hidden parts are absent, not empty-marked.",
+        "properties": {
+          "allergies": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AllergyIntolerance"
+            },
+            "title": "Allergies",
+            "type": "array"
+          },
+          "conditions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "title": "Conditions",
+            "type": "array"
+          },
+          "hidden_categories_count": {
+            "default": 0,
+            "title": "Hidden Categories Count",
+            "type": "integer"
+          },
+          "medications": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MedicationStatement"
+            },
+            "title": "Medications",
+            "type": "array"
+          },
+          "patient": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Patient"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recent_observations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Observation"
+            },
+            "title": "Recent Observations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "patient"
+        ],
+        "title": "RecordSummary",
+        "type": "object"
+      },
       "RedFlagHit": {
         "additionalProperties": false,
         "properties": {
@@ -1057,6 +2022,67 @@
           "rules_version"
         ],
         "title": "RedFlagHit",
+        "type": "object"
+      },
+      "Reference": {
+        "additionalProperties": false,
+        "description": "`resource_type/id` reference, e.g. Reference(type=\"Practitioner\", id=...).",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "Reference",
+        "type": "object"
+      },
+      "ReferenceRange": {
+        "additionalProperties": false,
+        "properties": {
+          "high": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High"
+          },
+          "low": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "title": "ReferenceRange",
         "type": "object"
       },
       "Registration": {
@@ -2604,6 +3630,7 @@
             "name": "provenance_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Provenance Id",
               "type": "string"
             }
@@ -2613,7 +3640,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Provenance"
+                }
               }
             },
             "description": "Successful Response"
@@ -2627,9 +3656,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M05)"
           }
         },
         "summary": "Source behind a brief line",
@@ -3969,6 +4995,7 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
             }
@@ -3978,7 +5005,11 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Record Get Patients Patient Id Fhir Export",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -3992,9 +5023,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M05)"
           }
         },
         "summary": "FHIR R4 Bundle",
@@ -4182,8 +5210,48 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "pattern": "^(Patient|Condition|AllergyIntolerance|MedicationStatement|Observation)$",
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           }
         ],
@@ -4191,7 +5259,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Page_PatientResource_"
+                }
               }
             },
             "description": "Successful Response"
@@ -4205,9 +5275,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M05)"
           }
         },
         "summary": "Resources of one type",
@@ -4225,6 +5292,7 @@
             "name": "patient_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Patient Id",
               "type": "string"
             }
@@ -4234,7 +5302,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/RecordSummary"
+                }
               }
             },
             "description": "Successful Response"
@@ -4248,9 +5318,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M05)"
           }
         },
         "summary": "Record summary filtered by access",

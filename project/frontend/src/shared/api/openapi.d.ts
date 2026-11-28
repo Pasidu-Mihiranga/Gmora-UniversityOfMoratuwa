@@ -1564,11 +1564,45 @@ export interface components {
             /** Id */
             id: string;
         };
+        /** Address */
+        Address: {
+            /** City */
+            city?: string | null;
+            /** District */
+            district?: string | null;
+            /** Text */
+            text?: string | null;
+        };
         /**
          * AgentKind
          * @enum {string}
          */
         AgentKind: "patient_companion" | "guardian_agent" | "doctor_assistant" | "verifier" | "single_agent_baseline";
+        /** AllergyIntolerance */
+        AllergyIntolerance: {
+            code: components["schemas"]["CodeableConcept"];
+            /**
+             * Criticality
+             * @default unable-to-assess
+             * @enum {string}
+             */
+            criticality: "low" | "high" | "unable-to-assess";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            meta: components["schemas"]["Meta"];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            /** Reaction */
+            reaction?: string | null;
+        };
         /** ApprovalItem */
         ApprovalItem: {
             /**
@@ -1779,6 +1813,49 @@ export interface components {
          * @enum {string}
          */
         CaseStatus: "open" | "intake" | "assessed" | "emergency" | "in_care" | "awaiting_doctor" | "replied" | "handed_to_human" | "closed";
+        /** CodeableConcept */
+        CodeableConcept: {
+            /** Coding */
+            coding?: components["schemas"]["Coding"][];
+            /** Text */
+            text?: string | null;
+        };
+        /** Coding */
+        Coding: {
+            /** Code */
+            code: string;
+            /** Display */
+            display?: string | null;
+            /** System */
+            system?: string | null;
+        };
+        /** Condition */
+        Condition: {
+            /**
+             * Clinical Status
+             * @enum {string}
+             */
+            clinical_status: "active" | "recurrence" | "remission" | "resolved";
+            code: components["schemas"]["CodeableConcept"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            meta: components["schemas"]["Meta"];
+            /** Note */
+            note?: string | null;
+            /** Onset */
+            onset?: string | null;
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            recorded_by?: components["schemas"]["Reference"] | null;
+        };
         /** Consent */
         Consent: {
             /** Categories */
@@ -1820,6 +1897,16 @@ export interface components {
              */
             version: number;
         };
+        /** ContactPoint */
+        ContactPoint: {
+            /**
+             * System
+             * @enum {string}
+             */
+            system: "phone" | "email" | "sms";
+            /** Value */
+            value: string;
+        };
         /**
          * DataCategory
          * @enum {string}
@@ -1845,10 +1932,42 @@ export interface components {
             password: string;
             role: components["schemas"]["Role"];
         };
+        /** Dosage */
+        Dosage: {
+            /** Text */
+            text?: string | null;
+            timing: components["schemas"]["DoseTiming"];
+        };
+        /**
+         * DoseSlot
+         * @enum {string}
+         */
+        DoseSlot: "morning" | "noon" | "evening" | "night";
+        /** DoseTiming */
+        DoseTiming: {
+            /**
+             * As Needed
+             * @default false
+             */
+            as_needed: boolean;
+            /** Days Of Week */
+            days_of_week?: number[];
+            /** Slots */
+            slots?: components["schemas"]["DoseSlot"][];
+            /** Times */
+            times?: string[];
+        };
         /** FactRequest */
         FactRequest: {
             /** Fact Key */
             fact_key: string;
+        };
+        /** GeoPoint */
+        GeoPoint: {
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
         };
         /** GrantChange */
         GrantChange: {
@@ -1880,6 +1999,15 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HumanName */
+        HumanName: {
+            /** Family */
+            family?: string | null;
+            /** Given */
+            given?: string[];
+            /** Text */
+            text?: string | null;
+        };
         /**
          * Language
          * @enum {string}
@@ -1891,6 +2019,34 @@ export interface components {
             login: string;
             /** Password */
             password: string;
+        };
+        /**
+         * MedicationStatement
+         * @description What is prescribed (CON-8).
+         */
+        MedicationStatement: {
+            dosage: components["schemas"]["Dosage"];
+            effective?: components["schemas"]["Period"] | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            medication: components["schemas"]["CodeableConcept"];
+            meta: components["schemas"]["Meta"];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            prescriber?: components["schemas"]["Reference"] | null;
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "on-hold" | "stopped" | "completed";
         };
         /** MessageAccepted */
         MessageAccepted: {
@@ -1919,6 +2075,34 @@ export interface components {
         Notes: {
             /** Text */
             text: string;
+        };
+        /** Observation */
+        Observation: {
+            code: components["schemas"]["CodeableConcept"];
+            derived_from?: components["schemas"]["Reference"] | null;
+            /**
+             * Effective At
+             * Format: date-time
+             */
+            effective_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Interpretation */
+            interpretation?: ("low" | "normal" | "high" | "abnormal") | null;
+            meta: components["schemas"]["Meta"];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            reference_range?: components["schemas"]["ReferenceRange"] | null;
+            /** Value */
+            value: components["schemas"]["Quantity"] | string;
         };
         /** OpenCase */
         OpenCase: {
@@ -1964,6 +2148,13 @@ export interface components {
             /** Next Cursor */
             next_cursor?: string | null;
         };
+        /** Page[PatientResource] */
+        Page_PatientResource_: {
+            /** Items */
+            items: components["schemas"]["PatientResource"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
         /** Page[TimelineItem] */
         Page_TimelineItem_: {
             /** Items */
@@ -1971,10 +2162,72 @@ export interface components {
             /** Next Cursor */
             next_cursor?: string | null;
         };
+        /** Patient */
+        Patient: {
+            address?: components["schemas"]["Address"] | null;
+            /**
+             * Age Band
+             * @enum {string}
+             */
+            age_band: "0-4" | "5-17" | "18-39" | "40-59" | "60-74" | "75+";
+            /**
+             * Birth Date
+             * Format: date
+             */
+            birth_date: string;
+            /** District */
+            district?: string | null;
+            /**
+             * Gender
+             * @enum {string}
+             */
+            gender: "female" | "male" | "other" | "unknown";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            language: components["schemas"]["Language"];
+            location?: components["schemas"]["GeoPoint"] | null;
+            meta: components["schemas"]["Meta"];
+            name: components["schemas"]["HumanName"];
+            /** Nic */
+            nic?: string | null;
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            /** Telecom */
+            telecom?: components["schemas"]["ContactPoint"][];
+            /** User Id */
+            user_id?: string | null;
+        };
         /** PatientMessage */
         PatientMessage: {
             /** Text */
             text: string;
+        };
+        /**
+         * PatientResource
+         * @description A resource that belongs to one patient (partition key, DB-3).
+         */
+        PatientResource: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            meta: components["schemas"]["Meta"];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Provenance Ids */
+            provenance_ids?: string[];
         };
         /** PendingApproval */
         PendingApproval: {
@@ -2005,6 +2258,89 @@ export interface components {
         ProfileChange: {
             language: components["schemas"]["Language"];
         };
+        /** Provenance */
+        Provenance: {
+            /**
+             * Activity
+             * @enum {string}
+             */
+            activity: "entered" | "extracted" | "imported" | "inferred" | "patient_reported";
+            /** Agent */
+            agent: string;
+            entity: components["schemas"]["ProvenanceEntity"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            meta: components["schemas"]["Meta"];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            /**
+             * Recorded At
+             * Format: date-time
+             */
+            recorded_at: string;
+            /** Targets */
+            targets: components["schemas"]["Reference"][];
+        };
+        /** ProvenanceEntity */
+        ProvenanceEntity: {
+            /** Communication Id */
+            communication_id?: string | null;
+            /** Document Id */
+            document_id?: string | null;
+            /** Line */
+            line?: number | null;
+            /** Page */
+            page?: number | null;
+            /** Quote */
+            quote?: string | null;
+        };
+        /** Quantity */
+        Quantity: {
+            /** Unit */
+            unit?: string | null;
+            /** Value */
+            value: number;
+        };
+        /**
+         * RecordSummary
+         * @description Only the parts the principal may see; hidden parts are absent, not empty-marked.
+         */
+        RecordSummary: {
+            /**
+             * Allergies
+             * @default []
+             */
+            allergies: components["schemas"]["AllergyIntolerance"][];
+            /**
+             * Conditions
+             * @default []
+             */
+            conditions: components["schemas"]["Condition"][];
+            /**
+             * Hidden Categories Count
+             * @default 0
+             */
+            hidden_categories_count: number;
+            /**
+             * Medications
+             * @default []
+             */
+            medications: components["schemas"]["MedicationStatement"][];
+            patient: components["schemas"]["Patient"] | null;
+            /**
+             * Recent Observations
+             * @default []
+             */
+            recent_observations: components["schemas"]["Observation"][];
+        };
         /** RedFlagHit */
         RedFlagHit: {
             /** Rule Id */
@@ -2012,6 +2348,28 @@ export interface components {
             /** Rules Version */
             rules_version: string;
             urgency: components["schemas"]["Urgency"];
+        };
+        /**
+         * Reference
+         * @description `resource_type/id` reference, e.g. Reference(type="Practitioner", id=...).
+         */
+        Reference: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Type */
+            type: string;
+        };
+        /** ReferenceRange */
+        ReferenceRange: {
+            /** High */
+            high?: number | null;
+            /** Low */
+            low?: number | null;
+            /** Text */
+            text?: string | null;
         };
         /**
          * Registration
@@ -3128,7 +3486,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Provenance"];
                 };
             };
             /** @description Validation Error */
@@ -3139,13 +3497,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -4408,7 +4759,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
@@ -4419,13 +4772,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -4583,7 +4929,11 @@ export interface operations {
     };
     record_get_patients_patient_id_resources: {
         parameters: {
-            query?: never;
+            query: {
+                type: string;
+                cursor?: string | null;
+                limit?: number;
+            };
             header?: never;
             path: {
                 patient_id: string;
@@ -4598,7 +4948,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Page_PatientResource_"];
                 };
             };
             /** @description Validation Error */
@@ -4609,13 +4959,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -4636,7 +4979,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["RecordSummary"];
                 };
             };
             /** @description Validation Error */
@@ -4647,13 +4990,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
