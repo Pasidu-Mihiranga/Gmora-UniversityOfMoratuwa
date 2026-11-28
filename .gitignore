@@ -39,3 +39,6 @@ dist/
 # Local runtime data
 project/storage/
 project/eval/runs/
+
+# Downloaded datasets (DDXPlus and others), never committed
+project/eval/data/

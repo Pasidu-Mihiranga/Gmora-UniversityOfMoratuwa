@@ -1,0 +1,80 @@
+# Questions (NAV-4): one per askable concept, in Sinhala and English, written for older and
+# low-literacy users: short, one thing at a time, no medical words. A `yes_no` answer sets the
+# concept present or absent. A `choice` question (the ambiguity check) sets the concept of the
+# chosen option. Sinhala needs the native-speaker review (D05).
+version: questions-v1
+
+clarify:
+  dizzy_kind:
+    for: dizzy
+    answer_type: choice
+    en: "When you feel dizzy, which is closer?"
+    si: "කරකැවිල්ල දැනෙන විට, මේ දෙකෙන් වඩා ගැළපෙන්නේ කුමක්ද?"
+    choices:
+      spinning: {en: "Everything is spinning", si: "හැම දෙයක්ම කැරකෙනවා වගේ", sets: vertigo}
+      faint: {en: "I feel I may faint", si: "ක්ලාන්ත වෙයි වගේ", sets: dizzy}
+      unsure: {en: "Not sure", si: "විශ්වාස නැහැ", sets: null}
+
+questions:
+  fever: {en: "Do you have a fever?", si: "ඔබට උණ තිබේද?"}
+  chills: {en: "Do you have chills or shivers?", si: "ඔබට හීතල හෝ වෙව්ලීම තිබේද?"}
+  cough: {en: "Do you have a cough?", si: "ඔබට කැස්සක් තිබේද?"}
+  coughing_fits: {en: "Do you have strong coughing fits?", si: "ඔබට නොනවත්වා දැඩි කැස්ස එනවාද?"}
+  sputum: {en: "Do you cough up yellow, green or a lot of phlegm?", si: "කහින විට කහ, කොළ හෝ වැඩිපුර සෙම එනවාද?"}
+  coughing_blood: {en: "Have you coughed up blood?", si: "කහින විට ලේ ආවාද?"}
+  breathless: {en: "Are you short of breath?", si: "ඔබට හුස්ම ගැනීමට අපහසුද?"}
+  wheeze: {en: "Is there a whistling sound when you breathe?", si: "හුස්ම ගන්නා විට පපුවෙන් සද්දයක් එනවාද?"}
+  stridor: {en: "Is there a high sound when you breathe in?", si: "හුස්ම ඇතුළට ගන්නා විට උස් සද්දයක් එනවාද?"}
+  sore_throat: {en: "Do you have a sore throat?", si: "ඔබේ උගුර රිදෙනවාද?"}
+  runny_nose: {en: "Do you have a runny or blocked nose?", si: "ඔබට හෙම්බිරිස්සාව හෝ නාසය හිරවීම තිබේද?"}
+  hoarse_voice: {en: "Has your voice changed or become hoarse?", si: "ඔබේ කටහඬ වෙනස් වී තිබේද?"}
+  swallowing_difficulty: {en: "Is it hard to swallow?", si: "ඔබට ගිලීමට අපහසුද?"}
+  ear_pain: {en: "Do you have ear pain?", si: "ඔබේ කන රිදෙනවාද?"}
+  chest_pain: {en: "Do you have pain in your chest?", si: "ඔබේ පපුවේ වේදනාවක් තිබේද?"}
+  chest_pain_at_rest: {en: "Does the chest pain come even when you rest?", si: "විවේක ගන්නා විටත් පපුවේ වේදනාව එනවාද?"}
+  pain_spreading: {en: "Does the pain spread to another place, like the arm, jaw or back?", si: "වේදනාව අතට, හක්කට හෝ පිටට පැතිරෙනවාද?"}
+  pain_on_breathing: {en: "Does it hurt more when you breathe in deeply?", si: "ගැඹුරින් හුස්ම ගන්නා විට වැඩිපුර රිදෙනවාද?"}
+  worse_lying_down: {en: "Is it worse when you lie down?", si: "ඇලවී සිටින විට එය වැඩිද?"}
+  better_leaning_forward: {en: "Is the pain better when you lean forward?", si: "ඉදිරියට නැමුණු විට වේදනාව අඩුද?"}
+  worse_on_exertion: {en: "Is it worse when you walk or work, and better when you rest?", si: "ඇවිදින විට හෝ වැඩ කරන විට වැඩි වී, විවේකයේදී අඩු වෙනවාද?"}
+  palpitations: {en: "Does your heart beat fast or unevenly?", si: "ඔබේ හදවත වේගයෙන් හෝ අක්‍රමවත්ව ගැහෙනවාද?"}
+  collapse: {en: "Did you faint or pass out?", si: "ඔබ ක්ලාන්ත වුණාද?"}
+  dizzy: {en: "Do you feel dizzy or light-headed?", si: "ඔබට කරකැවිල්ල හෝ ඔලුව සැහැල්ලු ගතියක් දැනෙනවාද?"}
+  abdominal_pain: {en: "Do you have pain in your stomach?", si: "ඔබේ බඩේ වේදනාවක් තිබේද?"}
+  heartburn: {en: "Do you have a burning feeling that rises from the stomach to the throat?", si: "බඩේ සිට උගුරට නගින දැවිල්ලක් තිබේද?"}
+  worse_after_eating: {en: "Is it worse after you eat?", si: "කෑමෙන් පසු එය වැඩිද?"}
+  nausea_vomiting: {en: "Do you feel sick or are you vomiting?", si: "ඔබට ඔක්කාරය හෝ වමනය තිබේද?"}
+  vomiting_blood: {en: "Have you vomited blood?", si: "ඔබ ලේ වමනය කළාද?"}
+  black_or_bloody_stool: {en: "Are your stools black or is there blood in them?", si: "ඔබේ මළ කළු පාටද, නැත්නම් ලේ තිබේද?"}
+  diarrhoea: {en: "Do you have loose stools?", si: "ඔබට පාචනය තිබේද?"}
+  headache: {en: "Do you have a headache?", si: "ඔබට හිසරදය තිබේද?"}
+  confusion: {en: "Have you felt confused lately?", si: "මෑතකදී ඔබට ව්‍යාකූල බවක් දැනුණාද?"}
+  one_side_weakness: {en: "Is one side of your face or body weak?", si: "ඔබේ මුහුණේ හෝ ඇඟේ එක පැත්තක් දුර්වලද?"}
+  limb_weakness: {en: "Are both your arms or legs weak?", si: "ඔබේ අත් දෙක හෝ කකුල් දෙක දුර්වලද?"}
+  speech_difficulty: {en: "Is it hard to speak clearly?", si: "පැහැදිලිව කතා කිරීමට අපහසුද?"}
+  numbness: {en: "Do you have numbness or tingling?", si: "ඔබට හිරිවැටීමක් හෝ කිලිපොළුවක් තිබේද?"}
+  seizure: {en: "Have you had a fit or seizure?", si: "ඔබට වලිප්පුවක් ආවාද?"}
+  double_vision: {en: "Do you see double?", si: "ඔබට දේවල් දෙකක් ලෙස පේනවාද?"}
+  swelling: {en: "Is any part of your body swollen?", si: "ඔබේ ඇඟේ කිසියම් කොටසක් ඉදිමී තිබේද?"}
+  fatigue: {en: "Are you much more tired than usual?", si: "ඔබට සාමාන්‍යයට වඩා ගොඩක් මහන්සියිද?"}
+  weight_loss: {en: "Have you lost weight without trying?", si: "උත්සාහ නොකර ඔබේ බර අඩු වුණාද?"}
+  pale_skin: {en: "Is your skin paler than usual?", si: "ඔබේ සම සාමාන්‍යයට වඩා සුදුමැලිද?"}
+  sweating: {en: "Are you sweating much more than usual?", si: "ඔබට සාමාන්‍යයට වඩා ගොඩක් දහඩිය දානවාද?"}
+  anxiety: {en: "Do you feel very anxious or afraid?", si: "ඔබට ගොඩක් බය හෝ කලබලයක් දැනෙනවාද?"}
+  muscle_pain: {en: "Do you have aches all over your body?", si: "ඔබේ ඇඟ පුරා කැක්කුම තිබේද?"}
+  limb_or_joint_pain: {en: "Do you have pain in your arms, legs or joints?", si: "ඔබේ අත්, කකුල් හෝ සන්ධිවල වේදනාවක් තිබේද?"}
+  back_pain: {en: "Do you have back pain?", si: "ඔබට කොන්දේ කැක්කුමක් තිබේද?"}
+  neck_pain: {en: "Do you have neck pain?", si: "ඔබේ බෙල්ල රිදෙනවාද?"}
+  stiff_neck: {en: "Is your neck stiff, so it is hard to bend your head forward?", si: "ඔබේ බෙල්ල තද වී, හිස ඉදිරියට නවන්න අමාරුද?"}
+  muscle_spasms: {en: "Do you have muscle spasms you cannot stop?", si: "නවත්වන්න බැරි මාංශ පේශි ගැස්සීම් තිබේද?"}
+  eye_redness: {en: "Are your eyes red or itchy?", si: "ඔබේ ඇස් රතුද, නැත්නම් කසනවාද?"}
+  allergen_contact: {en: "Did you touch or eat something you are allergic to?", si: "ඔබට අසාත්මික දෙයක් ඇල්ලුවාද හෝ කෑවාද?"}
+  smoker: {en: "Do you smoke, or did you smoke before?", si: "ඔබ දුම් බොනවාද, නැත්නම් කලින් බිව්වාද?"}
+  high_blood_pressure: {en: "Do you have high blood pressure?", si: "ඔබට අධික රුධිර පීඩනය තිබේද?"}
+  diabetes: {en: "Do you have diabetes?", si: "ඔබට දියවැඩියාව තිබේද?"}
+  heart_disease: {en: "Have you had heart trouble before?", si: "ඔබට කලින් හෘද ගැටලු තිබුණාද?"}
+  lung_disease: {en: "Do you have asthma or another long-term lung problem?", si: "ඔබට ඇදුම හෝ වෙනත් දිගුකාලීන පෙනහළු ගැටලුවක් තිබේද?"}
+  kidney_disease: {en: "Do you have a long-term kidney problem?", si: "ඔබට දිගුකාලීන වකුගඩු ගැටලුවක් තිබේද?"}
+  high_cholesterol: {en: "Do you have high cholesterol?", si: "ඔබට අධික කොලෙස්ටරෝල් තිබේද?"}
+  recent_infection: {en: "Have you had a cold or other infection in the last 2 weeks?", si: "පසුගිය සති 2 තුළ ඔබට හෙම්බිරිස්සාවක් හෝ වෙනත් ආසාදනයක් තිබුණාද?"}
+  immunosuppressed: {en: "Do you take medicine or have a condition that weakens your body's defences?", si: "ඔබේ ශරීරයේ ආරක්ෂාව අඩු කරන බෙහෙත් ගන්නවාද, නැත්නම් එවැනි තත්ත්වයක් තිබේද?"}

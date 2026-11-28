@@ -1,0 +1,66 @@
+# Routing (NAV-4): condition group -> doctor types (ranked) and how soon.
+#
+# STATUS: DRAFT, NEEDS D01 REVIEW. Drafted by the engineering lead from each group's ICD-10
+# chapter and DDXPlus severity so the engine runs; two team members label the groups blind (D01),
+# a third resolves disagreements, and their labels replace these. This draft is never counted in
+# the D01 agreement (kappa).
+#
+# Urgency is the window for seeing a doctor, not a diagnosis. Red-flag rules (safety) always set
+# the floor first and can only raise it.
+version: routing-v1-draft
+status: draft_needs_d01_review
+
+# For a child under 12 the children's doctor comes first, then the group's doctor types.
+child_under: 12
+child_specialty: paediatrics
+
+groups:
+  anaphylaxis: {specialties: [general_medicine], urgency: emergency}
+  larygospasm: {specialties: [ent, general_medicine], urgency: emergency}
+  ebola: {specialties: [general_medicine], urgency: emergency}
+  possible_nstemi_stemi: {specialties: [cardiology], urgency: emergency}
+  acute_pulmonary_edema: {specialties: [cardiology, respiratory], urgency: emergency}
+  spontaneous_pneumothorax: {specialties: [respiratory, general_surgery], urgency: emergency}
+  boerhaave: {specialties: [general_surgery, gastroenterology], urgency: emergency}
+  epiglottitis: {specialties: [ent], urgency: emergency}
+  guillain_barr_syndrome: {specialties: [neurology], urgency: emergency}
+  croup: {specialties: [paediatrics, ent], urgency: urgent_24h}
+  psvt: {specialties: [cardiology], urgency: urgent_24h}
+  scombroid_food_poisoning: {specialties: [general_medicine], urgency: urgent_24h}
+  myocarditis: {specialties: [cardiology], urgency: urgent_24h}
+  acute_dystonic_reactions: {specialties: [neurology, general_medicine], urgency: urgent_24h}
+  unstable_angina: {specialties: [cardiology], urgency: emergency}
+  stable_angina: {specialties: [cardiology, general_medicine], urgency: soon_72h}
+  pulmonary_embolism: {specialties: [respiratory, cardiology], urgency: emergency}
+  cluster_headache: {specialties: [neurology, general_medicine], urgency: soon_72h}
+  spontaneous_rib_fracture: {specialties: [orthopaedics, general_medicine], urgency: soon_72h}
+  gerd: {specialties: [gastroenterology, general_medicine], urgency: routine}
+  hiv_initial_infection: {specialties: [general_medicine, venereology], urgency: soon_72h}
+  inguinal_hernia: {specialties: [general_surgery], urgency: routine}
+  myasthenia_gravis: {specialties: [neurology], urgency: soon_72h}
+  atrial_fibrillation: {specialties: [cardiology, general_medicine], urgency: urgent_24h}
+  bronchiectasis: {specialties: [respiratory], urgency: routine}
+  chagas: {specialties: [general_medicine, cardiology], urgency: routine}
+  tuberculosis: {specialties: [respiratory, general_medicine], urgency: soon_72h}
+  bronchospasm_acute_asthma_exacerbation: {specialties: [respiratory, general_medicine], urgency: urgent_24h}
+  acute_copd_exacerbation_infection: {specialties: [respiratory, general_medicine], urgency: urgent_24h}
+  influenza: {specialties: [general_medicine], urgency: routine}
+  pneumonia: {specialties: [respiratory, general_medicine], urgency: urgent_24h}
+  bronchiolitis: {specialties: [paediatrics, respiratory], urgency: urgent_24h}
+  pulmonary_neoplasm: {specialties: [respiratory], urgency: soon_72h}
+  pancreatic_neoplasm: {specialties: [gastroenterology, general_surgery], urgency: soon_72h}
+  anemia: {specialties: [general_medicine], urgency: soon_72h}
+  viral_pharyngitis: {specialties: [general_medicine, ent], urgency: routine}
+  whooping_cough: {specialties: [general_medicine, paediatrics], urgency: soon_72h}
+  acute_laryngitis: {specialties: [ent, general_medicine], urgency: routine}
+  allergic_sinusitis: {specialties: [ent, general_medicine], urgency: routine}
+  localized_edema: {specialties: [general_medicine, cardiology, nephrology], urgency: soon_72h}
+  sle: {specialties: [rheumatology], urgency: routine}
+  acute_otitis_media: {specialties: [ent, general_medicine], urgency: soon_72h}
+  bronchitis: {specialties: [general_medicine, respiratory], urgency: routine}
+  acute_rhinosinusitis: {specialties: [ent, general_medicine], urgency: routine}
+  sarcoidosis: {specialties: [respiratory], urgency: routine}
+  pericarditis: {specialties: [cardiology], urgency: urgent_24h}
+  panic_attack: {specialties: [psychiatry, general_medicine], urgency: soon_72h}
+  urti: {specialties: [general_medicine], urgency: routine}
+  chronic_rhinosinusitis: {specialties: [ent], urgency: routine}

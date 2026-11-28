@@ -1,0 +1,192 @@
+# Navigation concepts (NAV-4): our finding concepts, each mapped to the DDXPlus evidences it stands
+# for. A DDXPlus patient has a concept when any of its evidences (or pain regions) is present; the
+# likelihoods in condition_groups.yaml are counted that way by eval/scripts/build_navigation_kb.py.
+#
+# Words in a patient's message are found by the safety lexicon (`safety` concepts, all three
+# scripts) and by the extra `words` here. `context` concepts can also come from the patient's
+# consented record and profile (age, chronic conditions, pregnancy).
+# Sinhala words need the native-speaker review (D05).
+version: concepts-v1
+
+# `screen`: a fixed English phrase the safety rules recognise. When the patient says yes to the
+# concept, the engine runs the red-flag rules on it, so an answer can raise the floor (NAV-1).
+# `red_flag_screen` concepts are part of an emergency rule: their questions never count toward
+# the 6-question cap. `screens`: when the first concept is present, these questions come first,
+# because together they complete a red-flag rule of safety rules v1 (RF-CARD-001, RF-RESP-003,
+# RF-NEURO-002).
+red_flag_screen: [stiff_neck, chest_pain, breathless, collapse, one_side_weakness, speech_difficulty, seizure, coughing_blood, vomiting_blood, black_or_bloody_stool, confusion, pain_spreading]
+screens:
+  chest_pain: [pain_spreading, sweating, breathless]
+  fever: [breathless, stiff_neck]
+  headache: [stiff_neck]
+
+# DDXPlus pain locations (evidence E_55) folded into body regions. Where the pain spreads to (E_57)
+# is the concept `pain_spreading`, not a region.
+pain_regions:
+  chest: [upper chest, lower chest, side of the chest, posterior chest wall, breast]
+  abdomen: [epigastric, belly, hypochondrium, iliac fossa, flank, pubis, iliac wing, groin]
+  head: [top of the head, forehead, temple, occiput, back of head]
+  throat: [tonsil, pharynx, thyroid cartilage, trachea, uvula, palace, under the jaw]
+  ear: [ear]
+  back: [thoracic spine, lumbar spine, coccyx, scapula, renal fossa, iliac crest]
+  neck: [back of the neck, side of the neck, cervical spine, trapezius]
+  limbs: [shoulder, biceps, triceps, forearm, elbow, wrist, hand, palm, finger, thumb, hip, thigh,
+          knee, popliteal, calf, tibia, ankle, foot, sole, heel, toe, buttock, ischio, axilla]
+
+concepts:
+  # ----- symptoms -------------------------------------------------------------------------------
+  fever: {screen: "fever", ddx: [E_91], safety: [fever, high_fever]}
+  chills: {ddx: [E_94], words: {en: [chills, shivering, shivers], si: [හීතල, වෙව්ලීම], si_latn: [hithala]}}
+  cough:
+    ddx: [E_201, E_203, E_202]
+    words: {en: [cough, coughing], si: [කැස්ස, කැස්සක්, කහිනවා], si_latn: [kassa, kesse, kahinawa]}
+  coughing_fits:
+    ddx: [E_203, E_166, E_202]
+    words: {en: [coughing fits, cough until I vomit, whooping], si: [නොනවත්වා කැස්ස, කහලා වමනය], si_latn: [nonawathwa kassa]}
+  sputum:
+    ddx: [E_77]
+    words: {en: [phlegm, sputum, mucus], si: [සෙම, සොටු], si_latn: [sema, sotu]}
+  coughing_blood: {screen: "coughing blood", ddx: [E_45], safety: [coughing_blood]}
+  breathless: {screen: "short of breath", ddx: [E_66, E_64], safety: [breathless, severe_breathless]}
+  wheeze:
+    ddx: [E_112, E_214]
+    words: {en: [wheeze, wheezing, whistling chest], si: [පපුව ගිරිය, හුස්ම ගන්නකොට සද්දයක්], si_latn: [pappuwa giriya]}
+  stridor: {ddx: [E_194], words: {en: [high pitched breathing, noisy breathing]}}
+  sore_throat:
+    ddx: [E_97]
+    pain_regions: [throat]
+    words: {en: [sore throat, throat pain, throat hurts], si: [උගුර රිදෙනවා, උගුරේ කැක්කුම], si_latn: [ugura ridenawa, ugure kakkuma]}
+  runny_nose:
+    ddx: [E_181, E_182]
+    words: {en: [runny nose, blocked nose, stuffy nose, sneezing], si: [හෙම්බිරිස්සාව, නාසය හිරවෙලා, කිවිසුම්], si_latn: [hembirissawa, nasaya hirawela]}
+  hoarse_voice:
+    ddx: [E_212]
+    words: {en: [hoarse, lost my voice, voice changed], si: [කටහඬ වෙනස්, කටහඬ නැති], si_latn: [katahanda wenas]}
+  swallowing_difficulty:
+    ddx: [E_65]
+    words: {en: [hard to swallow, difficulty swallowing, painful swallowing], si: [ගිලින්න අමාරු], si_latn: [gilinna amaru]}
+  ear_pain:
+    pain_regions: [ear]
+    words: {en: [ear pain, earache, ear hurts], si: [කන රිදෙනවා, කනේ කැක්කුම], si_latn: [kana ridenawa, kane kakkuma]}
+  chest_pain: {screen: "chest pain", pain_regions: [chest], safety: [chest_pain]}
+  chest_pain_at_rest: {ddx: [E_14]}
+  pain_spreading: {screen: "to my arm", ddx: [E_57], safety: [pain_spreading]}  # any radiation (E_57 other than nowhere)
+  pain_on_breathing:
+    ddx: [E_220]
+    words: {en: [hurts when I breathe, pain when breathing in], si: [හුස්ම ගද්දී රිදෙනවා], si_latn: [husma gaddi ridenawa]}
+  worse_lying_down: {ddx: [E_217]}
+  better_leaning_forward: {ddx: [E_33]}
+  worse_on_exertion: {ddx: [E_218]}
+  palpitations:
+    ddx: [E_155, E_164]
+    words: {en: [palpitations, heart racing, heart pounding, irregular heartbeat], si: [හදවත වේගයෙන් ගැහෙනවා, පපුව ගැහෙනවා], si_latn: [hadawatha wegayen gahenawa, papuwa gahenawa]}
+  collapse: {screen: "fainted", ddx: [E_159], safety: [collapse]}
+  dizzy:
+    screen: "dizzy"
+    ddx: [E_82, E_76]
+    safety: [dizzy]
+    ambiguous: dizzy_kind  # spinning or about to faint: ask before scoring (NAV-5 step 2)
+  abdominal_pain:
+    pain_regions: [abdomen]
+    safety: [severe_abdominal_pain]
+    words: {en: [stomach pain, stomach ache, abdominal pain, tummy pain, belly pain], si: [බඩේ කැක්කුම, බඩ රිදෙනවා, බඩේ වේදනාව], si_latn: [bade kakkuma, bada ridenawa]}
+  heartburn:
+    ddx: [E_173]
+    words: {en: [heartburn, acid reflux, burning in my chest after food], si: [පපුව දැවෙනවා, ගැස්ට්‍රයිටිස්, අම්ලය], si_latn: [papuwa dawenawa, gastritis]}
+  worse_after_eating: {ddx: [E_215]}
+  nausea_vomiting: {screen: "vomiting", ddx: [E_148, E_211], safety: [vomiting]}
+  vomiting_blood: {screen: "vomiting blood", ddx: [E_210], safety: [vomiting_blood]}
+  black_or_bloody_stool: {screen: "black stool", ddx: [E_140, E_179], safety: [gut_bleeding]}
+  diarrhoea:
+    ddx: [E_51]
+    words: {en: [diarrhoea, diarrhea, loose stools, loose motions], si: [පාචනය, බඩ යනවා], si_latn: [pachanaya, bada yanawa]}
+  headache: {screen: "headache", pain_regions: [head], safety: [headache, worst_headache]}
+  confusion: {screen: "confused", ddx: [E_39], safety: [confusion]}
+  one_side_weakness: {screen: "one side weak", ddx: [E_156, E_176], safety: [face_droop, one_side_weak]}
+  limb_weakness:
+    ddx: [E_84]
+    words: {en: [weak arms, weak legs, legs are weak], si: [කකුල් දුර්වල, අත් පය දුර්වල], si_latn: [kakul durwala]}
+  speech_difficulty: {screen: "slurred speech", ddx: [E_63], safety: [slurred_speech]}
+  numbness:
+    ddx: [E_93, E_157, E_177]
+    words: {en: [numbness, numb, tingling, pins and needles], si: [හිරිවැටෙනවා, කිලිපොළු], si_latn: [hiriwatenawa]}
+  double_vision:
+    ddx: [E_52]
+    words: {en: [double vision, seeing double], si: [දෙකක් පේනවා], si_latn: [dekak penawa]}
+  seizure: {screen: "having a fit", ddx: [E_43], safety: [seizure]}
+  rash:
+    ddx: [E_129]
+    # DDXPlus marks E_129 for nearly every pneumonia, influenza and anaphylaxis patient (colour
+    # "pink"), a dataset artefact: kept in the counts, but never asked as a question.
+    askable: false
+    safety: [rash_not_fading]
+    words: {en: [rash, skin redness, spots on my skin, hives], si: [පලු, කැසීම, ඇඟේ රතු], si_latn: [palu, kasima]}
+  swelling:
+    ddx: [E_151]
+    safety: [sudden_swelling]
+    words: {en: [swelling, swollen legs, swollen feet, puffy], si: [ඉදිමුම, කකුල් ඉදිමිලා], si_latn: [idimuma, kakul idimila]}
+  fatigue:
+    ddx: [E_89, E_88, E_175]
+    words: {en: [tired, fatigue, exhausted, no energy, weak], si: [මහන්සියි, හයිය නැහැ, දුර්වලයි], si_latn: [mahansiyi, hayiya naha]}
+  weight_loss:
+    ddx: [E_162, E_174]
+    words: {en: [weight loss, losing weight, lost weight, no appetite], si: [බර අඩුවෙලා, කෑම රුචිය නැහැ], si_latn: [bara aduwela]}
+  pale_skin: {ddx: [E_154], words: {en: [pale, looking pale], si: [සුදුමැලි], si_latn: [sudumali]}}
+  sweating: {screen: "sweating", ddx: [E_50], safety: [sweating]}
+  anxiety:
+    ddx: [E_16, E_111]
+    words: {en: [anxious, panic, worried, scared, afraid], si: [බය, කලබල, භීතිය], si_latn: [baya, kalabala]}
+  muscle_pain:
+    ddx: [E_144]
+    words: {en: [body aches, muscle pain, aching all over], si: [ඇඟ රිදෙනවා, ඇඟේ කැක්කුම], si_latn: [anga ridenawa]}
+  limb_or_joint_pain:
+    pain_regions: [limbs]
+    words: {en: [knee pain, joint pain, leg pain, arm pain, hip pain], si: [දණහිස රිදෙනවා, සන්ධි වේදනාව, කකුල රිදෙනවා], si_latn: [danahisa ridenawa, kakula ridenawa]}
+  back_pain:
+    pain_regions: [back]
+    words: {en: [back pain, backache], si: [කොන්දේ කැක්කුම, කොන්ද රිදෙනවා], si_latn: [konde kakkuma, konda ridenawa]}
+  neck_pain:
+    pain_regions: [neck]
+    words: {en: [neck pain, neck ache, my neck hurts], si: [බෙල්ල රිදෙනවා], si_latn: [bella ridenawa]}
+  stiff_neck:  # the red-flag follow-up (RF-NEURO-002); not scored, DDXPlus has no such evidence
+    screen: "stiff neck"
+    safety: [stiff_neck]
+  muscle_spasms: {ddx: [E_193, E_192]}
+  eye_redness:
+    ddx: [E_74, E_170]
+    words: {en: [red eyes, itchy eyes, eyes are red], si: [ඇස් රතු, ඇස් කසනවා], si_latn: [as rathu]}
+  allergen_contact: {ddx: [E_42, E_187]}
+
+  # ----- elder-care complaints (complaints.yaml; no DDXPlus mapping, so not scored) ---------------
+  high_sugar:
+    words: {en: [sugar is high, high sugar, sugar went up, high glucose], si: [සීනි වැඩි, සීනි වැඩිවෙලා, සීනි ගොඩක්], si_latn: [sini wadi, seeni wadi, seeni wadiwela]}
+  low_sugar_worry: {screen: "low sugar", safety: [low_sugar]}
+  high_bp_reading:
+    words: {en: [pressure is high, high blood pressure reading, bp is high, blood pressure went up], si: [ප්‍රෙෂර් වැඩි, රුධිර පීඩනය වැඩි], si_latn: [pressure wadi, presar wadi]}
+  side_effect:
+    words: {en: [side effect, since the new tablet, since the new medicine, reaction to my medicine], si: [බෙහෙත නිසා, අලුත් බෙහෙතට පස්සේ, බෙහෙතේ අතුරු ආබාධ], si_latn: [beheth nisa, aluth behethata passe]}
+  joint_flare:
+    words: {en: [knee is swollen, joints are swollen, arthritis is worse, joint pain is worse], si: [දණහිස ඉදිමිලා, සන්ධි ඉදිමිලා, වාතය වැඩි], si_latn: [danahisa idimila, wathaya wadi]}
+  kidney_concern:
+    words: {en: [kidney problem, kidney pain, passing less urine, little urine], si: [වකුගඩු, මුත්‍රා අඩුවෙන් යනවා], si_latn: [wakugadu, muthra aduwen]}
+  urinary_symptoms:
+    words: {en: [burning urine, burning when passing urine, passing urine often, peeing often, urine infection], si: [මුත්‍රා කරද්දී දැවිල්ල, නිතර මුත්‍රා යනවා, චූ කරද්දී දැවෙනවා], si_latn: [chu karaddi dawenawa, nithara muthra]}
+  fall: {screen: "fell", safety: [fall]}
+  vertigo:
+    words: {en: [room is spinning, everything is spinning, spinning], si: [ලෝකය කැරකෙනවා, හැම දෙයක්ම කැරකෙනවා], si_latn: [lokaya karakenawa]}
+  low_mood:
+    words: {en: [feel sad, feeling low, depressed, no interest in anything, crying all the time], si: [දුකයි, හිතට අමාරුයි, කිසිම දේකට කැමැත්තක් නැහැ], si_latn: [dukai, hithata amaruyi]}
+  memory_concern:
+    words: {en: [forgetful, memory loss, forgetting things, memory is bad], si: [අමතක වෙනවා, මතකය අඩුයි, මතකය නැති], si_latn: [amathaka wenawa, mathakaya aduyi]}
+
+  # ----- context and risk factors (also from the record and profile) -----------------------------
+  smoker: {ddx: [E_79, E_191], context: true, words: {en: [I smoke, smoker], si: [දුම් බොනවා], si_latn: [dum bonawa]}}
+  high_blood_pressure: {ddx: [E_104, E_102], context: true, chronic: [hypertension]}
+  diabetes: {ddx: [E_69], context: true, chronic: [diabetes]}
+  heart_disease: {ddx: [E_105, E_106, E_22, E_139], context: true, chronic: [ischaemic_heart_disease]}
+  lung_disease: {ddx: [E_123, E_31, E_124, E_18], context: true, chronic: [copd]}
+  kidney_disease: {ddx: [E_113, E_8, E_197], context: true, chronic: [ckd]}
+  high_cholesterol: {ddx: [E_71], context: true, chronic: [dyslipidaemia]}
+  pregnant: {screen: "pregnant", ddx: [E_167], context: true, safety: [pregnant]}
+  recent_infection: {ddx: [E_116, E_0], context: true}
+  immunosuppressed: {ddx: [E_227, E_2], context: true}
