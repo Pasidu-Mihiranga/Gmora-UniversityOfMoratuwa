@@ -43,3 +43,13 @@ class LoginAttemptRow(Base):
     success: Mapped[bool] = mapped_column(Boolean)
     at: Mapped[datetime] = mapped_column(TZ, server_default=text("now()"))
     __table_args__ = (Index("ix_identity_login_attempts_login_at", "login_hash", "at"),)
+
+
+class StreamTicketRow(Base):
+    """SEC-5: one-use stream tickets, stored as SHA-256 hashes so a database read reveals none."""
+
+    __tablename__ = "identity_stream_tickets"
+    ticket_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[UUID]
+    stream: Mapped[str] = mapped_column(String(80))
+    expires_at: Mapped[datetime] = mapped_column(TZ)

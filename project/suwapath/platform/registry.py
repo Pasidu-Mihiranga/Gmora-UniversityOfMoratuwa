@@ -24,3 +24,4 @@ class ModuleContext(Protocol):
     tools: ToolRegistry
     routers: list[APIRouter]
     ports: dict[str, Any]
+    token_verifier: Any  # set by identity: access token -> UserAccount (SEC-2)
