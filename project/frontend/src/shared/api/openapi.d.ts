@@ -396,7 +396,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reset the demo world (dev and demo) */
+        /**
+         * Reset the demo world (dev and demo)
+         * @description Empty every table and load the synthetic world again (spec 16). Mounted only in
+         *     development, demo and test (EVT-18); every signed-in demo user may use the dev panel.
+         */
         post: operations["dev_post_dev_scenario_reset"];
         delete?: never;
         options?: never;
@@ -3508,15 +3512,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        [key: string]: number;
+                    };
                 };
-            };
-            /** @description Not implemented yet (U08) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
