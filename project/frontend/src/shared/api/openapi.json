@@ -243,6 +243,95 @@
         "title": "AllergyIntolerance",
         "type": "object"
       },
+      "Appointment": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "organization_id": {
+            "format": "uuid",
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "practitioner_role_id": {
+            "format": "uuid",
+            "title": "Practitioner Role Id",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "sensitive": {
+            "default": false,
+            "title": "Sensitive",
+            "type": "boolean"
+          },
+          "slot_id": {
+            "format": "uuid",
+            "title": "Slot Id",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "title": "Start",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AppointmentStatus"
+          }
+        },
+        "required": [
+          "id",
+          "meta",
+          "patient_id",
+          "slot_id",
+          "practitioner_role_id",
+          "organization_id",
+          "start",
+          "status"
+        ],
+        "title": "Appointment",
+        "type": "object"
+      },
+      "AppointmentStatus": {
+        "enum": [
+          "held",
+          "booked",
+          "cancelled",
+          "fulfilled",
+          "noshow"
+        ],
+        "title": "AppointmentStatus",
+        "type": "string"
+      },
       "ApprovalItem": {
         "additionalProperties": false,
         "properties": {
@@ -1250,6 +1339,117 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "Hold": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "slot_id": {
+            "format": "uuid",
+            "title": "Slot Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slot_id",
+          "patient_id",
+          "case_id",
+          "expires_at"
+        ],
+        "title": "Hold",
+        "type": "object"
+      },
+      "HoldRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "slot_id": {
+            "format": "uuid",
+            "title": "Slot Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot_id"
+        ],
+        "title": "HoldRequest",
+        "type": "object"
+      },
+      "HospitalAppointmentRow": {
+        "additionalProperties": false,
+        "description": "BOOK-7: no clinical data; sensitive appointments show the number only.",
+        "properties": {
+          "appointment_id": {
+            "format": "uuid",
+            "title": "Appointment Id",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "patient_first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient First Name"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "appointment_id",
+          "number",
+          "patient_first_name",
+          "status"
+        ],
+        "title": "HospitalAppointmentRow",
+        "type": "object"
+      },
       "HumanName": {
         "additionalProperties": false,
         "properties": {
@@ -1630,6 +1830,34 @@
           "asked_at"
         ],
         "title": "OpenQuestion",
+        "type": "object"
+      },
+      "Page_Appointment_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Appointment"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Page[Appointment]",
         "type": "object"
       },
       "Page_CaseState_": {
@@ -2419,6 +2647,92 @@
         "title": "Session",
         "type": "object"
       },
+      "SessionSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "booked": {
+            "title": "Booked",
+            "type": "integer"
+          },
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "end": {
+            "format": "date-time",
+            "title": "End",
+            "type": "string"
+          },
+          "practitioner_role_id": {
+            "format": "uuid",
+            "title": "Practitioner Role Id",
+            "type": "string"
+          },
+          "schedule_id": {
+            "format": "uuid",
+            "title": "Schedule Id",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schedule_id",
+          "practitioner_role_id",
+          "start",
+          "end",
+          "capacity",
+          "booked"
+        ],
+        "title": "SessionSummary",
+        "type": "object"
+      },
+      "SlotView": {
+        "additionalProperties": false,
+        "properties": {
+          "free": {
+            "title": "Free",
+            "type": "boolean"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "practitioner_role_id": {
+            "format": "uuid",
+            "title": "Practitioner Role Id",
+            "type": "string"
+          },
+          "schedule_id": {
+            "format": "uuid",
+            "title": "Schedule Id",
+            "type": "string"
+          },
+          "slot_id": {
+            "format": "uuid",
+            "title": "Slot Id",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot_id",
+          "schedule_id",
+          "practitioner_role_id",
+          "number",
+          "start",
+          "free"
+        ],
+        "title": "SlotView",
+        "type": "object"
+      },
       "Specialty": {
         "description": "Specialty catalog (NAV-3).",
         "enum": [
@@ -2975,17 +3289,57 @@
     "/api/v1/bookings": {
       "get": {
         "operationId": "booking_get_bookings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Page_Appointment_"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M08)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "My appointments",
@@ -2997,17 +3351,36 @@
     "/api/v1/bookings/holds": {
       "post": {
         "operationId": "booking_post_bookings_holds",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Hold"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M08)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Hold a slot",
@@ -3025,8 +3398,26 @@
             "name": "hold_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Hold Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -3034,7 +3425,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
               }
             },
             "description": "Successful Response"
@@ -3048,9 +3441,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M08)"
           }
         },
         "summary": "Confirm a booking",
@@ -3068,6 +3458,7 @@
             "name": "appointment_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Appointment Id",
               "type": "string"
             }
@@ -3077,7 +3468,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
               }
             },
             "description": "Successful Response"
@@ -3091,9 +3484,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M08)"
           }
         },
         "summary": "Cancel",
@@ -3908,8 +4298,38 @@
             "name": "practitioner_role_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Practitioner Role Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "maximum": 14,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
             }
           }
         ],
@@ -3917,7 +4337,13 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SlotView"
+                  },
+                  "title": "Response Booking Get Doctors Practitioner Role Id Slots",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
@@ -3931,9 +4357,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M08)"
           }
         },
         "summary": "Free slots",
@@ -4207,17 +4630,49 @@
     "/api/v1/hospital/sessions": {
       "get": {
         "operationId": "booking_get_hospital_sessions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SessionSummary"
+                  },
+                  "title": "Response Booking Get Hospital Sessions",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M08)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Sessions with counts",
@@ -4235,6 +4690,7 @@
             "name": "schedule_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Schedule Id",
               "type": "string"
             }
@@ -4244,7 +4700,13 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HospitalAppointmentRow"
+                  },
+                  "title": "Response Booking Get Hospital Sessions Schedule Id Appointments",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
@@ -4258,9 +4720,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M08)"
           }
         },
         "summary": "Session appointments",
