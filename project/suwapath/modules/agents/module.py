@@ -66,5 +66,7 @@ def register(container: ModuleContext) -> None:
     delivery = Delivery(dependencies)
     register_supervisor(container.subscribers, dependencies, delivery, registry.kinds())
     container.ports["agent_registry"] = registry
+    # SEC-10 rule 5: the access policy intersects each agent's human with this declared scope.
+    container.ports["agent_scopes"] = registry.scopes()
     container.ports["agent_dependencies"] = dependencies
     container.routers.extend([build_router(container.uow_factory, dependencies), queue_stub()])

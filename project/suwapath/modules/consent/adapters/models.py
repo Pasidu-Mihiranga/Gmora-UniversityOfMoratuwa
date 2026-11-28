@@ -93,3 +93,16 @@ class SuggestionRow(UuidKey, Base):
     status: Mapped[str] = mapped_column(String(16), server_default="pending")
     created_at: Mapped[datetime] = mapped_column(TZ, server_default=text("now()"))
     decided_at: Mapped[datetime | None] = mapped_column(TZ)
+
+
+class CareRelationshipRow(UuidKey, Base):
+    """SEC-10 rule 4: a doctor treats a patient from booking until 30 days after the appointment.
+    Written by booking (M08) when an appointment is booked, completed or cancelled."""
+
+    __tablename__ = "consent_care_relationships"
+    patient_id: Mapped[UUID]
+    doctor_id: Mapped[UUID]  # the doctor's user id
+    appointment_id: Mapped[UUID] = mapped_column(unique=True)
+    starts_at: Mapped[datetime] = mapped_column(TZ)
+    ends_at: Mapped[datetime] = mapped_column(TZ)
+    __table_args__ = (Index("ix_consent_care_patient_doctor", "patient_id", "doctor_id"),)
