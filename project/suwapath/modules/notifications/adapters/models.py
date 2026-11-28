@@ -23,6 +23,8 @@ class NotificationRow(UuidKey, Base):
     urgency: Mapped[str] = mapped_column(String(10))
     link: Mapped[str | None] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(TZ, server_default=text("now()"))
+    # When it may reach the person: now, or the end of their quiet hours (spec 19).
+    deliver_at: Mapped[datetime] = mapped_column(TZ)
     read_at: Mapped[datetime | None] = mapped_column(TZ)
     __table_args__ = (
         Index(
@@ -31,4 +33,5 @@ class NotificationRow(UuidKey, Base):
             "created_at",
             postgresql_where=text("read_at IS NULL"),
         ),
+        Index("ix_notifications_items_delivery", "user_id", "deliver_at", "id"),
     )
