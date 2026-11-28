@@ -487,6 +487,12 @@ class SqlCaseService:
                 simulated=state.simulated,
             )
         )
+        try:
+            # Flush now, before any other query can autoflush it: the (case_id, version)
+            # constraint must surface here, as a VersionConflict, whoever writes next (DB-6).
+            await uow.session.flush()
+        except IntegrityError:
+            raise VersionConflict() from None
         await notify_stream(uow, stream_key(state.id))  # delivered on commit (API-21)
         payload = _integration_event(case, kind, data)
         if payload is not None:
