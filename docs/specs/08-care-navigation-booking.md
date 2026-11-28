@@ -146,13 +146,17 @@ It is never presented to patients as a guarantee.
 | Tool | Purpose |
 |---|---|
 | `navigation.start(case_id, text)` | extract findings, run the screen, return the first question or a result |
-| `navigation.answer(case_id, concept, answer)` | update findings, return next question or result |
+| `navigation.answer(case_id, concept, answer, context)` | update findings, return next question or result |
 | `navigation.result(case_id)` | current `NavigationResult` |
 | `navigation.find_doctors(...)` | `NAV-10` |
 | `navigation.plan_trip(...)` | `NAV-12` |
 
 Navigation state per case is stored as case events (`FactRecorded`, `UrgencyAssessed`,
-`RouteSuggested`), so it is replayable and audited.
+`RouteSuggested`), so it is replayable and audited. The engine itself keeps no state: each step
+returns the findings it newly read from the patient's words (`NavigationStep.findings`), the
+companion records them as `FactRecorded`, and the next step reads them back from the case. A
+question carries its reviewed text in the case language (`NavigationQuestion.text`, from
+`questions.yaml`).
 
 #### Booking follow-up questions
 

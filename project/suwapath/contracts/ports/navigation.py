@@ -57,17 +57,22 @@ class NavigationResult(Contract):
 class NavigationQuestion(Contract):
     concept: str
     question_key: str
+    text: str | None = None  # the reviewed question in the case language (kb/questions.yaml)
     answer_type: Literal["yes_no", "choice", "number", "duration"]
     choices: tuple[str, ...] = ()
     red_flag_screen: bool = False  # does not count toward the 6-question cap (NAV-1)
 
 
 class NavigationStep(Contract):
-    """Either the next question, a final result, or an emergency stop."""
+    """Either the next question, a final result, or an emergency stop.
+
+    `findings` are what this step newly read from the patient's words. The caller records them as
+    case facts (`FactRecorded`), so the case events stay the only navigation state (NAV-4)."""
 
     question: NavigationQuestion | None = None
     result: NavigationResult | None = None
     emergency: bool = False
+    findings: tuple[Finding, ...] = ()
 
 
 class DoctorQuery(Contract):
@@ -123,7 +128,12 @@ class NavigationService(Protocol):
     ) -> NavigationStep: ...
 
     async def answer(
-        self, principal: Principal, case_id: CaseId, concept: str, answer: str | float | bool
+        self,
+        principal: Principal,
+        case_id: CaseId,
+        concept: str,
+        answer: str | float | bool,
+        context: PatientContext | None = None,
     ) -> NavigationStep: ...
 
     async def result(self, principal: Principal, case_id: CaseId) -> NavigationResult | None: ...
