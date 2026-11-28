@@ -85,6 +85,7 @@ class MessageIntent(StrEnum):
     DOCTOR_BRIEF = "doctor_brief"
     REPLY_DRAFT = "reply_draft"
     REVISION_REQUEST = "revision_request"
+    PATIENT_QUESTION = "patient_question"
 
 
 class CheckInWithPatient(BaseModel):
@@ -135,6 +136,13 @@ class ReplyDraft(BaseModel):
     text: str = Field(max_length=4000)
     language: Literal["si", "en"]
     based_on_notes_id: ResourceId
+
+
+class PatientQuestion(BaseModel):
+    """The patient asked their doctor something ("Ask my doctor"). The text stays in the case
+    communication; only its ID travels, and the treating doctor reads it on the case."""
+
+    communication_id: ResourceId
 
 
 class RevisionRequest(BaseModel):
@@ -226,6 +234,13 @@ INTENTS: dict[MessageIntent, IntentSpec] = {
             {_VER},
             _PERSON_AGENTS,
             RevisionRequest,
+        ),
+        _spec(
+            MessageIntent.PATIENT_QUESTION,
+            MessageKind.INFO,
+            {_PC},
+            {_DA},
+            PatientQuestion,
         ),
     )
 }

@@ -189,3 +189,14 @@ async def mark(
         .returning(AgentMessageRow.id)
     )
     return changed.scalar_one_or_none() is not None
+
+
+async def of_intent(uow: UnitOfWork, case_id: CaseId, intent: MessageIntent) -> list[AgentMessage]:
+    rows = (
+        await uow.session.execute(
+            select(AgentMessageRow)
+            .where(AgentMessageRow.case_id == case_id, AgentMessageRow.intent == intent.value)
+            .order_by(AgentMessageRow.created_at)
+        )
+    ).scalars()
+    return [to_message(r) for r in rows]

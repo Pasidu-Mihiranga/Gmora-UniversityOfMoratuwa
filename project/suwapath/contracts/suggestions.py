@@ -33,6 +33,7 @@ class Suggestion(Contract):
             "ask_fact",
             "approve_reply",
             "open_record",
+            "ask_doctor",
         ]
         | None
     ) = None
