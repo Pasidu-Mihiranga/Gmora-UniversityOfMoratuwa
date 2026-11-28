@@ -54,6 +54,10 @@ class IdentityService(Protocol):
 
     async def get_user(self, user_id: UserId) -> UserAccount: ...
 
+    async def user_for_practitioner(self, practitioner_id: PractitionerId) -> UserAccount | None:
+        """The doctor's account (booking records who treats whom, SEC-10 rule 4)."""
+        ...
+
     async def issue_stream_ticket(self, user_id: UserId, stream: str) -> StreamTicket:
         """Valid for 60 s and one use, bound to the user and the stream (SEC-5)."""
         ...
