@@ -301,10 +301,11 @@ class CompanionReply(Contract):
     """One companion message to the patient, stored as JSON in the case communication.
 
     `text` is complete and human readable on its own; `suggestions` are the chips shown under it.
-    Replies come from reviewed templates, never from free model text (invariant 1).
+    Replies come from templates, never from free model text (invariant 1). A `doctor_reply` is
+    the treating doctor's own words, delivered only after the doctor approved them (AGT-30).
     """
 
-    kind: Literal["question", "clarify", "result", "emergency", "check_in", "info"]
-    text: str = Field(min_length=1, max_length=2000)
+    kind: Literal["question", "clarify", "result", "emergency", "check_in", "info", "doctor_reply"]
+    text: str = Field(min_length=1, max_length=4000)
     language: Language
     suggestions: tuple[Suggestion, ...] = Field(default=(), max_length=MAX_SUGGESTIONS)

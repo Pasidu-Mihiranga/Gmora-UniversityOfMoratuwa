@@ -178,7 +178,12 @@ so any API replica can serve any stream.
 
 `API-22` A companion message to the patient is a `CompanionReply` (`contracts/agents.py`) stored as
 JSON in the case communication and returned in the timeline item's `params.text`:
-`{"kind": "question" | "clarify" | "result" | "emergency" | "check_in" | "info", "text": "...",
+`{"kind": "question" | "clarify" | "result" | "emergency" | "check_in" | "info" | "doctor_reply", "text": "...",
 "language": "si" | "en", "suggestions": [Suggestion, ...]}`. `text` is complete and human
 readable on its own; clients show it as the message and the suggestions as chips (`FE-50`).
-Patient messages stay plain text.
+Patient messages stay plain text. A `doctor_reply` carries the treating doctor's own words,
+sent only after the doctor approved them.
+
+`API-23` `GET /doctor/cases/{cid}/brief` returns a `Brief` (`contracts/briefs.py`): lines grouped
+by section in the doctor's order, each with its `source` and `provenance_ids`. It never contains
+the patient's chat text or a condition hypothesis.
