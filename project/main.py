@@ -69,6 +69,25 @@ def _cmd_worker(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_agents(args: argparse.Namespace) -> int:
+    import asyncio
+
+    from suwapath.bootstrap import build_container, run_agent_worker
+    from suwapath.platform.logging import configure_logging
+
+    configure_logging()
+
+    async def run() -> None:
+        container = build_container()
+        try:
+            await run_agent_worker(container)
+        finally:
+            await container.db.dispose()
+
+    asyncio.run(run())
+    return 0
+
+
 def _parse_duration(text: str) -> timedelta:
     units = {"m": "minutes", "h": "hours", "d": "days"}
     number, unit = text[:-1], text[-1]
@@ -149,6 +168,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     worker = sub.add_parser("worker", help="deliver events and fire timers")
     worker.set_defaults(handler=_cmd_worker)
+
+    agents = sub.add_parser("agents", help="run agent jobs (patient companion, guardian, doctor)")
+    agents.set_defaults(handler=_cmd_agents)
 
     clock = sub.add_parser("clock", help="show or advance the simulated clock (development, demo)")
     clock.add_argument("action", choices=["show", "advance"])
