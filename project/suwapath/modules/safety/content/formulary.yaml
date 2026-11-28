@@ -1,0 +1,123 @@
+# Demo formulary v1 (SAF-30, SAF-31).
+#
+# FOR DEMONSTRATION WITH SYNTHETIC PATIENTS ONLY. NOT FOR CLINICAL USE.
+#
+# A small list of medicines common in older Sri Lankan adults, with only well-known interactions,
+# allergy classes, duplicate therapies and drug-condition cautions. It is not complete: a real
+# deployment needs a maintained drug database and a pharmacist's review. Each rule names the public
+# reference it was taken from. Names and classes match the codes the seed world uses.
+version: formulary-v1
+disclaimer: For demonstration with synthetic patients only. Not for clinical use.
+
+medicines:
+  metformin: [biguanide]
+  glibenclamide: [sulfonylurea]
+  gliclazide: [sulfonylurea]
+  insulin: [insulin]
+  amlodipine: [calcium_channel_blocker]
+  nifedipine: [calcium_channel_blocker]
+  losartan: [arb]
+  enalapril: [ace_inhibitor]
+  captopril: [ace_inhibitor]
+  atenolol: [beta_blocker]
+  metoprolol: [beta_blocker]
+  hydrochlorothiazide: [thiazide]
+  furosemide: [loop_diuretic]
+  spironolactone: [potassium_sparing_diuretic]
+  atorvastatin: [statin]
+  rosuvastatin: [statin]
+  simvastatin: [statin]
+  aspirin: [antiplatelet, salicylate]
+  clopidogrel: [antiplatelet]
+  warfarin: [anticoagulant]
+  diclofenac: [nsaid]
+  ibuprofen: [nsaid]
+  mefenamic_acid: [nsaid]
+  paracetamol: [analgesic]
+  omeprazole: [ppi]
+  pantoprazole: [ppi]
+  salbutamol: [beta_agonist]
+  prednisolone: [corticosteroid]
+  amoxicillin: [penicillin]
+  co_amoxiclav: [penicillin]
+  cloxacillin: [penicillin]
+  cephalexin: [cephalosporin]
+  ciprofloxacin: [fluoroquinolone]
+  clarithromycin: [macrolide]
+  azithromycin: [macrolide]
+  co_trimoxazole: [sulfonamide]
+  levothyroxine: [thyroid_hormone]
+  digoxin: [cardiac_glycoside]
+  allopurinol: [xanthine_oxidase_inhibitor]
+
+aliases:
+  salbutamol_inhaler: salbutamol
+  augmentin: co_amoxiclav
+  amoxicillin_clavulanate: co_amoxiclav
+  acetaminophen: paracetamol
+  panadol: paracetamol
+  cefalexin: cephalexin
+  glyburide: glibenclamide
+  sulfamethoxazole_trimethoprim: co_trimoxazole
+
+# allergy code or class -> the medicine classes it matches (SAF-32), and cross-reactions.
+allergy_classes:
+  penicillin:
+    matches: [penicillin]
+    cross: [{class: cephalosporin, severity: moderate}]
+    reference: "BNF, Penicillins: hypersensitivity and cross-sensitivity with cephalosporins"
+  sulfonamide:
+    matches: [sulfonamide]
+    reference: "BNF, Co-trimoxazole: contra-indications (sulfonamide hypersensitivity)"
+  sulfa_drug:
+    matches: [sulfonamide]
+    reference: "BNF, Co-trimoxazole: contra-indications (sulfonamide hypersensitivity)"
+  nsaid:
+    matches: [nsaid, salicylate]
+    reference: "BNF, Non-steroidal anti-inflammatory drugs: contra-indications (hypersensitivity to aspirin or any NSAID)"
+  cephalosporin:
+    matches: [cephalosporin]
+    reference: "BNF, Cephalosporins: contra-indications"
+  macrolide:
+    matches: [macrolide]
+    reference: "BNF, Macrolides: contra-indications"
+  fluoroquinolone:
+    matches: [fluoroquinolone]
+    reference: "BNF, Quinolones: contra-indications"
+
+# a and b are medicine names or classes.
+interactions:
+  - {a: anticoagulant, b: antiplatelet, severity: major, reference: "BNF Appendix 1: warfarin with antiplatelet drugs (increased bleeding risk)"}
+  - {a: anticoagulant, b: nsaid, severity: major, reference: "BNF Appendix 1: warfarin with NSAIDs (increased bleeding risk)"}
+  - {a: warfarin, b: ciprofloxacin, severity: major, reference: "BNF Appendix 1: warfarin with quinolones (anticoagulant effect increased)"}
+  - {a: warfarin, b: clarithromycin, severity: major, reference: "BNF Appendix 1: warfarin with macrolides (anticoagulant effect increased)"}
+  - {a: warfarin, b: co_trimoxazole, severity: major, reference: "BNF Appendix 1: warfarin with co-trimoxazole (anticoagulant effect increased)"}
+  - {a: ace_inhibitor, b: arb, severity: major, reference: "ONTARGET trial (NEJM 2008) and MHRA Drug Safety Update 2014: dual renin-angiotensin blockade"}
+  - {a: ace_inhibitor, b: potassium_sparing_diuretic, severity: major, reference: "BNF Appendix 1: ACE inhibitors with potassium-sparing diuretics (hyperkalaemia)"}
+  - {a: arb, b: potassium_sparing_diuretic, severity: major, reference: "BNF Appendix 1: angiotensin-II receptor antagonists with potassium-sparing diuretics (hyperkalaemia)"}
+  - {a: simvastatin, b: clarithromycin, severity: contraindicated, reference: "FDA Drug Safety Communication 2011: simvastatin with strong CYP3A4 inhibitors"}
+  - {a: atorvastatin, b: clarithromycin, severity: moderate, reference: "BNF Appendix 1: atorvastatin with clarithromycin (myopathy risk)"}
+  - {a: clopidogrel, b: omeprazole, severity: moderate, reference: "FDA Drug Safety Communication 2009: clopidogrel with omeprazole (reduced antiplatelet effect)"}
+  - {a: antiplatelet, b: nsaid, severity: moderate, reference: "BNF Appendix 1: aspirin with NSAIDs (gastro-intestinal bleeding)"}
+  - {a: sulfonylurea, b: fluoroquinolone, severity: moderate, reference: "FDA Drug Safety Communication 2018: fluoroquinolones and blood sugar disturbances"}
+  - {a: ace_inhibitor, b: nsaid, severity: moderate, reference: "BNF Appendix 1: ACE inhibitors with NSAIDs (renal impairment, reduced effect)"}
+  - {a: arb, b: nsaid, severity: moderate, reference: "BNF Appendix 1: angiotensin-II receptor antagonists with NSAIDs (renal impairment)"}
+
+# two different medicines of one of these classes is a duplicate therapy.
+duplicate_classes:
+  statin: "BNF, Statins: one statin at a time"
+  ppi: "BNF, Proton pump inhibitors: one at a time"
+  nsaid: "BNF, NSAIDs: avoid more than one NSAID"
+  ace_inhibitor: "BNF, ACE inhibitors: one at a time"
+  arb: "BNF, Angiotensin-II receptor antagonists: one at a time"
+  sulfonylurea: "BNF, Sulfonylureas: one at a time"
+  calcium_channel_blocker: "BNF, Calcium-channel blockers: one at a time"
+  beta_blocker: "BNF, Beta-adrenoceptor blockers: one at a time"
+  anticoagulant: "BNF, Anticoagulants: one at a time"
+
+# a medicine or class with a condition (by code prefix).
+drug_conditions:
+  - {drug: nsaid, condition: ckd, severity: major, reference: "KDIGO 2012 CKD guideline: avoid NSAIDs in chronic kidney disease"}
+  - {drug: metformin, condition: ckd, severity: moderate, reference: "BNF, Metformin: renal impairment (review dose by kidney function)"}
+  - {drug: corticosteroid, condition: diabetes, severity: moderate, reference: "BNF, Corticosteroids: cautions in diabetes mellitus (raised blood sugar)"}
+  - {drug: nsaid, condition: ischaemic_heart_disease, severity: moderate, reference: "MHRA Drug Safety Update 2012: cardiovascular safety of NSAIDs"}

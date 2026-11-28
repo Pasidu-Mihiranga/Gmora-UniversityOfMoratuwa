@@ -1,0 +1,55 @@
+# Banned wording in patient-facing English (SAF-20, SAF-21). Each pattern is a case-insensitive
+# regular expression on the text after normalization (NFC, lower case, single spaces, plain
+# apostrophes). Every pattern has an example it must catch and a safe near-miss it must not.
+language: en
+patterns:
+  - id: EN-DX-001
+    category: diagnosis
+    regex: "\\byou (?:have|have got|may have|might have|probably have|likely have|are suffering from|are having) (?:a |an )?(?:\\w+ ){0,2}(?:disease|infection|pneumonia|diabetes|cancer|stroke|heart attack|fracture|tuberculosis|dengue|asthma|hypertension|disorder|syndrome|tumou?r)\\b"
+    example: "You have pneumonia."
+    near_miss: "You have an appointment on Monday."
+  - id: EN-DX-002
+    category: diagnosis
+    regex: "\\b(?:this|it|that) (?:is|looks like|sounds like|seems like|could be|might be|may be|is probably|is likely) (?:a |an )?(?:\\w+ ){0,2}(?:disease|infection|pneumonia|diabetes|cancer|stroke|heart attack|fracture|tuberculosis|dengue|asthma|disorder|syndrome|tumou?r)\\b"
+    example: "This is diabetes."
+    near_miss: "This is your appointment card."
+  - id: EN-DX-003
+    category: diagnosis
+    regex: "\\b(?:your |the )?(?:x-ray|xray|x ray|scan|report|result|results|test) (?:shows|showed|confirms|confirmed|indicates|indicated|found|suggests)\\b"
+    example: "Your X-ray shows a shadow on the lung."
+    near_miss: "Your X-ray was sent to the doctor for review."
+  - id: EN-RS-001
+    category: reassurance
+    regex: "\\byou(?:'re| are) (?:fine|ok|okay|alright|all right|healthy|normal|safe)\\b"
+    example: "You are fine."
+    near_miss: "Are you feeling fine today?"
+  - id: EN-RS-002
+    category: reassurance
+    regex: "\\b(?:nothing to worry about|no need to worry|(?:don't|do not) worry|nothing serious|not serious|it is harmless|this is harmless|it is normal|this is normal)\\b"
+    example: "There is nothing to worry about."
+    near_miss: "Tell us what worries you."
+  - id: EN-RS-003
+    category: reassurance
+    regex: "\\b(?:no need to (?:see|visit|go to) (?:a |the )?(?:doctor|hospital)|you (?:don't|do not) need (?:a doctor|to see a doctor|to go to (?:a |the )?hospital))\\b"
+    example: "No need to see a doctor."
+    near_miss: "You need to see a doctor today."
+  - id: EN-DS-001
+    category: dosing
+    regex: "\\btake (?:\\d+|one|two|three|four|half|a|an) (?:more )?(?:tablets?|pills?|capsules?|mg|ml|spoons?|teaspoons?|doses?|puffs?|units?)\\b"
+    example: "Take two tablets now."
+    near_miss: "Take your appointment card with you."
+  - id: EN-DS-002
+    category: dosing
+    regex: "(?<!not )(?<!never )(?<!don't )\\b(?:stop|start|skip|double|increase|reduce|decrease|change|halve) (?:taking )?(?:your |the )(?:medicines?|medications?|tablets?|pills?|dose|doses|insulin)\\b"
+    example: "Stop your medicine."
+    near_miss: "Do not stop your medicine before you see your doctor."
+  - id: EN-PR-001
+    category: probability
+    regex: "\\b\\d{1,3}(?:\\.\\d+)? ?(?:%|percent|per cent) (?:chance|likely|likelihood|probability|risk|confidence|sure)\\b|\\b(?:probability|likelihood|confidence) (?:of|is) (?:about )?\\d"
+    example: "There is an 82% chance of pneumonia."
+    near_miss: "You took 90% of your doses this week."
+  - id: EN-BT-001
+    category: banned_term
+    regex: "\\b(?:diagnosis|diagnoses|diagnose|diagnosed|triage|triaged|our doctor|our doctors|medical advice)\\b"
+    example: "Here is your diagnosis."
+    near_miss: "Your doctor will see you on Monday."
