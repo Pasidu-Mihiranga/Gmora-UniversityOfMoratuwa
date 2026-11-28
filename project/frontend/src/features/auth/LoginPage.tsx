@@ -72,7 +72,7 @@ export default function LoginPage() {
     <AuthLayout title={t("login.welcome")} subtitle={t("login.subtitle")}>
       <form className="space-y-4" onSubmit={(e) => void submit(e)}>
         <label className="sp-field block">
-          <span className="sp-label">{t("login.login")}</span>
+          <span className="mb-1 block text-sm font-semibold text-ink-700">{t("login.login")}</span>
           <span className="relative block">
             <Icon name="person" size={20} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
             <input className="sp-input min-h-tap w-full pl-10" autoComplete="username" value={login} maxLength={160}
@@ -80,7 +80,7 @@ export default function LoginPage() {
           </span>
         </label>
         <label className="sp-field block">
-          <span className="sp-label">{t("login.password")}</span>
+          <span className="mb-1 block text-sm font-semibold text-ink-700">{t("login.password")}</span>
           <span className="relative block">
             <Icon name="lock" size={20} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
             <input className="sp-input min-h-tap w-full pl-10 pr-12" type={show ? "text" : "password"}
