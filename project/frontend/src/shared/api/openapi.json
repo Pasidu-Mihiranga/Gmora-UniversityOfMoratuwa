@@ -1130,6 +1130,101 @@
         "title": "DemoAccount",
         "type": "object"
       },
+      "DoctorOption": {
+        "additionalProperties": false,
+        "properties": {
+          "continuity": {
+            "default": false,
+            "title": "Continuity",
+            "type": "boolean"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "distance_km": {
+            "title": "Distance Km",
+            "type": "number"
+          },
+          "fee_lkr": {
+            "title": "Fee Lkr",
+            "type": "integer"
+          },
+          "languages": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Language"
+            },
+            "title": "Languages",
+            "type": "array"
+          },
+          "next_slot_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Slot At"
+          },
+          "next_slot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Slot Id"
+          },
+          "organization_id": {
+            "format": "uuid",
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "organization_name": {
+            "title": "Organization Name",
+            "type": "string"
+          },
+          "practitioner_id": {
+            "format": "uuid",
+            "title": "Practitioner Id",
+            "type": "string"
+          },
+          "practitioner_role_id": {
+            "format": "uuid",
+            "title": "Practitioner Role Id",
+            "type": "string"
+          },
+          "reason_key": {
+            "title": "Reason Key",
+            "type": "string"
+          },
+          "specialty": {
+            "$ref": "#/components/schemas/Specialty"
+          }
+        },
+        "required": [
+          "practitioner_id",
+          "practitioner_role_id",
+          "display_name",
+          "specialty",
+          "organization_id",
+          "organization_name",
+          "distance_km",
+          "next_slot_id",
+          "next_slot_at",
+          "fee_lkr",
+          "reason_key"
+        ],
+        "title": "DoctorOption",
+        "type": "object"
+      },
       "Dosage": {
         "additionalProperties": false,
         "properties": {
@@ -1525,6 +1620,39 @@
           }
         },
         "title": "HumanName",
+        "type": "object"
+      },
+      "Itinerary": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "format": "date",
+            "title": "Day",
+            "type": "string"
+          },
+          "stops": {
+            "items": {
+              "$ref": "#/components/schemas/TripStop"
+            },
+            "title": "Stops",
+            "type": "array"
+          },
+          "total_travel_minutes": {
+            "title": "Total Travel Minutes",
+            "type": "integer"
+          },
+          "total_wait_minutes": {
+            "title": "Total Wait Minutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "stops",
+          "total_wait_minutes",
+          "total_travel_minutes"
+        ],
+        "title": "Itinerary",
         "type": "object"
       },
       "Language": {
@@ -2002,6 +2130,34 @@
           "items"
         ],
         "title": "Page[CaseState]",
+        "type": "object"
+      },
+      "Page_DoctorOption_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DoctorOption"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Page[DoctorOption]",
         "type": "object"
       },
       "Page_Notification_": {
@@ -3108,6 +3264,67 @@
           "params"
         ],
         "title": "TimelineItem",
+        "type": "object"
+      },
+      "TripRequest": {
+        "properties": {
+          "date_from": {
+            "format": "date",
+            "title": "Date From",
+            "type": "string"
+          },
+          "date_to": {
+            "format": "date",
+            "title": "Date To",
+            "type": "string"
+          },
+          "near": {
+            "$ref": "#/components/schemas/GeoPoint"
+          },
+          "specialties": {
+            "items": {
+              "$ref": "#/components/schemas/Specialty"
+            },
+            "maxItems": 3,
+            "minItems": 2,
+            "title": "Specialties",
+            "type": "array"
+          }
+        },
+        "required": [
+          "specialties",
+          "near",
+          "date_from",
+          "date_to"
+        ],
+        "title": "TripRequest",
+        "type": "object"
+      },
+      "TripStop": {
+        "additionalProperties": false,
+        "properties": {
+          "practitioner_role_id": {
+            "format": "uuid",
+            "title": "Practitioner Role Id",
+            "type": "string"
+          },
+          "slot_id": {
+            "format": "uuid",
+            "title": "Slot Id",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot_id",
+          "practitioner_role_id",
+          "start"
+        ],
+        "title": "TripStop",
         "type": "object"
       },
       "Urgency": {
@@ -4611,17 +4828,168 @@
     "/api/v1/doctors": {
       "get": {
         "operationId": "navigation_get_doctors",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "specialty",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Specialty"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lat",
+            "required": true,
+            "schema": {
+              "maximum": 10.0,
+              "minimum": 5.5,
+              "title": "Lat",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lng",
+            "required": true,
+            "schema": {
+              "maximum": 82.5,
+              "minimum": 79.0,
+              "title": "Lng",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_from",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "Date From",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "Date To",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Language"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Language"
+            }
+          },
+          {
+            "in": "query",
+            "name": "time_of_day",
+            "required": false,
+            "schema": {
+              "default": "any",
+              "enum": [
+                "morning",
+                "afternoon",
+                "evening",
+                "any"
+              ],
+              "title": "Time Of Day",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_km",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "title": "Max Km",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 10,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Page_DoctorOption_"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M17)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Search doctors",
@@ -7140,13 +7508,16 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Specialty"
+                  },
+                  "title": "Response Navigation Get Specialties",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (M17)"
           }
         },
         "summary": "Specialty catalog",
@@ -7199,17 +7570,40 @@
     "/api/v1/trips/plan": {
       "post": {
         "operationId": "navigation_post_trips_plan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TripRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Itinerary"
+                  },
+                  "title": "Response Navigation Post Trips Plan",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M17)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Plan several doctors in one trip",

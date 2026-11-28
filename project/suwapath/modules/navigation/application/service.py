@@ -33,15 +33,27 @@ from suwapath.contracts.ports.safety import PatientContext, SafetyAssessment
 from suwapath.contracts.principal import Principal
 from suwapath.modules.navigation.domain.engine import Ask, Knowns, decide, next_question
 from suwapath.modules.navigation.domain.kb import KnowledgeBase
+from suwapath.modules.navigation.domain.matching import (
+    TRIP_RADIUS_KM,
+    bounding_box,
+    plan_trips,
+    rank_doctors,
+)
+from suwapath.platform.clock import Clock
 
 UNSURE = "unsure"
-MENTIONED = "mentioned"  # a finding read from the patient's words, not an answer
+MENTIONED = "mentioned"
+MAX_DOCTORS = 20
+MAX_TRIP_NEEDS = 3  # a finding read from the patient's words, not an answer
 
 
 class KbNavigationService:
-    def __init__(self, kb: KnowledgeBase, ports: Callable[[], Mapping[str, Any]]) -> None:
+    def __init__(
+        self, kb: KnowledgeBase, ports: Callable[[], Mapping[str, Any]], clock: Clock
+    ) -> None:
         self.kb = kb
         self._ports = ports
+        self._clock = clock
 
     # ----- the port ------------------------------------------------------------------------------
 
@@ -96,14 +108,41 @@ class KbNavigationService:
     async def find_doctors(
         self, query: DoctorQuery, cursor: str | None, limit: int
     ) -> Page[DoctorOption]:
-        """Doctor matching arrives with M17. Until then no cards: the patient still gets the
-        urgency and doctor type (raising here would stop the companion's result)."""
-        return Page(items=[])
+        """NAV-10, NAV-11, NAV-13, NAV-15. Ranking never uses commercial input (NAV-3)."""
+        names: list[Any] | None = None
+        if query.name:
+            names = await self._ports()["record"].search_practitioners(query.name, 20)
+            if not names:
+                return Page(items=[])
+        candidates = await self._ports()["booking"].doctor_candidates(
+            query.specialty,
+            bounding_box(query.near, query.max_km),
+            query.date_from,
+            query.date_to,
+            query.organization_id,
+        )
+        ids = sorted({c.practitioner_id for c in candidates}, key=str)
+        cards = {
+            c.practitioner_id: c for c in await self._ports()["record"].practitioner_cards(ids)
+        }
+        ranked = rank_doctors(query, candidates, cards, self._clock.now(), names)
+        start = int(cursor) if cursor and cursor.isdigit() else 0
+        limit = max(1, min(limit, MAX_DOCTORS))
+        page = ranked[start : start + limit]
+        more = start + limit < len(ranked)
+        return Page(items=page, next_cursor=str(start + limit) if more else None)
 
     async def plan_trip(
         self, specialties: list[Specialty], near: GeoPoint, date_from: date, date_to: date
     ) -> list[Itinerary]:
-        return []  # trip planning arrives with M17
+        """NAV-12, NAV-16: only for two or more needs; a single need is never made a trip."""
+        wanted = list(dict.fromkeys(specialties))
+        if not 2 <= len(wanted) <= MAX_TRIP_NEEDS:
+            return []
+        box = bounding_box(near, TRIP_RADIUS_KM)
+        booking = self._ports()["booking"]
+        needs = [await booking.doctor_candidates(s, box, date_from, date_to) for s in wanted]
+        return plan_trips(needs, near, date_from, date_to)
 
     def _screen(self, knowns: Knowns, context: PatientContext) -> SafetyAssessment:
         """The red-flag rules over everything the patient has reported, as fixed phrases, so a

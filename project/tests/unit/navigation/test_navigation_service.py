@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -14,6 +15,7 @@ from suwapath.contracts.ports.safety import PatientContext
 from suwapath.modules.navigation.application.service import KbNavigationService
 from suwapath.modules.navigation.domain.kb import KnowledgeBase
 from suwapath.modules.safety.application.service import RuleSafetyService
+from suwapath.platform.clock import FixedClock
 
 KB = KnowledgeBase.load()
 SAFETY = RuleSafetyService.from_content()
@@ -40,7 +42,11 @@ class Cases:
 
 
 def service(cases: Cases) -> KbNavigationService:
-    return KbNavigationService(KB, lambda: {"cases": cases, "safety": SAFETY})
+    return KbNavigationService(
+        KB,
+        lambda: {"cases": cases, "safety": SAFETY},
+        FixedClock(datetime(2026, 11, 28, 4, 0, tzinfo=UTC)),
+    )
 
 
 def said(text: str) -> UntrustedText:
