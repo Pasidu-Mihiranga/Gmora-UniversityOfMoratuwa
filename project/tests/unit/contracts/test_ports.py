@@ -14,7 +14,12 @@ import suwapath.contracts.ports as ports_pkg
 SYSTEM_ONLY = {
     "MemoryService.summarize_closed_case",
     "RecordService.patient_for_user",
-    "RecordService.medication_schedules",  # timing only, no clinical content (care, as a module)
+    "RecordService.medication_schedules",
+    # The agent directory: account and appointment IDs, and the few patient basics the patient's
+    # own agents need. Called only by the agent runtime, which acts for that patient.
+    "IdentityService.user_for_patient",
+    "BookingService.booked_case",
+    "RecordService.patient_basics",  # timing only, no clinical content (care, as a module)
     "BookingService.release_holds_for_case",
     # The storage layer's lock (SEC-22), not a read path: a module seals or opens a field only
     # after it decided the caller may see it, so the principal check happens before this call.

@@ -41,7 +41,7 @@ from suwapath.contracts.ids import PatientId, ResourceId, TraceId, UserId
 from suwapath.contracts.ports.audit import AuditEntryDraft
 from suwapath.contracts.ports.consent import AccessDecision, AccessPolicy, AccessRequest
 from suwapath.contracts.ports.crypto import PatientCipher
-from suwapath.contracts.ports.record import MedicationSchedule, RecordSummary
+from suwapath.contracts.ports.record import MedicationSchedule, PatientBasics, RecordSummary
 from suwapath.contracts.principal import Principal
 from suwapath.modules.record.adapters.models import (
     AllergyRow,
@@ -131,6 +131,38 @@ class SqlRecordService:
                 )
             ).scalar()
         return PatientId(found) if found else None
+
+    async def patient_basics(self, patient_id: PatientId) -> PatientBasics | None:
+        async with self._uow.join() as uow:
+            row = await uow.session.get(PatientRow, patient_id)
+            if row is None:
+                return None
+            patient = await self._open(KINDS["Patient"], row)
+            codes = {
+                coding.code
+                for c in [
+                    await self._open(KINDS["Condition"], r)
+                    for r in await self._rows(uow, KINDS["Condition"], patient_id)
+                ]
+                if c.clinical_status in ("active", "recurrence")  # type: ignore[attr-defined]
+                for coding in c.code.coding  # type: ignore[attr-defined]
+            }
+            now = uow.clock.now().date()
+        assert isinstance(patient, Patient)
+        age = (
+            now.year
+            - patient.birth_date.year
+            - ((now.month, now.day) < (patient.birth_date.month, patient.birth_date.day))
+        )
+        first = patient.name.given[0] if patient.name.given else (patient.name.text or "")
+        return PatientBasics(
+            first_name=first,
+            age_years=age,
+            sex=patient.gender,
+            language=patient.language,
+            home=patient.location,
+            condition_codes=frozenset(codes),
+        )
 
     async def medication_schedules(self, patient_id: PatientId) -> list[MedicationSchedule]:
         async with self._uow.join() as uow:

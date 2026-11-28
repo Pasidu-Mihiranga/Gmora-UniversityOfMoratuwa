@@ -7,6 +7,7 @@ retryable (it is never dropped).
 
 from __future__ import annotations
 
+from suwapath.modules.agents.adapters.directory import PortDirectory
 from suwapath.modules.agents.api.router import build_router, queue_stub
 from suwapath.modules.agents.application.companion import CompanionAgent
 from suwapath.modules.agents.application.context import Dependencies
@@ -66,6 +67,7 @@ def register(container: ModuleContext) -> None:
     delivery = Delivery(dependencies)
     register_supervisor(container.subscribers, dependencies, delivery, registry.kinds())
     container.ports["agent_registry"] = registry
+    container.ports["agent_directory"] = PortDirectory(lambda: container.ports)
     # SEC-10 rule 5: the access policy intersects each agent's human with this declared scope.
     container.ports["agent_scopes"] = registry.scopes()
     container.ports["agent_dependencies"] = dependencies
