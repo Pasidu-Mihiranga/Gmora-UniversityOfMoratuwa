@@ -126,6 +126,7 @@ def create_api(settings: Settings | None = None) -> FastAPI:
         routers=container.routers,
     )
     app.state.container = container
+    app.state.reset_world = lambda: reset_world(container)  # the dev panel's reset (dev only)
     return app
 
 
@@ -184,3 +185,74 @@ async def seed_demo_accounts(container: Container, seed: int = 42) -> list[str]:
             user_id=user.id,
         )
     return list(DEMO_LOGINS)
+
+
+async def seed_world(container: Container, seed: int = 42) -> dict[str, int]:
+    """`python main.py seed load`: the deterministic synthetic world of spec 16, loaded through
+    each module's own import path. Idempotent (every step skips what exists). Refused in
+    production, and needs DEMO_PASSWORD for the accounts."""
+    from suwapath.seed.generator import expand_doses, generate
+
+    settings = container.settings
+    password = settings.demo_password.get_secret_value()
+    if settings.suwapath_env == "production" or not password:
+        raise RuntimeError("the seed world needs DEMO_PASSWORD and is refused in production")
+    world = generate(seed)
+    ports = container.ports
+    identity, record, booking = ports["identity"], ports["record"], ports["booking"]
+    consent, care = ports["consent"], ports["care"]
+    for user in world.users:
+        await identity.create_user(
+            login=user.login,
+            password=password,
+            role=user.role,
+            display_name=user.display_name,
+            language=user.language,
+            patient_id=user.patient_id,
+            practitioner_id=user.practitioner_id,
+            organization_id=user.organization_id,
+            user_id=user.id,
+        )
+    counts = {"accounts": len(world.users)}
+    counts["doctors"] = await record.import_practitioners(world.practitioners)
+    counts["sessions"] = await booking.import_directory(
+        world.organizations, world.practitioner_roles, world.schedules
+    )
+    counts["sources"] = await record.import_provenance(world.provenance)
+    counts["record entries"] = await record.import_resources(
+        [
+            *world.patients,
+            *world.conditions,
+            *world.allergies,
+            *world.medications,
+            *world.observations,
+        ],
+        agent="seed",
+    )
+    counts["grants"] = await consent.import_grants(world.consents)
+    doses = 0
+    for plan in world.adherence:
+        doses += await care.import_dose_history(plan.patient_id, expand_doses(world, plan))
+    counts["past doses"] = doses
+    return counts
+
+
+async def reset_world(container: Container, seed: int = 42) -> dict[str, int]:
+    """Development and demo only: empty every table, reset the simulated clock, seed again."""
+    from sqlalchemy import text
+
+    if not container.settings.dev_tools_enabled:
+        raise RuntimeError("reset is for development and demo only")
+    async with container.db.engine.begin() as conn:
+        tables = (
+            await conn.execute(
+                text(
+                    "SELECT string_agg(quote_ident(tablename), ', ') FROM pg_tables "
+                    "WHERE schemaname = 'public' "
+                    "AND tablename NOT IN ('alembic_version', 'platform_clock')"
+                )
+            )
+        ).scalar_one()
+        await conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY"))
+        await conn.execute(text("UPDATE platform_clock SET offset_seconds = 0"))
+    return await seed_world(container, seed)

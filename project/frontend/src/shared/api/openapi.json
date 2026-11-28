@@ -3933,18 +3933,22 @@
     },
     "/api/v1/dev/scenario/reset": {
       "post": {
+        "description": "Empty every table and load the synthetic world again (spec 16). Mounted only in\ndevelopment, demo and test (EVT-18); every signed-in demo user may use the dev panel.",
         "operationId": "dev_post_dev_scenario_reset",
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Dev Post Dev Scenario Reset",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (U08)"
           }
         },
         "summary": "Reset the demo world (dev and demo)",

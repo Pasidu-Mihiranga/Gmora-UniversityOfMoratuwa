@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import date, datetime, timedelta
 from typing import Any
 from uuid import UUID
@@ -33,7 +33,7 @@ from suwapath.contracts.events.catalog import (
     TimerFired,
 )
 from suwapath.contracts.fhir.base import Meta
-from suwapath.contracts.fhir.resources import Appointment
+from suwapath.contracts.fhir.resources import Appointment, Organization, PractitionerRole, Schedule
 from suwapath.contracts.ids import (
     AppointmentId,
     CaseId,
@@ -51,6 +51,7 @@ from suwapath.contracts.principal import Principal
 from suwapath.modules.booking.adapters.models import (
     AppointmentRow,
     HoldRow,
+    OrganizationRow,
     PractitionerRoleRow,
     ScheduleRow,
     SlotRow,
@@ -312,6 +313,72 @@ class SqlBookingService:
             items=items,
             next_cursor=rows[limit - 1].starts_at.isoformat() if len(rows) > limit else None,
         )
+
+    # ----- directory, for the seed loader (BOOK-1) ----------------------------------------------
+
+    async def import_directory(
+        self,
+        organizations: Sequence[Organization],
+        roles: Sequence[PractitionerRole],
+        schedules: Sequence[Schedule],
+    ) -> int:
+        """Hospitals, doctors at hospitals, sessions, and one numbered slot per place in each
+        session, spaced evenly across the session. Idempotent by id."""
+        added = 0
+        async with self._uow.join() as uow:
+            for org in organizations:
+                if await uow.session.get(OrganizationRow, org.id) is None:
+                    uow.session.add(
+                        OrganizationRow(
+                            id=org.id,
+                            name=org.name,
+                            district=org.district,
+                            lat=org.location.lat,
+                            lng=org.location.lng,
+                            phone=org.phone,
+                        )
+                    )
+            for role in roles:
+                if await uow.session.get(PractitionerRoleRow, role.id) is None:
+                    uow.session.add(
+                        PractitionerRoleRow(
+                            id=role.id,
+                            practitioner_id=role.practitioner_id,
+                            organization_id=role.organization_id,
+                            specialty=role.specialty.value,
+                            fee_lkr=role.fee_lkr,
+                        )
+                    )
+            await uow.session.flush()
+            for schedule in schedules:
+                if await uow.session.get(ScheduleRow, schedule.id) is not None:
+                    continue
+                start, end = schedule.planning_horizon.start, schedule.planning_horizon.end
+                assert start is not None and end is not None
+                uow.session.add(
+                    ScheduleRow(
+                        id=schedule.id,
+                        practitioner_role_id=schedule.practitioner_role_id,
+                        organization_id=schedule.organization_id,
+                        starts_at=start,
+                        ends_at=end,
+                        capacity=schedule.capacity,
+                    )
+                )
+                step = (end - start) / schedule.capacity
+                for n in range(schedule.capacity):
+                    uow.session.add(
+                        SlotRow(
+                            id=new_id(),
+                            schedule_id=schedule.id,
+                            practitioner_role_id=schedule.practitioner_role_id,
+                            number=n + 1,
+                            starts_at=start + step * n,
+                        )
+                    )
+                added += 1
+            await uow.session.flush()
+        return added
 
     # ----- emergency (BOOK-5, SAF-10) -----------------------------------------------------------
 

@@ -33,6 +33,7 @@ from suwapath.contracts.fhir.resources import (
     MedicationStatement,
     Observation,
     Patient,
+    Practitioner,
     Provenance,
     ProvenanceEntity,
 )
@@ -48,6 +49,7 @@ from suwapath.modules.record.adapters.models import (
     MedicationStatementRow,
     ObservationRow,
     PatientRow,
+    PractitionerRow,
     ProvenanceRow,
 )
 from suwapath.platform.ids import new_id
@@ -354,6 +356,58 @@ class SqlRecordService:
                     patient_id=patient,
                 )
                 written += 1
+        return written
+
+    async def import_practitioners(self, practitioners: Sequence[Practitioner]) -> int:
+        """Directory data (no PHI), for the seed loader. Idempotent by id."""
+        written = 0
+        async with self._uow.join() as uow:
+            for doctor in practitioners:
+                if await uow.session.get(PractitionerRow, doctor.id) is not None:
+                    continue
+                name = (
+                    doctor.name.text
+                    or " ".join([*doctor.name.given, doctor.name.family or ""]).strip()
+                )
+                uow.session.add(
+                    PractitionerRow(
+                        id=doctor.id,
+                        user_id=doctor.user_id,
+                        search_name=name[:120],
+                        qualifications=list(doctor.qualifications),
+                        languages=[lang.value for lang in doctor.languages],
+                    )
+                )
+                written += 1
+            await uow.session.flush()
+        return written
+
+    async def import_provenance(self, sources: Sequence[Provenance]) -> int:
+        """Sources that seeded resources point at (CON-9). Idempotent by id; quotes sealed."""
+        written = 0
+        async with self._uow.join() as uow:
+            for source in sources:
+                if await uow.session.get(ProvenanceRow, source.id) is not None:
+                    continue
+                uow.session.add(
+                    ProvenanceRow(
+                        id=source.id,
+                        patient_id=source.patient_id,
+                        targets=[t.model_dump(mode="json") for t in source.targets],
+                        activity=source.activity,
+                        agent=source.agent[:80],
+                        recorded_at=source.recorded_at,
+                        entity_enc=await self._encrypt(
+                            PatientId(source.patient_id),
+                            "record_provenance",
+                            "entity_enc",
+                            source.id,
+                            source.entity.model_dump_json().encode(),
+                        ),
+                    )
+                )
+                written += 1
+            await uow.session.flush()
         return written
 
     async def destroy_patient_key(self, principal: Principal, patient_id: PatientId) -> None:

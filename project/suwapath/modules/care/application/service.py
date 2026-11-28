@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 import base64
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any, Literal
@@ -271,6 +271,37 @@ class SqlCareService:
             missed_by_slot={s: n for s, n in by_slot.items() if n},
             current_streak_days=streak,
         )
+
+    async def import_dose_history(
+        self, patient_id: PatientId, history: Sequence[tuple[ResourceId, datetime, DoseSlot, bool]]
+    ) -> int:
+        """Past doses for the seed world: taken or missed (CARE-4, CARE-5). One batch per patient;
+        idempotent by (medicine, scheduled time)."""
+        if not history:
+            return 0
+        async with self._uow.join() as uow:
+            now = uow.clock.now()
+            rows = [
+                {
+                    "id": new_id(),
+                    "patient_id": patient_id,
+                    "medication_statement_id": statement,
+                    "scheduled_at": at,
+                    "slot": slot.value,
+                    "status": "completed" if taken else "not-done",
+                    "status_reason": None if taken else "missed",
+                    "recorded_at": min(now, at + timedelta(hours=1)),
+                    "recorded_by": "patient" if taken else "timer",
+                }
+                for statement, at, slot, taken in history
+            ]
+            inserted = await uow.session.execute(
+                insert(MedicationAdministrationRow)
+                .values(rows)
+                .on_conflict_do_nothing(index_elements=["medication_statement_id", "scheduled_at"])
+                .returning(MedicationAdministrationRow.id)
+            )
+            return len(inserted.scalars().all())
 
     # ----- the rolling 48 hour window (CARE-3) -------------------------------------------------
 

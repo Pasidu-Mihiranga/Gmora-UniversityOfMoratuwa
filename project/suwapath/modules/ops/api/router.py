@@ -1,6 +1,10 @@
 """HTTP routes for the `ops` module. Stubs until issue U08 implements them (W0.8)."""
 
+from fastapi import Depends, Request
+
 from suwapath.contracts.enums import Role
+from suwapath.contracts.errors import NotFound
+from suwapath.platform.http.auth import require
 from suwapath.platform.http.stubs import ALL_ROLES, StubRoute, stub_router
 
 ROUTES = [
@@ -22,9 +26,22 @@ router = stub_router("ops", ROUTES)
 DEV_ROUTES = [
     StubRoute("GET", "/dev/clock", ALL_ROLES, "Simulated clock (dev and demo)", "U08"),
     StubRoute("POST", "/dev/clock/advance", ALL_ROLES, "Advance the clock (dev and demo)", "U08"),
-    StubRoute(
-        "POST", "/dev/scenario/reset", ALL_ROLES, "Reset the demo world (dev and demo)", "U08"
-    ),
 ]
 
 dev_router = stub_router("dev", DEV_ROUTES)
+
+
+@dev_router.post(
+    "/dev/scenario/reset",
+    summary="Reset the demo world (dev and demo)",
+    operation_id="dev_post_dev_scenario_reset",
+    dependencies=[Depends(require(*ALL_ROLES))],
+)
+async def reset(request: Request) -> dict[str, int]:
+    """Empty every table and load the synthetic world again (spec 16). Mounted only in
+    development, demo and test (EVT-18); every signed-in demo user may use the dev panel."""
+    reset_world = getattr(request.app.state, "reset_world", None)
+    if reset_world is None:
+        raise NotFound()
+    counts: dict[str, int] = await reset_world()
+    return counts
