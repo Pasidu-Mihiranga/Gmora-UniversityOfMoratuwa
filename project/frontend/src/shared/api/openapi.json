@@ -759,6 +759,38 @@
         "title": "CaseStatus",
         "type": "string"
       },
+      "CheckResult": {
+        "additionalProperties": false,
+        "properties": {
+          "check": {
+            "title": "Check",
+            "type": "string"
+          },
+          "codes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Codes",
+            "type": "array"
+          },
+          "fixable": {
+            "default": true,
+            "title": "Fixable",
+            "type": "boolean"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "check",
+          "passed"
+        ],
+        "title": "CheckResult",
+        "type": "object"
+      },
       "CodeableConcept": {
         "additionalProperties": false,
         "properties": {
@@ -1027,6 +1059,15 @@
           "sensitive_mental_health"
         ],
         "title": "DataCategory",
+        "type": "string"
+      },
+      "DecidedBy": {
+        "enum": [
+          "rules",
+          "model",
+          "human"
+        ],
+        "title": "DecidedBy",
         "type": "string"
       },
       "Decision": {
@@ -2019,6 +2060,34 @@
         "title": "Page[PatientResource]",
         "type": "object"
       },
+      "Page_ReviewItem_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Page[ReviewItem]",
+        "type": "object"
+      },
       "Page_TimelineItem_": {
         "additionalProperties": false,
         "properties": {
@@ -2643,6 +2712,85 @@
         "title": "Registration",
         "type": "object"
       },
+      "ReviewDecision": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "send",
+              "edit",
+              "discard"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "edited_text": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edited Text"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "ReviewDecision",
+        "type": "object"
+      },
+      "ReviewItem": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          },
+          "preview": {
+            "title": "Preview",
+            "type": "string"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "reviewer_role": {
+            "enum": [
+              "doctor",
+              "patient"
+            ],
+            "title": "Reviewer Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "message_id",
+          "reviewer_role",
+          "preview",
+          "reason_codes",
+          "created_at"
+        ],
+        "title": "ReviewItem",
+        "type": "object"
+      },
       "Role": {
         "enum": [
           "patient",
@@ -3085,6 +3233,92 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "Verdict": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckResult"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "cost_usd": {
+            "default": 0.0,
+            "title": "Cost Usd",
+            "type": "number"
+          },
+          "decided_by": {
+            "$ref": "#/components/schemas/DecidedBy"
+          },
+          "latency_ms": {
+            "default": 0,
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          },
+          "model_checks": {
+            "enum": [
+              "run",
+              "not_run",
+              "failed"
+            ],
+            "title": "Model Checks",
+            "type": "string"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "model_probabilities": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Model Probabilities",
+            "type": "object"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/VerdictKind"
+          }
+        },
+        "required": [
+          "message_id",
+          "verdict",
+          "decided_by",
+          "checks",
+          "model_checks",
+          "at"
+        ],
+        "title": "Verdict",
+        "type": "object"
+      },
+      "VerdictKind": {
+        "enum": [
+          "allow",
+          "revise",
+          "block",
+          "escalate",
+          "hold"
+        ],
+        "title": "VerdictKind",
+        "type": "string"
       }
     }
   },
@@ -6616,17 +6850,57 @@
     "/api/v1/reviews": {
       "get": {
         "operationId": "verifier_get_reviews",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Page_ReviewItem_"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M16)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Messages waiting for my review",
@@ -6644,16 +6918,29 @@
             "name": "review_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Review Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDecision"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Verdict"
+                }
               }
             },
             "description": "Successful Response"
@@ -6667,9 +6954,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M16)"
           }
         },
         "summary": "Send, edit or discard",

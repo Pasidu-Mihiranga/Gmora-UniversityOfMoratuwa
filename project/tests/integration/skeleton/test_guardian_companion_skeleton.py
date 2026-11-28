@@ -28,10 +28,10 @@ from suwapath.contracts.enums import (
     Role,
 )
 from suwapath.contracts.events.catalog import PatientMessageReceived
-from suwapath.contracts.ids import CaseId, MessageId, PatientId, ResourceId, TraceId, UserId
+from suwapath.contracts.ids import CaseId, PatientId, ResourceId, TraceId, UserId
 from suwapath.contracts.ports.consent import AccessRequest
 from suwapath.contracts.principal import Principal
-from suwapath.contracts.testing.doubles_clinical import InMemoryCaseService
+from suwapath.contracts.testing.doubles_clinical import InMemoryCaseService, KeywordSafetyService
 from suwapath.contracts.testing.doubles_core import (
     InMemoryAccessPolicy,
     InMemoryNotificationService,
@@ -40,7 +40,8 @@ from suwapath.modules.agents.adapters.models import AgentMessageRow
 from suwapath.modules.agents.application import runtime
 from suwapath.modules.agents.application.skeleton_agents import CompanionAgent, GuardianAgent
 from suwapath.modules.care.application import doses
-from suwapath.modules.verifier.application.rules import RulesVerifier
+from suwapath.modules.verifier.application.service import SqlVerifier
+from suwapath.modules.verifier.domain.checks import default_checks
 from suwapath.platform.clock import FixedClock
 from suwapath.platform.events.dispatcher import Dispatcher
 from suwapath.platform.events.subscribers import SubscriberRegistry
@@ -100,6 +101,7 @@ class Harness:
     dispatcher: Dispatcher
     runner: runtime.AgentRunner
     delivery: runtime.Delivery
+    verifier: SqlVerifier
 
     async def pump(self) -> None:
         """Run timers, event delivery and agent jobs until the system is quiet."""
@@ -143,7 +145,7 @@ class Harness:
             return [Sent(r.id, r.sender, r.status, r.trace_id, r.case_id) for r in rows]
 
     async def approve_alert(self) -> bool:
-        alert = (await self.messages(MessageIntent.GUARDIAN_ALERT))[0]
+        """Amma sends the alert from her review queue (VER-5); delivery acts on her verdict."""
         amma = Principal(
             kind=PrincipalKind.USER,
             user_id=self.world.amma_user,
@@ -153,10 +155,15 @@ class Harness:
             purpose=Purpose.SELF_ACCESS,
             trace_id=TraceId(TRACE),
         )
+        page = await self.verifier.reviews(amma, None, 10)
+        if len(page.items) != 1:
+            return False
         async with self.factory() as uow:
-            approved = await self.delivery.approve_escalated(uow, amma, MessageId(alert.id))
+            await self.verifier.decide_review(amma, page.items[0].id, "send", None)
             await uow.commit()
-        return approved
+        await self.pump()
+        alert = (await self.messages(MessageIntent.GUARDIAN_ALERT))[0]
+        return alert.status == MessageStatus.DELIVERED.value
 
     def notifications_for(self, user: UserId) -> list[dict[str, object]]:
         return [{"kind": n.kind, **n.params} for n in self.notifications.items if n.user_id == user]
@@ -182,6 +189,12 @@ def harness(uow_factory: UnitOfWorkFactory, clock: FixedClock) -> Harness:
         user_roles={world.nimal: Role.GUARDIAN, world.amma_user: Role.PATIENT},
     )
     notifications = InMemoryNotificationService(now=clock.now)
+    verifier = SqlVerifier(
+        uow_factory,
+        lambda: default_checks(KeywordSafetyService().check_wording),
+        lambda: {"agent_directory": world, "notifications": notifications},
+        lambda: None,  # no model verifier: rules only (VER-10)
+    )
 
     async def latest_patient_text(case_id: CaseId) -> UntrustedText | None:
         texts = [t for c, sender, t in cases.communications if c == case_id and sender == "patient"]
@@ -190,7 +203,7 @@ def harness(uow_factory: UnitOfWorkFactory, clock: FixedClock) -> Harness:
     deps = runtime.Dependencies(
         cases=cases,
         policy=policy,
-        verifier=RulesVerifier(clock.now),
+        verifier=verifier,
         notifications=notifications,
         directory=world,
         missed_doses=doses.missed_doses,
@@ -214,6 +227,7 @@ def harness(uow_factory: UnitOfWorkFactory, clock: FixedClock) -> Harness:
         Dispatcher(uow_factory, subscribers),
         runtime.AgentRunner(uow_factory, agents, deps),
         delivery,
+        verifier,
     )  # type: ignore[arg-type]
 
 
@@ -328,3 +342,32 @@ async def test_unanswered_check_in_times_out_to_an_alert(harness: Harness) -> No
     await harness.amma_replies("I am fine")  # a late answer does not create a second alert
     await harness.pump()
     assert len(await harness.messages(MessageIntent.GUARDIAN_ALERT)) == 1
+
+
+async def test_a_held_message_is_retried_and_reaches_a_human_never_unchecked(
+    harness: Harness,
+) -> None:
+    """VER-9: the model verifier is down. Even the agent-to-agent check-in is held and retried
+    every 2 minutes; after 30 minutes it goes to a human. Nothing moves on unchecked."""
+
+    async def down(state: list[str], questions: dict[str, object]) -> object:
+        raise RuntimeError("provider down")
+
+    harness.verifier._decide_fn = lambda: down  # type: ignore[assignment,return-value]
+    await harness.schedule_missed_evenings()
+    await harness.pump()
+
+    async def status() -> str:
+        return (await harness.messages(MessageIntent.CHECK_IN_WITH_PATIENT))[0].status
+
+    assert await status() == MessageStatus.HELD.value
+    assert [t for _, sender, t in harness.cases.communications if sender == "patient"] == []
+    for _ in range(14):  # 28 minutes of retries: still held
+        harness.clock.advance(timedelta(minutes=2))
+        await harness.pump()
+    assert await status() == "held"
+    harness.clock.advance(timedelta(minutes=3))
+    await harness.pump()
+    assert await status() == "escalated"
+    assert harness.notifications_for(harness.world.nimal) == []
+    assert harness.notifications_for(harness.world.amma_user)[-1]["kind"] == "review_required"

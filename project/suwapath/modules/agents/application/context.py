@@ -25,7 +25,7 @@ from suwapath.contracts.agents import (
 )
 from suwapath.contracts.cases import CaseState
 from suwapath.contracts.common import Contract, UntrustedText
-from suwapath.contracts.enums import AgentKind, DataCategory, Language
+from suwapath.contracts.enums import AgentKind, DataCategory, Language, Urgency
 from suwapath.contracts.errors import AccessDenied, ConsentDenied, NotFound, ValidationFailed
 from suwapath.contracts.fhir.base import GeoPoint
 from suwapath.contracts.ids import (
@@ -121,6 +121,8 @@ class Dependencies:
     safety: SafetyService | None = None
     navigation: NavigationService | None = None
     booking: BookingService | None = None
+    # The case's urgency floor, for the verifier's urgency check (VER-2).
+    case_floor: Callable[[CaseId], Awaitable[Urgency | None]] | None = None
 
 
 @dataclass

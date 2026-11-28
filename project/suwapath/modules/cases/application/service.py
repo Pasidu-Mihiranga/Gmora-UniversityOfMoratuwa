@@ -446,6 +446,11 @@ class SqlCaseService:
             raise VersionConflict()
         return case
 
+    async def urgency_floor(self, case_id: CaseId) -> Urgency | None:
+        """The case's urgency floor, for the verifier's urgency check (system read, no content)."""
+        async with self._uow.join() as uow:
+            return (await self._load(uow, case_id)).state.urgency_floor
+
     async def load(self, uow: UnitOfWork, case_id: CaseId) -> Case:
         return await self._load(uow, case_id)
 

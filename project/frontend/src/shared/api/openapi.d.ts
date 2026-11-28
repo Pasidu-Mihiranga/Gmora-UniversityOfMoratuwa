@@ -1924,6 +1924,23 @@ export interface components {
          * @enum {string}
          */
         CaseStatus: "open" | "intake" | "assessed" | "emergency" | "in_care" | "awaiting_doctor" | "replied" | "handed_to_human" | "closed";
+        /** CheckResult */
+        CheckResult: {
+            /** Check */
+            check: string;
+            /**
+             * Codes
+             * @default []
+             */
+            codes: string[];
+            /**
+             * Fixable
+             * @default true
+             */
+            fixable: boolean;
+            /** Passed */
+            passed: boolean;
+        };
         /** CodeableConcept */
         CodeableConcept: {
             /** Coding */
@@ -2023,6 +2040,11 @@ export interface components {
          * @enum {string}
          */
         DataCategory: "demographics" | "contact" | "conditions" | "allergies" | "medications" | "adherence" | "observations" | "reports" | "imaging" | "appointments" | "conversations" | "sensitive_sexual_health" | "sensitive_mental_health";
+        /**
+         * DecidedBy
+         * @enum {string}
+         */
+        DecidedBy: "rules" | "model" | "human";
         /** Decision */
         Decision: {
             /**
@@ -2393,6 +2415,13 @@ export interface components {
             /** Next Cursor */
             next_cursor?: string | null;
         };
+        /** Page[ReviewItem] */
+        Page_ReviewItem_: {
+            /** Items */
+            items: components["schemas"]["ReviewItem"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
         /** Page[TimelineItem] */
         Page_TimelineItem_: {
             /** Items */
@@ -2629,6 +2658,43 @@ export interface components {
              */
             role: "patient" | "guardian";
         };
+        /** ReviewDecision */
+        ReviewDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "send" | "edit" | "discard";
+            /** Edited Text */
+            edited_text?: string | null;
+        };
+        /** ReviewItem */
+        ReviewItem: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Message Id
+             * Format: uuid
+             */
+            message_id: string;
+            /** Preview */
+            preview: string;
+            /** Reason Codes */
+            reason_codes: string[];
+            /**
+             * Reviewer Role
+             * @enum {string}
+             */
+            reviewer_role: "doctor" | "patient";
+        };
         /**
          * Role
          * @enum {string}
@@ -2833,6 +2899,49 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** Verdict */
+        Verdict: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Checks */
+            checks: components["schemas"]["CheckResult"][];
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            decided_by: components["schemas"]["DecidedBy"];
+            /**
+             * Latency Ms
+             * @default 0
+             */
+            latency_ms: number;
+            /**
+             * Message Id
+             * Format: uuid
+             */
+            message_id: string;
+            /**
+             * Model Checks
+             * @enum {string}
+             */
+            model_checks: "run" | "not_run" | "failed";
+            /** Model Id */
+            model_id?: string | null;
+            /** Model Probabilities */
+            model_probabilities?: {
+                [key: string]: number;
+            };
+            verdict: components["schemas"]["VerdictKind"];
+        };
+        /**
+         * VerdictKind
+         * @enum {string}
+         */
+        VerdictKind: "allow" | "revise" | "block" | "escalate" | "hold";
     };
     responses: never;
     parameters: never;
@@ -5624,7 +5733,10 @@ export interface operations {
     };
     verifier_get_reviews: {
         parameters: {
-            query?: never;
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -5637,15 +5749,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Page_ReviewItem_"];
                 };
             };
-            /** @description Not implemented yet (M16) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -5658,7 +5772,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewDecision"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -5666,7 +5784,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Verdict"];
                 };
             };
             /** @description Validation Error */
@@ -5677,13 +5795,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M16) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

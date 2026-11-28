@@ -231,7 +231,12 @@ class DoctorAssistant:
                     )
                 ),
             )
-            if verdict.verdict is not VerdictKind.ALLOW:  # fail closed (invariant 5)
+            # Without a model verifier a reply draft is escalated to a human (VER-10); for a reply
+            # that human is the treating doctor, whose approval comes next (AGT-30, invariant 6).
+            rules_only = verdict.verdict is VerdictKind.ESCALATE and any(
+                c.check == "policy" and "rules_only" in c.codes for c in verdict.checks
+            )
+            if verdict.verdict is not VerdictKind.ALLOW and not rules_only:  # fail closed
                 status = {
                     VerdictKind.REVISE: MessageStatus.RETURNED,
                     VerdictKind.ESCALATE: MessageStatus.ESCALATED,
