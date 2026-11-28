@@ -430,7 +430,9 @@ class CompanionAgent:
                 await self._ask(turn, asked, clarify=True)
                 return
             turn.fact(asked.concept, present=parsed.label != "no", value=parsed.label)
-            step = await navigation.answer(principal, case_id, asked.concept, parsed.value)
+            step = await navigation.answer(principal, case_id, asked.concept, parsed.value, context)
+        for finding in step.findings:  # NAV-4: the case events are the navigation state
+            turn.fact(finding.concept, present=finding.present, value="mentioned")
         await self._step(turn, step, assessment, profile)
 
     async def _judge(
@@ -496,7 +498,7 @@ class CompanionAgent:
                 choices=list(question.choices),
                 red_flag_screen=question.red_flag_screen,
             )
-        body = copy.question_text(
+        body = question.text or copy.question_text(
             question.question_key, question.concept, question.answer_type, lang
         )
         if clarify:

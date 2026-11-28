@@ -40,7 +40,12 @@ from suwapath.contracts.ids import (
     UserId,
 )
 from suwapath.contracts.ports.care import AdherenceDay, AdherenceSummary
-from suwapath.contracts.ports.navigation import DoctorOption, NavigationStep
+from suwapath.contracts.ports.navigation import (
+    DoctorOption,
+    Finding,
+    NavigationQuestion,
+    NavigationStep,
+)
 from suwapath.contracts.principal import Principal
 from suwapath.contracts.testing.doubles_clinical import (
     InMemoryBookingService,
@@ -93,7 +98,7 @@ class ScriptedNavigation:
         return self.steps.pop(0)
 
     async def answer(
-        self, principal: Any, case_id: Any, concept: str, answer: Any
+        self, principal: Any, case_id: Any, concept: str, answer: Any, context: Any = None
     ) -> NavigationStep:
         self.calls.append(("answer", concept, answer))
         return self.steps.pop(0)
@@ -490,3 +495,24 @@ async def test_amma_not_well_starts_intake_and_raises_the_alert(
     assert home.navigation.calls[0][0] == "start"
     assert (await home.replies())[-1].kind == "question"
     assert "check_in_result" in await home.intents()
+
+
+async def test_findings_from_the_first_message_become_case_facts_and_text_is_shown(
+    uow_factory: UnitOfWorkFactory, clock: FixedClock
+) -> None:
+    """NAV-4: the engine keeps no state; the companion records the findings it returns, and shows
+    the reviewed question text when the engine gives one."""
+    step = NavigationStep(
+        question=NavigationQuestion(
+            concept="cough",
+            question_key="nav.cough",
+            answer_type="yes_no",
+            text="Do you have a cough?",
+        ),
+        findings=(Finding(concept="fever", present=True), Finding(concept="chills", present=False)),
+    )
+    home = home_for(uow_factory, clock, [step])
+    await home.opens("I have had fever for a day")
+    assert (await home.replies())[-1].text == "Do you have a cough?"
+    facts = {(f.key, f.present, f.value) for f in (await home.state()).facts}
+    assert {("fever", True, "mentioned"), ("chills", False, "mentioned")} <= facts
