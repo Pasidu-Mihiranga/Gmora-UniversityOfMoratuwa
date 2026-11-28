@@ -15,6 +15,11 @@ SYSTEM_ONLY = {
     "MemoryService.summarize_closed_case",
     "RecordService.patient_for_user",
     "BookingService.release_holds_for_case",
+    # The storage layer's lock (SEC-22), not a read path: a module seals or opens a field only
+    # after it decided the caller may see it, so the principal check happens before this call.
+    "PatientCipher.encrypt",
+    "PatientCipher.decrypt",
+    "PatientCipher.destroy_key",
 }
 
 
