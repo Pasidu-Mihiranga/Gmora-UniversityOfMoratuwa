@@ -1,0 +1,73 @@
+# Elder-care and chronic-disease complaints (NAV-5 extension).
+#
+# DDXPlus has no patients for these, so there are no counted likelihoods to use. Instead each
+# complaint routes straight to doctor types and a window, used when the complaint is present and
+# the DDXPlus groups give no confident answer. No probabilities are invented here.
+#
+# STATUS: DRAFT, NEEDS REVIEW with the D01 labels. Every rule names the public guideline it follows;
+# `verified: false` until a team member has opened the reference and confirmed it supports the
+# routing. Red-flag rules always run first and can only raise the window.
+version: complaints-v1-draft
+status: draft_needs_review
+
+complaints:
+  diabetes_control:
+    concepts: [high_sugar, low_sugar_worry]
+    specialties: [general_medicine, endocrinology]
+    urgency: soon_72h
+    reference: "NICE NG28, Type 2 diabetes in adults: management"
+    verified: false
+  blood_pressure_control:
+    concepts: [high_bp_reading]
+    specialties: [general_medicine, cardiology]
+    urgency: soon_72h
+    reference: "NICE NG136, Hypertension in adults: diagnosis and management"
+    verified: false
+  medicine_side_effect:
+    concepts: [side_effect]
+    specialties: [general_medicine]
+    urgency: soon_72h
+    reference: "NICE NG5, Medicines optimisation: the safe and effective use of medicines"
+    verified: false
+  joint_flare:
+    concepts: [joint_flare]
+    specialties: [general_medicine, rheumatology, orthopaedics]
+    urgency: routine
+    reference: "NICE NG226, Osteoarthritis in over 16s: diagnosis and management"
+    verified: false
+  kidney_concern:
+    concepts: [kidney_concern]
+    specialties: [general_medicine, nephrology]
+    urgency: soon_72h
+    reference: "NICE NG203, Chronic kidney disease: assessment and management"
+    verified: false
+  urinary:
+    concepts: [urinary_symptoms]
+    specialties: [general_medicine, urology]
+    urgency: soon_72h
+    reference: "NICE NG109, Urinary tract infection (lower): antimicrobial prescribing; NICE CG97, Lower urinary tract symptoms in men"
+    verified: false
+  falls:
+    concepts: [fall]
+    specialties: [general_medicine, orthopaedics]
+    urgency: soon_72h
+    reference: "NICE NG249, Falls: assessment and prevention in older people and in people 50 and over at higher risk"
+    verified: false
+  dizziness:
+    concepts: [vertigo]  # spinning dizziness (the dizzy_kind answer); light-headedness is scored
+    specialties: [general_medicine, ent, neurology]
+    urgency: soon_72h
+    reference: "NICE Clinical Knowledge Summaries, Vertigo"
+    verified: false
+  low_mood:
+    concepts: [low_mood]
+    specialties: [general_medicine, psychiatry]
+    urgency: soon_72h
+    reference: "NICE NG222, Depression in adults: treatment and management"
+    verified: false
+  memory:
+    concepts: [memory_concern]
+    specialties: [general_medicine, neurology, psychiatry]
+    urgency: routine
+    reference: "NICE NG97, Dementia: assessment, management and support"
+    verified: false
