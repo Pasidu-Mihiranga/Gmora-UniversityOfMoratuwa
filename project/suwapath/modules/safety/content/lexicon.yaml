@@ -1,0 +1,177 @@
+# Safety lexicon v1 (SAF-2): patient words -> concepts, in English (en), Sinhala (si) and Sinhala
+# written in Latin script (si_latn). Matching is case-insensitive and by whole words; a trailing
+# "*" matches any ending of the last word (for example "faint*" matches fainted and fainting).
+# In Sinhala (si, si_latn) the last word of a phrase also matches with any ending when it has 4 or
+# more letters (පපුවේ කැක්කුම matches කැක්කුමක්); shorter words (උණ, una) stay whole words.
+# Every concept used by a red-flag rule must be here, in all three scripts (tests check this).
+# The Sinhala entries need the native-speaker review (issue D05) before the demo.
+version: lexicon-v1
+concepts:
+  chest_pain:
+    en: [chest pain, pain in my chest, pain in the chest, chest hurts, chest is hurting, chest tightness, tight chest, chest pressure, pressure in my chest, heavy chest]
+    si: [පපුවේ වේදනාව, පපුවේ කැක්කුම, පපුව රිදෙනවා, පපුව තද, පපුව තදයි, පපුවේ තද, පපුවේ තදයක්, පපුවේ බරක්]
+    si_latn: [papuwe wedanawa, papuwe kakkuma, papuwa ridenawa, papuwa thada, papuwe thada, papuwe barak]
+  pain_spreading:
+    en: [left arm, down my arm, to my arm, to the arm, to my jaw, jaw pain, to my back, to my shoulder]
+    si: [වම් අතට, වම් අත, හක්කට, හක්ක රිදෙනවා, උරහිසට]
+    si_latn: [wam athata, wam atha, hakkata, hakka ridenawa, urahisata]
+  sweating:
+    en: [sweating, sweaty, cold sweat, sweat*]
+    si: [දහඩිය, දාඩිය]
+    si_latn: [dahadiya, dadiya]
+  breathless:
+    en: [short of breath, shortness of breath, breathless*, hard to breathe, difficult to breathe, difficulty breathing, trouble breathing, cannot breathe properly, out of breath]
+    si: [හුස්ම ගන්න අමාරු, හුස්ම හිර, හුස්ම හිරවෙනවා, හති වැටෙනවා, හුස්ම අමාරු]
+    si_latn: [husma ganna amaru, husma hira, husma hirawenawa, hathi watenawa, husma amaru]
+  severe_breathless:
+    en: [cannot breathe, can't breathe, cant breathe, unable to breathe, gasping, struggling to breathe, too breathless to speak, cannot speak because of breath]
+    si: [හුස්ම ගන්නම බෑ, හුස්ම ගන්න බැහැ, හුස්ම ගන්න බෑ, හුස්ම නවතිනවා]
+    si_latn: [husma gannama ba, husma ganna bahe, husma ganna ba, husma nawathinawa]
+  blue_lips:
+    en: [blue lips, lips are blue, lips turning blue, blue face, turning blue]
+    si: [තොල් නිල්, තොල් නිල් පාට, මුහුණ නිල් පාට]
+    si_latn: [thol nil, thol nil pata, muhuna nil pata]
+  vomiting:
+    en: [vomit*, throwing up, threw up, nausea, nauseous, feel sick]
+    si: [වමනය, වමනේ, වමන, ඔක්කාරය, ඔක්කාරෙ]
+    si_latn: [wamane, vamane, wamanaya, okkare, okkaraya]
+  collapse:
+    en: [faint*, passed out, pass out, collapsed, collapse, blacked out, lost consciousness, unconscious, not waking up, unresponsive]
+    si: [ක්ලාන්ත, ක්ලාන්තය, සිහිය නැති, සිහිය නැතිවුණා, සිහිසුන්, ඇද වැටුණා]
+    si_latn: [klantha, klanthaya, sihiya nathi, sihiya nathiwuna, sihisun, ada watuna]
+  face_droop:
+    en: [face drooping, face droop*, face is drooping, one side of my face, one side of the face, face weak, face is weak, mouth drooping, crooked mouth, crooked face]
+    si: [මුහුණ ඇද, මුහුණ ඇදවෙලා, කට ඇද, කට ඇදවෙලා, මුහුණේ එක පැත්තක්]
+    si_latn: [muhuna ada, muhuna adawela, kata ada, kata adawela, muhune eka paththak]
+  one_side_weak:
+    en: [arm weakness, weak arm, arm is weak, cannot lift my arm, cannot lift the arm, one side weak, weakness on one side, leg weakness on one side, numb on one side, cannot move my arm]
+    si: [අතක් පණ නැති, අත පණ නැති, එක පැත්තක් පණ නැති, අත උස්සන්න බෑ, කකුලක් පණ නැති]
+    si_latn: [athak pana nathi, atha pana nathi, eka paththak pana nathi, atha ussanna ba, kakulak pana nathi]
+  slurred_speech:
+    en: [slurred speech, slurring, speech is slurred, cannot speak properly, trouble speaking, words are jumbled, talking strangely]
+    si: [කතාව පැටලෙනවා, කතා කරන්න අමාරු, කතාව අපැහැදිලි, හරියට කතා කරන්න බෑ]
+    si_latn: [kathawa patalenawa, katha karanna amaru, kathawa apahadili, hariyata katha karanna ba]
+  fever:
+    en: [fever, feverish, high temperature, temperature is high, febrile]
+    si: [උණ, උණක්, උණයි, උණ තියෙනවා, උණ ගැනිලා]
+    si_latn: [una, unak, unai, una thiyenawa, una ganila]
+  high_fever:
+    en: [high fever, very high fever, fever of 39, fever of 40, 103 fever, 104 fever, burning up]
+    si: [දරුණු උණ, උණ වැඩියි, ලොකු උණක්, උණ ගොඩක්]
+    si_latn: [daruna una, una wadiyi, loku unak, una godak]
+  several_days:
+    en: [3 days, three days, 4 days, four days, 5 days, five days, a week, one week, many days, several days, since last week]
+    si: [දවස් තුනක, දවස් තුනක්, දවස් හතරක, දවස් පහක, දින තුනක, සතියක, සතියක්, දවස් ගාණක]
+    si_latn: [dawas thunak, dawas hatharak, dawas pahak, dina thunak, sathiyak, dawas ganak]
+  stiff_neck:
+    en: [stiff neck, neck is stiff, neck stiffness, cannot bend my neck]
+    si: [බෙල්ල තද, බෙල්ල තදවෙලා, බෙල්ල නවන්න බෑ]
+    si_latn: [bella thada, bella thadawela, bella nawanna ba]
+  rash_not_fading:
+    en: [rash that does not fade, rash does not fade, purple rash, purple spots, rash does not go away when pressed]
+    si: [දම් පාට පලු, දම් පාට ලප, නොමැකෙන පලු]
+    si_latn: [dam pata palu, dam pata lapa, nomakena palu]
+  headache:
+    en: [headache, head ache, head hurts, head is hurting, head pain, pain in my head]
+    si: [හිසරදය, හිසරදයක්, ඔලුව රිදෙනවා, ඔලුවේ කැක්කුම, ඔලුවේ වේදනාව]
+    si_latn: [hisaradaya, hisaradayak, oluwa ridenawa, oluwe kakkuma, oluwe wedanawa]
+  worst_headache:
+    en: [worst headache, worst ever headache, worst headache of my life, sudden severe headache, thunderclap headache, headache came on suddenly, sudden headache like a blow]
+    si: [ජීවිතේ නරකම හිසරදය, හදිසියේ දරුණු හිසරදය, හදිසියේ දරුණු ඔලුවේ කැක්කුම, පහරක් වගේ හිසරදය]
+    si_latn: [jiwithe narakama hisaradaya, hadisiye daruna hisaradaya, hadisiye daruna oluwe kakkuma, paharak wage hisaradaya]
+  seizure:
+    en: [seizure, having a fit, fitting, convulsion*, shaking all over and not responding, epileptic fit]
+    si: [වලිප්පුව, වලිප්පුවක්, වලිප්පු, ගැස්සි ගැස්සි]
+    si_latn: [walippuwa, walippuwak, walippu, gassi gassi]
+  coughing_blood:
+    en: [coughing blood, coughing up blood, cough up blood, blood in my cough, blood in sputum, blood when I cough]
+    si: [කැස්සේ ලේ, ලේ කහිනවා, කහින කොට ලේ, සෙම එක්ක ලේ]
+    si_latn: [kesse le, kasse le, le kahinawa, kahina kota le, sema ekka le]
+  heavy_bleeding:
+    en: [bleeding heavily, heavy bleeding, bleeding a lot, bleeding will not stop, bleeding won't stop, bleeding does not stop, cannot stop the bleeding, lots of blood, soaked with blood]
+    si: [ලේ ගලනවා, ලේ ගොඩක් යනවා, ලේ නවතින්නේ නැහැ, ලේ නවතින්නේ නෑ, ලේ නවත්තන්න බෑ]
+    si_latn: [le galanawa, le godak yanawa, le nawathinne naha, le nawathinne na, le nawaththanna ba]
+  bleeding:
+    en: [bleeding, blood coming, spotting]
+    si: [ලේ යනවා, ලේ ගියා, ලේ එනවා]
+    si_latn: [le yanawa, le giya, le enawa]
+  vomiting_blood:
+    en: [vomiting blood, vomited blood, blood in my vomit, throwing up blood]
+    si: [ලේ වමනය, ලේ වමනේ, වමනයේ ලේ]
+    si_latn: [le wamane, le wamanaya, wamane le]
+  gut_bleeding:
+    en: [black stool, black stools, black poo, tarry stool, blood in my stool, blood in stool, blood in the toilet, bleeding from the back passage]
+    si: [කළු පාට මළ, කළු පාටට මළ, මළ එක්ක ලේ, මල පහ කරද්දී ලේ]
+    si_latn: [kalu pata mala, kalu patata mala, mala ekka le, mala paha karaddi le]
+  severe_abdominal_pain:
+    en: [severe stomach pain, severe abdominal pain, very bad stomach pain, terrible stomach pain, unbearable stomach pain, severe belly pain, stomach pain is unbearable]
+    si: [බඩේ දරුණු කැක්කුම, බඩේ දරුණු වේදනාව, බඩ දරුණු ලෙස රිදෙනවා, ඉවසන්න බැරි බඩේ කැක්කුම]
+    si_latn: [bade daruna kakkuma, bade daruna wedanawa, bada daruna lesa ridenawa, iwasanna bari bade kakkuma]
+  pregnant:
+    en: [pregnant, pregnancy, expecting a baby, weeks pregnant]
+    si: [ගැබිනි, ගර්භනී, බබෙක් ලැබෙන්න ඉන්නවා, බඩේ බබා]
+    si_latn: [gabini, garbhani, babek labenna innawa, bade baba]
+  postpartum:
+    en: [after giving birth, after the delivery, since the delivery, after my baby was born, gave birth, just delivered]
+    si: [දරු ප්රසූතියෙන් පස්සේ, බබා ලැබුණාට පස්සේ, බබා ලැබුණට පස්සේ, දරුවා ලැබුණාට පස්සේ]
+    si_latn: [baba labunata passe, daruwa labunata passe, prasuthiyen passe]
+  blurred_vision:
+    en: [blurred vision, blurry vision, cannot see clearly, seeing spots, flashing lights in my eyes]
+    si: [ඇස් බොඳ, ඇස් බොඳවෙනවා, හරියට පේන්නේ නැහැ, හරියට පේන්නේ නෑ]
+    si_latn: [as bonda, as bondawenawa, hariyata penne naha, hariyata penne na]
+  sudden_swelling:
+    en: [face is swollen, swollen face, hands are swollen, swollen hands, sudden swelling, puffy face]
+    si: [මුහුණ ඉදිමිලා, අත් ඉදිමිලා, හදිසියේ ඉදිමුම]
+    si_latn: [muhuna idimila, ath idimila, hadisiye idimuma]
+  baby_not_moving:
+    en: [baby is not moving, baby not moving, baby moving less, less movement, baby has stopped moving, reduced movements]
+    si: [බබා සෙලවෙන්නේ නැහැ, බබා සෙලවෙන්නේ නෑ, බබා අඩුවෙන් සෙලවෙනවා]
+    si_latn: [baba selawenne naha, baba selawenne na, baba aduwen selawenawa]
+  waters_broke:
+    en: [waters broke, water broke, leaking fluid, fluid leaking]
+    si: [වතුර ගියා, වතුර කැඩුණා, දියර යනවා]
+    si_latn: [wathura giya, wathura kaduna, diyara yanawa]
+  self_harm:
+    en: [kill myself, end my life, suicide, suicidal, want to die, hurt myself, harm myself, no reason to live, better off dead]
+    si: [මැරෙන්න හිතෙනවා, දිවි නසා ගන්න, ජීවත් වෙන්න ඕනේ නැහැ, ජීවත් වෙන්න ඕනේ නෑ, මාව මරාගන්න]
+    si_latn: [marenna hithenawa, diwi nasa ganna, jiwath wenna one naha, jiwath wenna one na, mawa maraganna]
+  baby:
+    en: [my baby, the baby, newborn, infant]
+    si: [බබා, බබාට, ළදරුවා, ළදරුවාට, අලුත උපන්]
+    si_latn: [baba, babata, ladaruwa, aluth upan]
+  not_feeding:
+    en: [not feeding, not drinking milk, refusing feeds, will not feed, won't feed, not breastfeeding]
+    si: [කිරි බොන්නේ නැහැ, කිරි බොන්නේ නෑ, කිරි උරන්නේ නැහැ]
+    si_latn: [kiri bonne naha, kiri bonne na, kiri uranne naha]
+  very_drowsy:
+    en: [very drowsy, hard to wake, difficult to wake, will not wake, floppy, very sleepy and limp]
+    si: [අවදි කරන්න අමාරු, ඇහැරෙන්නේ නැහැ, ඇහැරෙන්නේ නෑ, ඇඟ පණ නැති]
+    si_latn: [awadi karanna amaru, aharenne naha, aharenne na, anga pana nathi]
+  fall:
+    en: [fell, fall, fallen, fell down, slipped and fell, had a fall, tripped]
+    si: [වැටුණා, වැටුනා, ලිස්සලා වැටුණා, බිම වැටුණා]
+    si_latn: [watuna, wetuna, lissala watuna, bima watuna]
+  injury:
+    en: [hurt my, injured, injury, cannot stand, can't stand, cannot get up, can't get up, cannot walk, hit my head, head injury, bruise*, swollen, swelling, broken, bleeding]
+    si: [තුවාල, තුවාලයක්, නැගිටින්න බෑ, නැගිටින්න බැහැ, ඇවිදින්න බෑ, ඔලුව වැදුණා, ඉදිමිලා, කැඩිලා]
+    si_latn: [thuwala, thuwalayak, nagitinna ba, nagitinna bahe, awidinna ba, oluwa waduna, idimila, kadila]
+  confusion:
+    en: [confused, confusion, disoriented, not making sense, does not recognise, doesn't recognise, does not know where, talking nonsense, suddenly forgetful]
+    si: [ව්යාකූල, ව්යාකූලයි, අඳුනගන්නේ නැහැ, අඳුනගන්නේ නෑ, අමුතු විදියට කතා, පිස්සු කතා]
+    si_latn: [wyakula, wyakulayi, andunaganne naha, andunaganne na, amuthu widiyata katha]
+  dizzy:
+    en: [dizzy, dizziness, lightheaded, light headed, giddy, room is spinning, head is spinning]
+    si: [කරකැවිල්ල, කරකැවෙනවා, ඔලුව කැරකෙනවා, ඔලුව කරකැවෙනවා, කැරකිල්ල]
+    si_latn: [karakawilla, karakawenawa, oluwa karakenawa, oluwa karakawenawa, karakilla]
+  missed_medicine:
+    en: [missed my medicine, missed my tablets, forgot my medicine, forgot my tablets, did not take my medicine, didn't take my medicine, skipped my medicine]
+    si: [බෙහෙත් බොන්න අමතක, බෙහෙත් බිව්වේ නැහැ, බෙහෙත් බිව්වේ නෑ, බෙහෙත් ගත්තේ නැහැ]
+    si_latn: [beheth bonna amathaka, beheth biwwe naha, beheth biwwe na, beheth gaththe naha]
+  shaking:
+    en: [shaking, shaky, trembling, tremor*]
+    si: [වෙව්ලනවා, වෙව්ලුම, ගැහෙනවා]
+    si_latn: [wewlanawa, wewluma, gahenawa]
+  low_sugar:
+    en: [low sugar, sugar is low, sugar dropped, low blood sugar, hypo, hypoglycaemia, hypoglycemia]
+    si: [සීනි අඩුවෙලා, සීනි අඩු වෙලා, සීනි බැහැලා, සීනි අඩු වුණා]
+    si_latn: [sini aduwela, seeni aduwela, sini adu wela, seeni adu wela, seeni bahala, sini bahala]
