@@ -204,3 +204,115 @@ async def test_routes_keep_the_refresh_token_in_a_strict_cookie(
         assert (await client.post("/api/v1/auth/logout", headers=bearer)).status_code == 204
         assert (await client.get("/api/v1/me", headers=bearer)).status_code == 401
     assert COOKIE == "suwapath_refresh"
+
+
+# ----- sign up and demo accounts ------------------------------------------------------------------
+
+
+async def test_patients_and_guardians_can_sign_up_and_are_signed_in(
+    identity: SqlIdentityService,
+) -> None:
+    app = create_app(
+        Settings(_env_file=None),
+        token_verifier=identity.verify_access_token,
+        routers=[build_router(identity)],
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="https://test"
+    ) as client:
+        created = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "role": "patient",
+                "display_name": "Sunil",
+                "login": "sunil@example.test",
+                "password": "long enough",
+                "language": "en",
+            },
+        )
+        assert created.status_code == 201
+        user = created.json()["user"]
+        assert user["role"] == "patient" and user["patient_id"]  # a patient gets a record id
+        assert "httponly" in created.headers["set-cookie"].lower()
+        son = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "role": "guardian",
+                "display_name": "Ravi",
+                "login": "ravi@example.test",
+                "password": "long enough",
+            },
+        )
+        assert son.status_code == 201 and son.json()["user"]["patient_id"] is None
+        doctor = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "role": "doctor",
+                "display_name": "Dr X",
+                "login": "drx@example.test",
+                "password": "long enough",
+            },
+        )
+        assert doctor.status_code == 422  # doctors are added by an administrator
+        again = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "role": "patient",
+                "display_name": "K",
+                "login": LOGIN,
+                "password": "long enough",
+            },
+        )
+        short = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "role": "patient",
+                "display_name": "K",
+                "login": "new@example.test",
+                "password": "short",
+            },
+        )
+        assert again.status_code == short.status_code == 422
+        assert "already" not in again.text  # no hint that the account exists
+
+
+async def test_staff_roles_cannot_be_self_registered(identity: SqlIdentityService) -> None:
+    with pytest.raises(AccessDenied):
+        await identity.register(
+            login="x@example.test",
+            password="long enough",
+            role=Role.DOCTOR,
+            display_name="X",
+            language=Language.EN,
+        )
+
+
+async def test_demo_accounts_route_exists_only_with_a_demo_password(
+    identity: SqlIdentityService,
+) -> None:
+    await identity.create_user(
+        login="amma@demo.suwapath.lk",
+        password="demo password",
+        role=Role.PATIENT,
+        display_name="Kamala Perera",
+        language=Language.SI,
+    )
+    settings = Settings(_env_file=None)
+    with_demo = create_app(settings, routers=[build_router(identity, "demo password")])
+    without = create_app(settings, routers=[build_router(identity)])
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=with_demo), base_url="https://test"
+    ) as client:
+        listed = (await client.get("/api/v1/auth/demo-accounts")).json()
+    assert listed == [
+        {
+            "role": "patient",
+            "login": "amma@demo.suwapath.lk",
+            "display_name": "Kamala Perera",
+            "password": "demo password",
+        }
+    ]
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=without), base_url="https://test"
+    ) as client:
+        assert (await client.get("/api/v1/auth/demo-accounts")).status_code == 404

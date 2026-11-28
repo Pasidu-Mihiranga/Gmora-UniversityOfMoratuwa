@@ -136,6 +136,23 @@ def _cmd_openapi(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_seed_accounts(args: argparse.Namespace) -> int:
+    import asyncio
+
+    from suwapath.bootstrap import build_container, seed_demo_accounts
+
+    async def run() -> list[str]:
+        container = build_container()
+        try:
+            return await seed_demo_accounts(container, args.seed)
+        finally:
+            await container.db.dispose()
+
+    for login in asyncio.run(run()):
+        print(f"ready: {login}")
+    return 0
+
+
 def _cmd_seed(args: argparse.Namespace) -> int:
     from pathlib import Path
 
@@ -183,6 +200,11 @@ def build_parser() -> argparse.ArgumentParser:
     generate_cmd.add_argument("--seed", type=int, default=42)
     generate_cmd.add_argument("--out", default=None)
     generate_cmd.set_defaults(handler=_cmd_seed)
+    accounts_cmd = seed_sub.add_parser(
+        "accounts", help="create the five demo sign-ins with DEMO_PASSWORD (not in production)"
+    )
+    accounts_cmd.add_argument("--seed", type=int, default=42)
+    accounts_cmd.set_defaults(handler=_cmd_seed_accounts)
 
     openapi = sub.add_parser("openapi", help="write the OpenAPI document for the frontend (API-3)")
     openapi.add_argument("--out", default="frontend/src/shared/api/openapi.json")

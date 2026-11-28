@@ -8,14 +8,14 @@ The refresh route is cookie-authenticated, so it also needs the CSRF header and 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import Field
 
 from suwapath.contracts.common import Contract
 from suwapath.contracts.enums import Language, Role
-from suwapath.contracts.errors import AccessDenied
+from suwapath.contracts.errors import AccessDenied, NotFound
 from suwapath.contracts.ids import UserId
 from suwapath.contracts.ports.identity import IssuedTokens, StreamTicket, UserAccount
 from suwapath.contracts.principal import Principal
@@ -43,11 +43,38 @@ class ProfileChange(Contract):
     language: Language
 
 
+class Registration(Contract):
+    """Self sign-up is for patients and guardians only. Doctors and admins are created by an
+    admin, because a doctor must be verified before seeing patient data."""
+
+    role: Literal["patient", "guardian"]
+    display_name: str = Field(min_length=1, max_length=100)
+    login: str = Field(min_length=3, max_length=160)
+    password: str = Field(min_length=8, max_length=200)
+    language: Language = Language.SI
+
+
+class DemoAccount(Contract):
+    role: Role
+    login: str
+    display_name: str
+    password: str  # the shared synthetic DEMO_PASSWORD; this route exists only in development/demo
+
+
 class TicketRequest(Contract):
     stream: str = Field(pattern=STREAM)
 
 
-def build_router(service: SqlIdentityService) -> APIRouter:
+DEMO_LOGINS: tuple[str, ...] = (  # spec 16 section 2, in this order on the sign-in page
+    "amma@demo.suwapath.lk",
+    "nimal@demo.suwapath.lk",
+    "dr.silva@demo.suwapath.lk",
+    "admin.lotus@demo.suwapath.lk",
+    "ops@demo.suwapath.lk",
+)
+
+
+def build_router(service: SqlIdentityService, demo_password: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1", tags=["identity"])
 
     async def _session(response: Response, tokens: IssuedTokens) -> Session:
@@ -75,6 +102,45 @@ def build_router(service: SqlIdentityService) -> APIRouter:
         client = request.client.host if request.client else "unknown"
         tokens = await service.authenticate(body.login, body.password, client)
         return await _session(response, tokens)
+
+    @router.post(
+        "/auth/register",
+        status_code=201,
+        summary="Create a patient or guardian account",
+        operation_id="identity_post_auth_register",
+        dependencies=[Depends(public())],
+    )
+    async def register(body: Registration, request: Request, response: Response) -> Session:
+        await service.register(
+            login=body.login,
+            password=body.password,
+            role=Role(body.role),
+            display_name=body.display_name,
+            language=body.language,
+        )
+        client = request.client.host if request.client else "unknown"
+        return await _session(
+            response, await service.authenticate(body.login, body.password, client)
+        )
+
+    @router.get(
+        "/auth/demo-accounts",
+        summary="Demo accounts (development and demo only)",
+        operation_id="identity_get_auth_demo_accounts",
+        dependencies=[Depends(public())],
+    )
+    async def demo_accounts() -> list[DemoAccount]:
+        """404 unless demo sign-ins are on (development or demo, with DEMO_PASSWORD). Always
+        mounted, so the API schema is the same in every environment."""
+        if not demo_password:
+            raise NotFound()
+        accounts = await service.accounts_by_login(DEMO_LOGINS)
+        return [
+            DemoAccount(
+                role=a.role, login=login, display_name=a.display_name, password=demo_password
+            )
+            for login, a in accounts
+        ]
 
     @router.post(
         "/auth/refresh",

@@ -485,6 +485,34 @@
         "title": "Decision",
         "type": "object"
       },
+      "DemoAccount": {
+        "additionalProperties": false,
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "login": {
+            "title": "Login",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "required": [
+          "role",
+          "login",
+          "display_name",
+          "password"
+        ],
+        "title": "DemoAccount",
+        "type": "object"
+      },
       "FactRequest": {
         "additionalProperties": false,
         "properties": {
@@ -845,6 +873,50 @@
           "rules_version"
         ],
         "title": "RedFlagHit",
+        "type": "object"
+      },
+      "Registration": {
+        "additionalProperties": false,
+        "description": "Self sign-up is for patients and guardians only. Doctors and admins are created by an\nadmin, because a doctor must be verified before seeing patient data.",
+        "properties": {
+          "display_name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "si"
+          },
+          "login": {
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Login",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 200,
+            "minLength": 8,
+            "title": "Password",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "patient",
+              "guardian"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "display_name",
+          "login",
+          "password"
+        ],
+        "title": "Registration",
         "type": "object"
       },
       "Role": {
@@ -1334,6 +1406,32 @@
         ]
       }
     },
+    "/api/v1/auth/demo-accounts": {
+      "get": {
+        "description": "404 unless demo sign-ins are on (development or demo, with DEMO_PASSWORD). Always\nmounted, so the API schema is the same in every environment.",
+        "operationId": "identity_get_auth_demo_accounts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DemoAccount"
+                  },
+                  "title": "Response Identity Get Auth Demo Accounts",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Demo accounts (development and demo only)",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "operationId": "identity_post_auth_login",
@@ -1405,6 +1503,47 @@
           }
         },
         "summary": "Rotate the refresh token (cookie, CSRF checked)",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "identity_post_auth_register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Registration"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create a patient or guardian account",
         "tags": [
           "identity"
         ]

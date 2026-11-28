@@ -22,8 +22,17 @@ interface Session {
   user: SessionUser | null;
   loading: boolean;
   signIn: (login: string, password: string) => Promise<boolean>;
+  register: (input: Registration) => Promise<boolean>;
   signOut: () => Promise<void>;
   previewAs?: (role: Role) => void; // present only in development builds
+}
+
+export interface Registration {
+  role: "patient" | "guardian"; // doctors and admins are created by an administrator
+  display_name: string;
+  login: string;
+  password: string;
+  language: "si" | "en";
 }
 
 const SessionContext = createContext<Session | null>(null);
@@ -86,22 +95,37 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return me !== null;
   }, []);
 
+  const register = useCallback(async (input: Registration) => {
+    const response = await fetch("/api/v1/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) return false;
+    const body = (await response.json()) as { access_token?: string };
+    setAccessToken(body.access_token ?? null);
+    const me = await loadMe();
+    setUser(me);
+    return me !== null;
+  }, []);
+
   const signOut = useCallback(async () => {
     if (!user?.preview) {
-      await fetch("/api/v1/auth/logout", { method: "POST", headers: CSRF_HEADER }).catch(() => undefined);
+      // Through the API client, so the access token goes with it; the cookie ends the session.
+      await api.POST("/api/v1/auth/logout").catch(() => undefined);
     }
     clear();
   }, [clear, user]);
 
   const value = useMemo<Session>(() => {
-    const session: Session = { user, loading, signIn, signOut };
+    const session: Session = { user, loading, signIn, register, signOut };
     if (import.meta.env.DEV) {
       // Lets teammates see every screen before the identity module lands. Removed from production builds.
       session.previewAs = (role) =>
         setUser({ id: `preview-${role}`, role, display_name: `Preview ${role}`, language: "si", preview: true });
     }
     return session;
-  }, [user, loading, signIn, signOut]);
+  }, [user, loading, signIn, register, signOut]);
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
