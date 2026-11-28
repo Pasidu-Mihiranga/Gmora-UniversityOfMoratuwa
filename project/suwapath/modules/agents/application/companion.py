@@ -76,6 +76,7 @@ WINDOW: dict[Urgency, timedelta] = {  # spec 07 section 2
 }
 RED_FLAG_FACT = "red_flag."
 NAVIGATION_STOP = "NAV-EMERGENCY"  # the navigation engine's own emergency stop
+QUESTION_SOURCE = "patient_question"  # an "Ask my doctor" message (API, cases module)
 JEV_MIN_CONFIDENCE = 0.7
 INTAKE_STATES = (CaseStatus.OPEN, CaseStatus.INTAKE)
 ANSWER_INSTRUCTIONS = (
@@ -215,6 +216,9 @@ class CompanionAgent:
         turn.source = await ctx.patient_message_id()
         for flag in assessment.red_flags:
             turn.fact(f"{RED_FLAG_FACT}{flag.rule_id}", value=flag.urgency.value)
+        if said.source == QUESTION_SOURCE:  # "Ask my doctor", after the safety check above
+            await self._forward_question(turn)
+            return turn.done()
         check_in = await ctx.pending_request(MessageIntent.CHECK_IN_WITH_PATIENT)
         if check_in is not None:
             unwell = await self._answer_check_in(turn, check_in, said, assessment)
@@ -326,6 +330,39 @@ class CompanionAgent:
             await turn.reply("info", copy.text("check_in.thanks", turn.language))
             return False
         return patient_ok == "no"
+
+    # ----- "Ask my doctor" ------------------------------------------------------------------------
+
+    async def _forward_question(self, turn: Turn) -> None:
+        """Only the message ID travels; the treating doctor reads the words on the case."""
+        lang = turn.language
+        if (
+            await turn.ctx.deps.directory.doctor_case(turn.state.patient_id) is None
+            or not turn.source
+        ):
+            await turn.reply(
+                "info",
+                copy.text("question.no_doctor", lang),
+                (
+                    _action_chip(
+                        copy.chip("show_doctors", lang),
+                        lang,
+                        "show_doctors",
+                        f"doctors:{turn.state.id}",
+                    ),
+                ),
+            )
+            return
+        turn.messages.append(
+            AgentMessageDraft(
+                intent=MessageIntent.PATIENT_QUESTION,
+                recipient=AgentKind.DOCTOR_ASSISTANT.value,
+                body={"communication_id": str(turn.source)},
+                consent_scope=frozenset({DataCategory.CONVERSATIONS}),
+                dedupe_hint=f"question:{turn.source}",
+            )
+        )
+        await turn.reply("info", copy.text("question.sent", lang))
 
     # ----- a fact the doctor asked for (spec 16 steps 5 and 6) -----------------------------------
 

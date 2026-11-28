@@ -102,6 +102,7 @@ Delivery code accepts only messages that have a stored verdict `allow` (or a hum
 | `doctor_brief` | doctor_assistant -> doctor (person) | brief | brief id | |
 | `reply_draft` | doctor_assistant -> patient (person) | draft | text in patient language, from the doctor's notes | |
 | `revision_request` | verifier -> author agent | revision_request | failed checks, guidance codes | |
+| `patient_question` | patient_companion -> doctor_assistant | info | communication id of the patient's question ("Ask my doctor"), never the text | |
 
 `AGT-13` New intents are added by a `contract-change` pull request that adds a row here and a
 schema in `contracts/agents.py`.

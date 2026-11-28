@@ -65,6 +65,8 @@ from suwapath.platform.uow import UnitOfWork, UnitOfWorkFactory
 log = logging.getLogger(__name__)
 K = CaseEventKind
 APPROVAL_TIMER = "approval_timeout"
+QUESTION_SOURCE = "patient_question"  # UntrustedText.source of an "Ask my doctor" message
+DOCTOR = "doctor"
 MESSAGE_RETRIES = 3
 TIMELINE_KIND: dict[CaseEventKind, str] = {
     K.PATIENT_MESSAGE: "patient_message",
@@ -300,7 +302,11 @@ class SqlCaseService:
         async with self._uow.join() as uow:
             row = (
                 await uow.session.execute(
-                    select(CommunicationRow.id, CommunicationRow.payload_enc)
+                    select(
+                        CommunicationRow.id,
+                        CommunicationRow.payload_enc,
+                        CommunicationRow.recipient,
+                    )
                     .where(
                         CommunicationRow.case_id == case_id, CommunicationRow.sender == "patient"
                     )
@@ -310,9 +316,8 @@ class SqlCaseService:
             ).first()
         if row is None:
             return None
-        return ResourceId(row.id), UntrustedText(
-            value=row.payload_enc.decode(), source="patient_message"
-        )
+        source = QUESTION_SOURCE if row.recipient == DOCTOR else "patient_message"
+        return ResourceId(row.id), UntrustedText(value=row.payload_enc.decode(), source=source)
 
     async def patient_of(self, case_id: CaseId) -> PatientId:
         async with self._uow.join() as uow:
@@ -445,7 +450,7 @@ class SqlCaseService:
                 case_id=case.state.id,
                 patient_id=case.state.patient_id,
                 sender="patient",
-                recipient="patient_companion",
+                recipient=DOCTOR if message.source == QUESTION_SOURCE else "patient_companion",
                 payload_enc=message.value.encode(),  # encrypted with the patient key once M04 lands
                 simulated=case.state.simulated,
             )
@@ -617,23 +622,25 @@ async def _audit(uow: UnitOfWork, principal: Principal, case: Case, action: str)
     )
 
 
-async def _texts(uow: UnitOfWork, rows: Sequence[TimelineRow]) -> dict[str, str]:
+async def _texts(uow: UnitOfWork, rows: Sequence[TimelineRow]) -> dict[str, tuple[str, str]]:
     ids = [UUID(r.params["communication_id"]) for r in rows if "communication_id" in r.params]
     if not ids:
         return {}
     found = await uow.session.execute(
-        select(CommunicationRow.id, CommunicationRow.payload_enc).where(
+        select(CommunicationRow.id, CommunicationRow.payload_enc, CommunicationRow.recipient).where(
             CommunicationRow.id.in_(ids)
         )
     )
-    return {str(i): payload.decode() for i, payload in found.all()}
+    return {str(i): (payload.decode(), to) for i, payload, to in found.all()}
 
 
-def _item(row: TimelineRow, texts: dict[str, str]) -> TimelineItem:
+def _item(row: TimelineRow, texts: dict[str, tuple[str, str]]) -> TimelineItem:
     params = dict(row.params)
-    text = texts.get(params.get("communication_id", ""))
-    if text is not None and row.kind in ("patient_message", "agent_message"):
-        params["text"] = text  # the row is already filtered to a category the viewer may see
+    found = texts.get(params.get("communication_id", ""))
+    if found is not None and row.kind in ("patient_message", "agent_message"):
+        params["text"] = found[0]  # the row is already filtered to a category the viewer may see
+        if found[1] == DOCTOR:
+            params["to"] = DOCTOR  # "Ask my doctor": the treating doctor reads it here
     return TimelineItem(
         id=str(row.id),
         case_id=CaseId(row.case_id),

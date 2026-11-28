@@ -61,7 +61,9 @@ def build_lines(
     adherence: AdherenceSummary | None,
     clashes: Sequence[Clash],
     now: datetime,
+    questions: Sequence[ResourceId] = (),
 ) -> list[BriefLine]:
+    """`questions`: the patient's "Ask my doctor" messages, shown as links, never as text."""
     lines: list[BriefLine] = []
     lines += _alerts(case, clashes)
     lines += _navigation(case)
@@ -107,6 +109,10 @@ def build_lines(
         _line(S.OPEN_QUESTIONS, q.key.replace("_", " "), None, "case", ())
         for q in case.open_questions
         if q.for_role == "doctor"
+    ]
+    lines += [
+        _line(S.OPEN_QUESTIONS, "Patient question", None, "patient_reported", (q,))
+        for q in questions
     ]
     return lines
 

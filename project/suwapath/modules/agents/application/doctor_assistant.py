@@ -44,7 +44,9 @@ from suwapath.contracts.errors import NotFound
 from suwapath.contracts.ids import MessageId, ResourceId
 from suwapath.contracts.ports.consent import AccessDecision
 from suwapath.contracts.ports.verifier import VerificationContext
+from suwapath.contracts.suggestions import Suggestion
 from suwapath.modules.agents.adapters import briefs
+from suwapath.modules.agents.application import companion_text as copy
 from suwapath.modules.agents.application import messages
 from suwapath.modules.agents.application.context import AgentContext
 from suwapath.modules.agents.domain.brief import build_lines, missing_facts, ordered
@@ -114,7 +116,10 @@ class DoctorAssistant:
             return await self._resume(ctx, MessageId(UUID(data["draft_id"])), str(data["decision"]))
         if "message_id" in data:  # the companion answered a question for the doctor
             answer = await ctx.message(MessageId(UUID(data["message_id"])))
-            if answer is not None and answer.intent is MessageIntent.MISSING_FACT_ANSWER:
+            if answer is not None and answer.intent in (
+                MessageIntent.MISSING_FACT_ANSWER,
+                MessageIntent.PATIENT_QUESTION,
+            ):
                 return await self._brief(ctx)
         return AgentResult(status="done", reason="nothing_to_do")
 
@@ -147,7 +152,9 @@ class DoctorAssistant:
             patient_id=state.patient_id,
             version=await briefs.next_brief_version(ctx.uow, state.id),
             built_at=now,
-            lines=tuple(ordered(build_lines(state, record, adherence, clashes, now))),
+            lines=tuple(
+                ordered(build_lines(state, record, adherence, clashes, now, await _questions(ctx)))
+            ),
             missing_facts=tuple(r.fact_key for r in missing),
             hidden_categories_count=record.hidden_categories_count if record else 0,
         )
@@ -314,7 +321,16 @@ class DoctorAssistant:
             return "reply_rejected"
         case = await ctx.cases.get()  # EVT-21: fresh state after the pause
         text = await briefs.edited_text(ctx.uow, draft_id) or str(draft.body["text"])
-        reply = CompanionReply(kind="doctor_reply", text=text, language=case.language)
+        lang = case.language
+        ask = Suggestion(
+            kind="action",
+            label=copy.chip("ask_doctor", lang),
+            language=lang,
+            source="step",
+            action_kind="ask_doctor",
+            action_id=f"ask:{case.id}",
+        )
+        reply = CompanionReply(kind="doctor_reply", text=text, language=lang, suggestions=(ask,))
         communication_id = await ctx.deps.cases.deliver_communication(
             case.id, "patient", reply.model_dump_json(), case.simulated
         )
@@ -334,6 +350,13 @@ class DoctorAssistant:
         )
         await messages.mark(ctx.uow, draft_id, MessageStatus.DELIVERED, (MessageStatus.HELD,))
         return "reply_delivered"
+
+
+async def _questions(ctx: AgentContext) -> list[ResourceId]:
+    if ctx.case_id is None:
+        return []
+    asked = await messages.of_intent(ctx.uow, ctx.case_id, MessageIntent.PATIENT_QUESTION)
+    return [ResourceId(UUID(str(m.body["communication_id"]))) for m in asked]
 
 
 def _thread(ctx: AgentContext, notes_id: str) -> dict[str, Any]:

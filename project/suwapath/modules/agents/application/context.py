@@ -354,4 +354,7 @@ class AgentContext:
         """The patient's latest message in this case, as quoted data (invariant 7)."""
         if self.case_id is None or self.spec.kind is not AgentKind.PATIENT_COMPANION:
             return None
+        if self.deps.latest_patient_message is not None:
+            found = await self.deps.latest_patient_message(self.case_id)
+            return found[1] if found else None  # keeps the source, e.g. a question to the doctor
         return await self.deps.latest_patient_text(self.case_id)
