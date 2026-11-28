@@ -8,7 +8,7 @@ from uuid import UUID
 from sqlalchemy import Boolean, Float, Index, Integer, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from suwapath.platform.columns import TZ, Timestamps, UuidKey
+from suwapath.platform.columns import TZ, Encrypted, Timestamps, UuidKey
 from suwapath.platform.db import Base
 
 
@@ -74,6 +74,8 @@ class AppointmentRow(UuidKey, Timestamps, Base):
     status: Mapped[str] = mapped_column(String(12))
     case_id: Mapped[UUID | None]
     sensitive: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
+    # BOOK-7: the hospital sees the first name only; sealed with the patient's key.
+    first_name_enc: Mapped[bytes | None] = mapped_column(Encrypted)
     __table_args__ = (
         Index(
             "uq_booking_appointments_one_booked_per_slot",
@@ -83,3 +85,11 @@ class AppointmentRow(UuidKey, Timestamps, Base):
         ),
         Index("ix_booking_appointments_patient_start", "patient_id", "starts_at"),
     )
+
+
+class StoppedCaseRow(Base):
+    """BOOK-5, SAF-10: a case with a red flag; no hold or booking may be made for it."""
+
+    __tablename__ = "booking_stopped_cases"
+    case_id: Mapped[UUID] = mapped_column(primary_key=True)
+    stopped_at: Mapped[datetime] = mapped_column(TZ)

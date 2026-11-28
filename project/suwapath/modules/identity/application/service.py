@@ -153,6 +153,17 @@ class SqlIdentityService:
                 raise NotFound()
             return _account(user)
 
+    async def user_for_practitioner(self, practitioner_id: PractitionerId) -> UserAccount | None:
+        async with self._uow.join() as uow:
+            user = (
+                await uow.session.execute(
+                    select(UserRow).where(
+                        UserRow.practitioner_id == practitioner_id, UserRow.status == "active"
+                    )
+                )
+            ).scalar()
+            return _account(user) if user is not None else None
+
     # ----- stream tickets (SEC-5) ---------------------------------------------------------------
 
     async def issue_stream_ticket(self, user_id: UserId, stream: str) -> StreamTicket:

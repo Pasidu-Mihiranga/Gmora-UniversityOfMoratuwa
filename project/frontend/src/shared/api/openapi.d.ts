@@ -1661,6 +1661,55 @@ export interface components {
             /** Reaction */
             reaction?: string | null;
         };
+        /** Appointment */
+        Appointment: {
+            /** Case Id */
+            case_id?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            meta: components["schemas"]["Meta"];
+            /**
+             * Organization Id
+             * Format: uuid
+             */
+            organization_id: string;
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /**
+             * Practitioner Role Id
+             * Format: uuid
+             */
+            practitioner_role_id: string;
+            /** Provenance Ids */
+            provenance_ids?: string[];
+            /**
+             * Sensitive
+             * @default false
+             */
+            sensitive: boolean;
+            /**
+             * Slot Id
+             * Format: uuid
+             */
+            slot_id: string;
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
+            status: components["schemas"]["AppointmentStatus"];
+        };
+        /**
+         * AppointmentStatus
+         * @enum {string}
+         */
+        AppointmentStatus: "held" | "booked" | "cancelled" | "fulfilled" | "noshow";
         /** ApprovalItem */
         ApprovalItem: {
             /**
@@ -2082,6 +2131,58 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** Hold */
+        Hold: {
+            /** Case Id */
+            case_id: string | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /**
+             * Slot Id
+             * Format: uuid
+             */
+            slot_id: string;
+        };
+        /** HoldRequest */
+        HoldRequest: {
+            /** Case Id */
+            case_id?: string | null;
+            /**
+             * Slot Id
+             * Format: uuid
+             */
+            slot_id: string;
+        };
+        /**
+         * HospitalAppointmentRow
+         * @description BOOK-7: no clinical data; sensitive appointments show the number only.
+         */
+        HospitalAppointmentRow: {
+            /**
+             * Appointment Id
+             * Format: uuid
+             */
+            appointment_id: string;
+            /** Number */
+            number: number;
+            /** Patient First Name */
+            patient_first_name: string | null;
+            /** Status */
+            status: string;
+        };
         /** HumanName */
         HumanName: {
             /** Family */
@@ -2223,6 +2324,13 @@ export interface components {
              * @default false
              */
             red_flag_screen: boolean;
+        };
+        /** Page[Appointment] */
+        Page_Appointment_: {
+            /** Items */
+            items: components["schemas"]["Appointment"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
         };
         /** Page[CaseState] */
         Page_CaseState_: {
@@ -2522,6 +2630,60 @@ export interface components {
             /** Access Token */
             access_token: string;
             user: components["schemas"]["UserAccount"];
+        };
+        /** SessionSummary */
+        SessionSummary: {
+            /** Booked */
+            booked: number;
+            /** Capacity */
+            capacity: number;
+            /**
+             * End
+             * Format: date-time
+             */
+            end: string;
+            /**
+             * Practitioner Role Id
+             * Format: uuid
+             */
+            practitioner_role_id: string;
+            /**
+             * Schedule Id
+             * Format: uuid
+             */
+            schedule_id: string;
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
+        };
+        /** SlotView */
+        SlotView: {
+            /** Free */
+            free: boolean;
+            /** Number */
+            number: number;
+            /**
+             * Practitioner Role Id
+             * Format: uuid
+             */
+            practitioner_role_id: string;
+            /**
+             * Schedule Id
+             * Format: uuid
+             */
+            schedule_id: string;
+            /**
+             * Slot Id
+             * Format: uuid
+             */
+            slot_id: string;
+            /**
+             * Start
+             * Format: date-time
+             */
+            start: string;
         };
         /**
          * Specialty
@@ -2916,7 +3078,10 @@ export interface operations {
     };
     booking_get_bookings: {
         parameters: {
-            query?: never;
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2929,15 +3094,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Page_Appointment_"];
                 };
             };
-            /** @description Not implemented yet (M08) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -2948,30 +3115,38 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HoldRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Hold"];
                 };
             };
-            /** @description Not implemented yet (M08) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
     booking_post_bookings_holds_hold_id_confirm: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 hold_id: string;
             };
@@ -2985,7 +3160,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Appointment"];
                 };
             };
             /** @description Validation Error */
@@ -2996,13 +3171,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M08) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -3023,7 +3191,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Appointment"];
                 };
             };
             /** @description Validation Error */
@@ -3034,13 +3202,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M08) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -3629,7 +3790,10 @@ export interface operations {
     };
     booking_get_doctors_practitioner_role_id_slots: {
         parameters: {
-            query?: never;
+            query?: {
+                from?: string | null;
+                days?: number;
+            };
             header?: never;
             path: {
                 practitioner_role_id: string;
@@ -3644,7 +3808,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["SlotView"][];
                 };
             };
             /** @description Validation Error */
@@ -3655,13 +3819,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M08) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -3926,7 +4083,9 @@ export interface operations {
     };
     booking_get_hospital_sessions: {
         parameters: {
-            query?: never;
+            query?: {
+                date?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3939,15 +4098,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["SessionSummary"][];
                 };
             };
-            /** @description Not implemented yet (M08) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -3968,7 +4129,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["HospitalAppointmentRow"][];
                 };
             };
             /** @description Validation Error */
@@ -3979,13 +4140,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M08) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

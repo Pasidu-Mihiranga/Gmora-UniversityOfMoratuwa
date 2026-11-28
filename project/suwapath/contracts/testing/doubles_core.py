@@ -201,6 +201,9 @@ class InMemoryIdentityService:
     async def logout(self, refresh_token: str) -> None:
         self.refresh_tokens.pop(refresh_token, None)
 
+    async def user_for_practitioner(self, practitioner_id: object) -> UserAccount | None:
+        return next((u for u in self.users.values() if u.practitioner_id == practitioner_id), None)
+
     async def issue_stream_ticket(self, user_id: UserId, stream: str) -> StreamTicket:
         expires = self.now() + timedelta(seconds=STREAM_TICKET_SECONDS)
         ticket = secrets.token_urlsafe(32)
