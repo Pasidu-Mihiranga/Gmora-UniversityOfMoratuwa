@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import base64
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import Any, Literal
 from uuid import UUID
 
@@ -43,6 +43,7 @@ from suwapath.contracts.events.catalog import (
 from suwapath.contracts.ids import CaseId, PatientId, ResourceId, TraceId
 from suwapath.contracts.ports.audit import AuditEntryDraft
 from suwapath.contracts.ports.cases import TimelineItem
+from suwapath.contracts.ports.crypto import PatientCipher
 from suwapath.contracts.principal import Principal
 from suwapath.modules.cases.adapters.models import (
     CaseEventRow,
@@ -65,6 +66,8 @@ from suwapath.platform.uow import UnitOfWork, UnitOfWorkFactory
 log = logging.getLogger(__name__)
 K = CaseEventKind
 APPROVAL_TIMER = "approval_timeout"
+COMMS = "cases_communications"
+ERASED = "(this message was erased)"
 QUESTION_SOURCE = "patient_question"  # UntrustedText.source of an "Ask my doctor" message
 DOCTOR = "doctor"
 MESSAGE_RETRIES = 3
@@ -91,9 +94,35 @@ RECIPIENT_CATEGORY: dict[str, DataCategory] = {"guardian": DataCategory.ADHERENC
 
 
 class SqlCaseService:
-    def __init__(self, uow_factory: UnitOfWorkFactory, policy: PolicySource) -> None:
+    def __init__(
+        self,
+        uow_factory: UnitOfWorkFactory,
+        policy: PolicySource,
+        cipher: Callable[[], PatientCipher | None] | None = None,
+    ) -> None:
+        """`cipher` seals patient text with the patient's key (SEC-22). The app always binds it;
+        without one (unit tests only) text is stored as plain bytes."""
         self._uow = uow_factory
         self._policy = policy
+        self._cipher = cipher or (lambda: None)
+
+    async def _seal(self, patient_id: PatientId, row_id: UUID, text: str) -> bytes:
+        cipher = self._cipher()
+        if cipher is None:
+            return text.encode()
+        return await cipher.encrypt(patient_id, COMMS, "payload_enc", row_id, text.encode())
+
+    async def _open(self, patient_id: UUID, row_id: UUID, sealed: bytes) -> str:
+        cipher = self._cipher()
+        if cipher is None:
+            return sealed.decode()
+        try:
+            opened = await cipher.decrypt(
+                PatientId(patient_id), COMMS, "payload_enc", row_id, sealed
+            )
+        except NotFound:
+            return ERASED  # crypto-shredded (SEC-25): the words are gone for good
+        return opened.decode()
 
     # ----- port: CaseService ------------------------------------------------------------------
 
@@ -134,7 +163,7 @@ class SqlCaseService:
             )
             await uow.session.flush()
             if communication_id is not None:
-                self._store_patient_text(uow, case, communication_id, first_message)
+                await self._store_patient_text(uow, case, communication_id, first_message)
                 await uow.session.flush()
             await self._record(uow, case, K.CASE_OPENED, data, _actor(principal), None)
             await _audit(uow, principal, case, "case.open")
@@ -201,7 +230,7 @@ class SqlCaseService:
             if cursor:
                 query = query.where(TimelineRow.seq > _decode_cursor(cursor))
             rows = list((await uow.session.execute(query)).scalars())
-            texts = await _texts(uow, rows[:limit])
+            texts = await self._texts(uow, rows[:limit])
         items = [_item(row, texts) for row in rows[:limit]]
         next_cursor = _encode_cursor(rows[limit - 1].seq) if len(rows) > limit else None
         return Page(items=items, next_cursor=next_cursor)
@@ -220,7 +249,7 @@ class SqlCaseService:
                     patient_id=case.state.patient_id,
                     sender="agent",
                     recipient=recipient[:40],
-                    payload_enc=payload.encode(),  # encrypted with the patient key once M04 lands
+                    payload_enc=await self._seal(case.state.patient_id, communication_id, payload),
                     simulated=simulated,
                 )
             )
@@ -248,15 +277,24 @@ class SqlCaseService:
         async with self._uow.join() as uow:
             row = (
                 await uow.session.execute(
-                    select(CommunicationRow.payload_enc)
+                    select(
+                        CommunicationRow.id,
+                        CommunicationRow.patient_id,
+                        CommunicationRow.payload_enc,
+                    )
                     .where(
                         CommunicationRow.case_id == case_id, CommunicationRow.sender == "patient"
                     )
                     .order_by(CommunicationRow.created_at.desc(), CommunicationRow.id.desc())
                     .limit(1)
                 )
-            ).scalar()
-        return UntrustedText(value=row.decode(), source="patient_message") if row else None
+            ).first()
+        if row is None:
+            return None
+        return UntrustedText(
+            value=await self._open(row.patient_id, row.id, row.payload_enc),
+            source="patient_message",
+        )
 
     async def timeline_since(
         self, principal: Principal, case_id: CaseId, after_seq: int | None, limit: int = 100
@@ -290,7 +328,7 @@ class SqlCaseService:
                     )
                 ).scalars()
             )
-            texts = await _texts(uow, rows)
+            texts = await self._texts(uow, rows)
         items = [(row.seq, _item(row, texts)) for row in rows]
         position = rows[-1].seq if rows else after_seq
         return filter_state(case.state, allowed), items, position
@@ -306,6 +344,7 @@ class SqlCaseService:
                         CommunicationRow.id,
                         CommunicationRow.payload_enc,
                         CommunicationRow.recipient,
+                        CommunicationRow.patient_id,
                     )
                     .where(
                         CommunicationRow.case_id == case_id, CommunicationRow.sender == "patient"
@@ -317,7 +356,8 @@ class SqlCaseService:
         if row is None:
             return None
         source = QUESTION_SOURCE if row.recipient == DOCTOR else "patient_message"
-        return ResourceId(row.id), UntrustedText(value=row.payload_enc.decode(), source=source)
+        text = await self._open(row.patient_id, row.id, row.payload_enc)
+        return ResourceId(row.id), UntrustedText(value=text, source=source)
 
     async def patient_of(self, case_id: CaseId) -> PatientId:
         async with self._uow.join() as uow:
@@ -432,7 +472,7 @@ class SqlCaseService:
         self, uow: UnitOfWork, case: Case, principal: Principal, message: UntrustedText
     ) -> tuple[Case, ResourceId]:
         communication_id = ResourceId(new_id())
-        self._store_patient_text(uow, case, communication_id, message)
+        await self._store_patient_text(uow, case, communication_id, message)
         await uow.session.flush()
         draft = CaseEventDraft(
             kind=K.PATIENT_MESSAGE,
@@ -441,9 +481,29 @@ class SqlCaseService:
         )
         return await self.append_events(uow, case, [draft], principal), communication_id
 
-    def _store_patient_text(
+    async def _texts(
+        self, uow: UnitOfWork, rows: Sequence[TimelineRow]
+    ) -> dict[str, tuple[str, str]]:
+        ids = [UUID(r.params["communication_id"]) for r in rows if "communication_id" in r.params]
+        if not ids:
+            return {}
+        found = await uow.session.execute(
+            select(
+                CommunicationRow.id,
+                CommunicationRow.patient_id,
+                CommunicationRow.payload_enc,
+                CommunicationRow.recipient,
+            ).where(CommunicationRow.id.in_(ids))
+        )
+        return {
+            str(i): (await self._open(patient, i, payload), to)
+            for i, patient, payload, to in found.all()
+        }
+
+    async def _store_patient_text(
         self, uow: UnitOfWork, case: Case, communication_id: ResourceId, message: UntrustedText
     ) -> None:
+        sealed = await self._seal(case.state.patient_id, communication_id, message.value)
         uow.session.add(
             CommunicationRow(
                 id=communication_id,
@@ -451,7 +511,7 @@ class SqlCaseService:
                 patient_id=case.state.patient_id,
                 sender="patient",
                 recipient=DOCTOR if message.source == QUESTION_SOURCE else "patient_companion",
-                payload_enc=message.value.encode(),  # encrypted with the patient key once M04 lands
+                payload_enc=sealed,
                 simulated=case.state.simulated,
             )
         )
@@ -620,18 +680,6 @@ async def _audit(uow: UnitOfWork, principal: Principal, case: Case, action: str)
             metadata={"version": case.state.version, "status": case.state.status.value},
         )
     )
-
-
-async def _texts(uow: UnitOfWork, rows: Sequence[TimelineRow]) -> dict[str, tuple[str, str]]:
-    ids = [UUID(r.params["communication_id"]) for r in rows if "communication_id" in r.params]
-    if not ids:
-        return {}
-    found = await uow.session.execute(
-        select(CommunicationRow.id, CommunicationRow.payload_enc, CommunicationRow.recipient).where(
-            CommunicationRow.id.in_(ids)
-        )
-    )
-    return {str(i): (payload.decode(), to) for i, payload, to in found.all()}
 
 
 def _item(row: TimelineRow, texts: dict[str, tuple[str, str]]) -> TimelineItem:

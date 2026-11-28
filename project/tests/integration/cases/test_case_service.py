@@ -474,3 +474,32 @@ async def test_routes_open_and_read_a_case(service: SqlCaseService, world: World
         assert [c["id"] for c in mine["items"]] == [case_id]
         missing = await client.get(f"/api/v1/cases/{uuid4()}", headers=headers)
         assert missing.status_code == 404
+
+
+# ----- patient text is sealed with the patient's key (SEC-22, SEC-25) ---------------------------
+
+
+async def test_patient_text_is_stored_sealed_and_erased_by_shredding(
+    uow_factory: UnitOfWorkFactory, world: World
+) -> None:
+    import base64
+    import os
+
+    from suwapath.modules.cases.adapters.models import CommunicationRow
+    from suwapath.modules.record.application.keys import SqlPatientCipher
+    from suwapath.platform.crypto import DekCache, LocalKeyProvider
+
+    provider = LocalKeyProvider(base64.b64encode(os.urandom(32)).decode())
+    cipher = SqlPatientCipher(uow_factory, lambda: provider, DekCache())
+    sealed_service = SqlCaseService(uow_factory, lambda: world.policy, lambda: cipher)
+    state = await sealed_service.open(
+        world.amma, world.patient, _text("my chest feels tight"), Language.SI
+    )
+    async with uow_factory() as uow:
+        stored = (await uow.session.execute(select(CommunicationRow.payload_enc))).scalar_one()
+    assert b"chest" not in stored and stored[0] == 1  # sealed, versioned format
+    page = await sealed_service.timeline(world.amma, state.id, None, 10)
+    assert page.items[0].params["text"] == "my chest feels tight"
+    await cipher.destroy_key(world.patient)
+    page = await sealed_service.timeline(world.amma, state.id, None, 10)
+    assert page.items[0].params["text"] == "(this message was erased)"
