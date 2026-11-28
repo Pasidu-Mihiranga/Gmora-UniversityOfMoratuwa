@@ -120,8 +120,10 @@ class Directory:
     async def practitioner_of(self, user_id: UserId) -> PractitionerId | None:
         return self.practitioner if user_id == self.doctor else None
 
-    async def doctor_case(self, patient_id: PatientId) -> None:
-        return None
+    booked: CaseId | None = None
+
+    async def doctor_case(self, patient_id: PatientId) -> tuple[CaseId, UserId] | None:
+        return (self.booked, self.doctor) if self.booked else None
 
     async def profile(self, patient_id: PatientId) -> PatientProfile:
         return PatientProfile(first_name=fx.AMMA_FIRST_NAME, age_years=fx.AMMA_AGE)
@@ -302,7 +304,14 @@ class Clinic:
             )
             await uow.commit()
         await self.pump()
+        self.dir.booked = state.id
         return state.id
+
+    async def asks_doctor(self, case_id: CaseId, text: str) -> None:
+        await self.cases.add_patient_message(
+            self.amma, case_id, UntrustedText(value=text, source="patient_question")
+        )
+        await self.pump()
 
     async def says(self, case_id: CaseId, text: str) -> None:
         await self.cases.add_patient_message(
@@ -466,3 +475,67 @@ async def test_other_doctors_cannot_decide(clinic: Clinic) -> None:
         f"/api/v1/doctor/approvals/{draft_id}", {"decision": "approved"}, token="other-doctor"
     )
     assert response.status_code == 404
+
+
+# ----- "Ask my doctor" ----------------------------------------------------------------------------
+
+
+async def _replied(clinic: Clinic) -> CaseId:
+    case_id = await clinic.booked_case()
+    draft_id = await _draft(clinic, case_id)
+    await clinic.post(f"/api/v1/doctor/approvals/{draft_id}", {"decision": "approved"})
+    await clinic.pump()
+    return case_id
+
+
+async def test_the_doctors_reply_offers_ask_my_doctor(clinic: Clinic) -> None:
+    await _replied(clinic)
+    reply = (await clinic.replies())[-1]
+    assert [(c.action_kind, c.label) for c in reply.suggestions] == [
+        ("ask_doctor", "වෛද්‍යවරයාගෙන් අහන්න")
+    ]
+
+
+async def test_a_question_reaches_the_doctor_as_a_link_not_as_text(clinic: Clinic) -> None:
+    case_id = await _replied(clinic)
+    question = "Can I take the tablet after dinner?"
+    await clinic.asks_doctor(case_id, question)
+    assert (await clinic.replies())[-1].text.startswith("මම ඔබේ ප්‍රශ්නය")
+    response = await clinic.get(f"/api/v1/doctor/cases/{case_id}/brief")
+    assert question not in response.text  # the brief links to it, never copies it
+    line = next(x for x in response.json()["lines"] if x["label"] == "Patient question")
+    assert line["section"] == "open_questions" and line["verified"]
+    doctor = Principal(
+        kind=PrincipalKind.USER,
+        user_id=clinic.dir.doctor,
+        role=Role.DOCTOR,
+        acting_for=clinic.dir.doctor,
+        purpose=Purpose.TREATMENT,
+        trace_id=TraceId(TRACE),
+    )
+    timeline = (await clinic.cases.timeline(doctor, case_id, None, 100)).items
+    asked = [i for i in timeline if i.params.get("to") == "doctor"]
+    assert [i.params["text"] for i in asked] == [question]
+    assert str(asked[0].params["communication_id"]) == line["provenance_ids"][0]
+
+
+async def test_a_red_flag_in_a_question_takes_the_emergency_lane(clinic: Clinic) -> None:
+    case_id = await _replied(clinic)
+    await clinic.asks_doctor(case_id, "I have chest pain now, should I wait for you?")
+    assert (await clinic.replies())[-1].kind == "emergency"
+    brief = (await clinic.get(f"/api/v1/doctor/cases/{case_id}/brief")).json()
+    assert all(x["label"] != "Patient question" for x in brief["lines"])  # not a routine question
+
+
+async def test_without_a_booked_doctor_amma_is_told_to_book_first(clinic: Clinic) -> None:
+    state = await clinic.cases.open(
+        clinic.amma,
+        clinic.dir.patient,
+        UntrustedText(value="මට ඔලුව කැරකෙනවා", source="patient_message"),
+        Language.SI,
+    )
+    await clinic.pump()
+    await clinic.asks_doctor(state.id, "Is this serious?")
+    reply = (await clinic.replies())[-1]
+    assert reply.text.startswith("මේ සඳහා ඔබට තවම වෛද්‍යවරයෙකු නැහැ")
+    assert [c.action_kind for c in reply.suggestions] == ["show_doctors"]
