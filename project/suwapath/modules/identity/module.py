@@ -22,4 +22,6 @@ def register(container: ModuleContext) -> None:
     service = SqlIdentityService(container.uow_factory, secret)
     container.ports["identity"] = service
     container.token_verifier = service.verify_access_token
-    container.routers.append(build_router(service))
+    settings = container.settings
+    demo = settings.demo_password.get_secret_value() if settings.dev_tools_enabled else ""
+    container.routers.append(build_router(service, demo or None))

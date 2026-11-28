@@ -11,6 +11,7 @@ Attempts are stored as hashes of the login and the IP, never in clear.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime, timedelta
 from uuid import UUID
 
@@ -37,6 +38,7 @@ from suwapath.platform.uow import UnitOfWork, UnitOfWorkFactory
 
 MAX_FAILURES = 5  # SEC-1
 FAILURE_WINDOW = timedelta(minutes=10)
+NOT_CREATED = "This account could not be created. Check the details or sign in."
 WRONG = "Email, phone or password is wrong, or there were too many tries. Try again later."
 
 
@@ -229,6 +231,40 @@ class SqlIdentityService:
             await uow.session.flush()
             account = _account(row)
         return account
+
+    async def register(
+        self, *, login: str, password: str, role: Role, display_name: str, language: Language
+    ) -> UserAccount:
+        """Self sign-up: patients and guardians only. A taken login gets the same answer as any
+        other refusal, so sign-up cannot be used to find out who has an account."""
+        if role not in (Role.PATIENT, Role.GUARDIAN):
+            raise AccessDenied("This kind of account is created by an administrator")
+        async with self._uow.join() as uow:
+            taken = await uow.session.execute(
+                select(exists().where(UserRow.login == cred.normalize_login(login)))
+            )
+            if taken.scalar():
+                raise ValidationFailed(NOT_CREATED, fields=["login"])
+        return await self.create_user(
+            login=login,
+            password=password,
+            role=role,
+            display_name=display_name,
+            language=language,
+            patient_id=PatientId(new_id()) if role is Role.PATIENT else None,
+        )
+
+    async def accounts_by_login(self, logins: Sequence[str]) -> list[tuple[str, UserAccount]]:
+        async with self._uow.join() as uow:
+            rows = (
+                await uow.session.execute(
+                    select(UserRow).where(
+                        UserRow.login.in_([cred.normalize_login(x) for x in logins])
+                    )
+                )
+            ).scalars()
+            found = {r.login: _account(r) for r in rows}
+        return [(x, found[x]) for x in logins if x in found]
 
     async def set_language(self, user_id: UserId, language: Language) -> UserAccount:
         async with self._uow() as uow:
