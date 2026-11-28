@@ -156,3 +156,31 @@ async def run_agent_worker(container: Container) -> None:
             with suppress(NotImplementedError):
                 loop.add_signal_handler(sig, worker.stop)
         await worker.run()
+
+
+async def seed_demo_accounts(container: Container, seed: int = 42) -> list[str]:
+    """`python main.py seed accounts`: the five demo sign-ins of spec 16, with DEMO_PASSWORD.
+    Idempotent; refused in production. The full world loads with I01."""
+    from suwapath.modules.identity.api.router import DEMO_LOGINS
+    from suwapath.seed.generator import generate
+
+    settings = container.settings
+    password = settings.demo_password.get_secret_value()
+    if settings.suwapath_env == "production" or not password:
+        raise RuntimeError("demo accounts need DEMO_PASSWORD and are refused in production")
+    identity = container.ports["identity"]
+    users = {u.login: u for u in generate(seed).users if u.login in DEMO_LOGINS}
+    for login in DEMO_LOGINS:
+        user = users[login]
+        await identity.create_user(
+            login=user.login,
+            password=password,
+            role=user.role,
+            display_name=user.display_name,
+            language=user.language,
+            patient_id=user.patient_id,
+            practitioner_id=user.practitioner_id,
+            organization_id=user.organization_id,
+            user_id=user.id,
+        )
+    return list(DEMO_LOGINS)
