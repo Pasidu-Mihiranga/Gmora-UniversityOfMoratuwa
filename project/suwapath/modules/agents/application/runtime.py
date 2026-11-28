@@ -28,6 +28,7 @@ from suwapath.contracts.cases import CaseEventDraft, CaseEventKind
 from suwapath.contracts.enums import (
     AgentKind,
     DataCategory,
+    DecidedBy,
     MessageStatus,
     PrincipalKind,
     Purpose,
@@ -93,6 +94,8 @@ logger = logging.getLogger("suwapath.agents")
 MAX_JOB_ATTEMPTS = 3
 LEASE_RENEW_SECONDS = 30.0  # EVT-11
 CHECKIN_FOLLOWUP_TIMER = "guardian_checkin_followup"
+HOLD_TIMER = "verifier_hold_retry"  # VER-9: a held message is verified again
+HOLD_RETRY = timedelta(minutes=2)
 HANDOVER_REASONS = frozenset(get_args(HandedToHuman.model_fields["reason"].annotation))
 PURPOSE_OF: dict[AgentKind, Purpose] = {
     AgentKind.PATIENT_COMPANION: Purpose.CARE_NAVIGATION,
@@ -384,24 +387,33 @@ class Delivery:
         if not message.needs_verification:
             await self._route(uow, message, envelope)
             return
+        await self._verify(uow, message, envelope)
+
+    async def _verify(
+        self, uow: UnitOfWork, message: AgentMessage, envelope: EventEnvelope
+    ) -> None:
+        """AGT-10: verify, then act on the verdict. Nothing reaches anyone without `allow`."""
         access = await self._recipient_access(uow, message)
+        case_floor = self.deps.case_floor
+        floor = await case_floor(message.case_id) if case_floor is not None else None
         verdict = await self.deps.verifier.check(
-            message, VerificationContext(recipient_access=access)
+            message, VerificationContext(recipient_access=access, case_urgency_floor=floor)
         )
+        drafted = (MessageStatus.DRAFTED,)
         if verdict.verdict is VerdictKind.ALLOW:
             await self._route(uow, message, envelope)
         elif verdict.verdict is VerdictKind.ESCALATE:
-            if await messages.mark(
-                uow, message.message_id, MessageStatus.ESCALATED, (MessageStatus.DRAFTED,)
-            ):
-                patient = await self.deps.directory.case_patient(message.case_id)
-                await self.deps.notifications.notify(
-                    NotificationDraft(
-                        user_id=await self.deps.directory.patient_user(patient),
-                        kind="review_required",
-                        template_key=f"review.{message.intent.value}",
-                        params={"message_id": str(message.message_id)},
-                    )
+            # The verifier queued the review and told the reviewer (VER-5).
+            await messages.mark(uow, message.message_id, MessageStatus.ESCALATED, drafted)
+        elif verdict.verdict is VerdictKind.HOLD:  # VER-9: fail closed, try again later
+            if await messages.mark(uow, message.message_id, MessageStatus.HELD, drafted):
+                due = uow.clock.now() + HOLD_RETRY
+                await uow.schedule_timer(
+                    kind=HOLD_TIMER,
+                    due_at=due,
+                    ref_type="agent_message",
+                    ref_id=str(message.message_id),
+                    dedupe_key=f"hold:{message.message_id}:{due.isoformat()}",
                 )
         else:
             status = (
@@ -409,18 +421,37 @@ class Delivery:
                 if verdict.verdict is VerdictKind.REVISE
                 else MessageStatus.BLOCKED
             )
-            await messages.mark(uow, message.message_id, status, (MessageStatus.DRAFTED,))
+            await messages.mark(uow, message.message_id, status, drafted)
 
-    async def approve_escalated(
-        self, uow: UnitOfWork, reviewer: Principal, message_id: MessageId
-    ) -> bool:
-        """VER-5: the patient approves a guardian-bound message held for review."""
+    async def on_timer(self, envelope: EventEnvelope, uow: UnitOfWork) -> None:
+        """A held message is verified again (VER-9); the verifier escalates it after 30 min."""
+        payload = envelope.payload
+        assert isinstance(payload, TimerFired)
+        if payload.kind != HOLD_TIMER:
+            return
+        message_id = MessageId(UUID(payload.ref_id))
+        if not await messages.mark(uow, message_id, MessageStatus.DRAFTED, (MessageStatus.HELD,)):
+            return
         message = await messages.load(uow, message_id)
+        if message is not None:
+            await self._verify(uow, message, envelope)
+
+    async def on_human_verdict(self, envelope: EventEnvelope, uow: UnitOfWork) -> None:
+        """VER-5: a reviewer sent or discarded an escalated message."""
+        payload = envelope.payload
+        assert isinstance(payload, VerdictIssued)
+        if payload.decided_by is not DecidedBy.HUMAN:
+            return
+        message = await messages.load(uow, payload.message_id)
         if message is None or message.status is not MessageStatus.ESCALATED:
-            return False
-        if reviewer.patient_scope != await self.deps.directory.case_patient(message.case_id):
-            return False
-        return await self._deliver_to_person(uow, message, (MessageStatus.ESCALATED,))
+            return
+        escalated = (MessageStatus.ESCALATED,)
+        if payload.verdict is not VerdictKind.ALLOW:
+            await messages.mark(uow, message.message_id, MessageStatus.BLOCKED, escalated)
+        elif message.recipient in {k.value for k in AgentKind}:
+            await self._route(uow, message, envelope, escalated)
+        else:
+            await self._deliver_to_person(uow, message, escalated)
 
     async def _recipient_access(self, uow: UnitOfWork, message: AgentMessage) -> AccessDecision:
         """Allowed when at least one receiving person (or the receiving agent) may see it."""
@@ -499,11 +530,15 @@ class Delivery:
             trace_id=trace,
         )
 
-    async def _route(self, uow: UnitOfWork, message: AgentMessage, envelope: EventEnvelope) -> None:
+    async def _route(
+        self,
+        uow: UnitOfWork,
+        message: AgentMessage,
+        envelope: EventEnvelope,
+        only_from: tuple[MessageStatus, ...] = (MessageStatus.DRAFTED,),
+    ) -> None:
         if message.recipient in {k.value for k in AgentKind}:
-            if not await messages.mark(
-                uow, message.message_id, MessageStatus.DELIVERED, (MessageStatus.DRAFTED,)
-            ):
+            if not await messages.mark(uow, message.message_id, MessageStatus.DELIVERED, only_from):
                 return
             patient = await self.deps.directory.case_patient(message.case_id)
             recipient = AgentKind(message.recipient)
@@ -519,7 +554,7 @@ class Delivery:
                 data={"message_id": str(message.message_id)},
             )
         else:
-            await self._deliver_to_person(uow, message, (MessageStatus.DRAFTED,))
+            await self._deliver_to_person(uow, message, only_from)
 
     async def _recipient_human(
         self, uow: UnitOfWork, message: AgentMessage, patient: PatientId
@@ -848,4 +883,8 @@ def register_supervisor(
     supervisor = Supervisor(deps, kinds)
     supervisor.register(subscribers)
     subscribers.add("agents.message_sent", delivery.on_message_sent, name="agents.delivery")
+    subscribers.add("platform.timer_fired", delivery.on_timer, name="agents.delivery_hold_retry")
+    subscribers.add(
+        "verifier.verdict_issued", delivery.on_human_verdict, name="agents.delivery_on_review"
+    )
     return supervisor

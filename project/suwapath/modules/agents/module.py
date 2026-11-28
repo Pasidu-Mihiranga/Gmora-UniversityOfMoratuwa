@@ -62,6 +62,7 @@ def register(container: ModuleContext) -> None:
             navigation=ports["navigation"],
             booking=ports["booking"],
             record=ports["record"],
+            case_floor=ports["cases"].urgency_floor,
         )
 
     delivery = Delivery(dependencies)
