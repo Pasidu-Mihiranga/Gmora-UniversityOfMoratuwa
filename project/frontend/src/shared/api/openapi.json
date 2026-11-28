@@ -1567,17 +1567,33 @@
             "name": "case_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Case Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Last-Event-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 20,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
             }
           }
         ],
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
-              }
+              "text/event-stream": {}
             },
             "description": "Successful Response"
           },
@@ -1590,9 +1606,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M10)"
           }
         },
         "summary": "Case events (SSE)",
