@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Depends, Header, Path, Query, Request
+from fastapi.responses import StreamingResponse
 from pydantic import Field
 
 from suwapath.contracts.cases import CaseState
@@ -19,11 +20,23 @@ from suwapath.contracts.ids import CaseId, ResourceId
 from suwapath.contracts.ports.cases import TimelineItem
 from suwapath.contracts.principal import Principal
 from suwapath.modules.cases.application.service import SqlCaseService
-from suwapath.platform.http.auth import require
-from suwapath.platform.http.stubs import StubRoute, stub_router
+from suwapath.modules.cases.application.stream import case_events, parse_last_event_id
+from suwapath.platform.http.auth import require, require_stream
 
 PURPOSES = {Role.GUARDIAN: Purpose.GUARDIAN_MONITORING, Role.DOCTOR: Purpose.TREATMENT}
 Patient = Annotated[Principal, Depends(require(Role.PATIENT, purpose=Purpose.CARE_NAVIGATION))]
+StreamViewer = Annotated[
+    Principal,
+    Depends(
+        require_stream(
+            Role.PATIENT,
+            Role.GUARDIAN,
+            Role.DOCTOR,
+            stream_key=lambda request: f"case:{request.path_params['case_id']}",
+            purposes=PURPOSES,
+        )
+    ),
+]
 Viewer = Annotated[
     Principal,
     Depends(require(Role.PATIENT, Role.GUARDIAN, Role.DOCTOR, purposes=PURPOSES)),
@@ -43,15 +56,6 @@ class PatientMessage(Contract):
 
 class MessageAccepted(Contract):
     communication_id: ResourceId
-
-
-STREAM = StubRoute(
-    "GET",
-    "/cases/{case_id}/stream",
-    (Role.PATIENT, Role.GUARDIAN, Role.DOCTOR),
-    "Case events (SSE)",
-    "M10",
-)
 
 
 def build_router(service: SqlCaseService) -> APIRouter:
@@ -114,8 +118,37 @@ def build_router(service: SqlCaseService) -> APIRouter:
         )
         return MessageAccepted(communication_id=communication_id)
 
+    @router.get(
+        "/cases/{case_id}/stream",
+        summary="Case events (SSE)",
+        operation_id="cases_get_cases_case_id_stream",
+        response_class=StreamingResponse,
+        responses={200: {"content": {"text/event-stream": {}}}},
+    )
+    async def stream(
+        case_id: CasePath,
+        principal: StreamViewer,
+        request: Request,
+        last_event_id: Annotated[str | None, Header(alias="Last-Event-ID", max_length=20)] = None,
+    ) -> StreamingResponse:
+        hub = getattr(request.app.state, "stream_hub", None)
+        if hub is None:
+            raise NotFound()
+        await service.get(principal, case_id)  # 404 before the stream opens (CON-11)
+        assert principal.user_id is not None
+        subscription = await hub.subscribe(f"case:{case_id}", principal.user_id)
+        events = case_events(
+            service,
+            principal,
+            case_id,
+            subscription,
+            parse_last_event_id(last_event_id),
+            request.is_disconnected,
+        )
+        return StreamingResponse(
+            events,
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
+        )
+
     return router
-
-
-def stream_stub() -> APIRouter:
-    return stub_router("cases", [STREAM])

@@ -66,6 +66,56 @@ class RoleGuard:
         return principal
 
 
+TicketRedeemer = Callable[[str, str], Awaitable[UserAccount]]
+
+
+class StreamTicketGuard(RoleGuard):
+    """SEC-5: a stream authenticates with `?ticket=` (SSE cannot send headers). The ticket is
+    redeemed once for the stream named by `stream_key(request)`; roles are checked as usual."""
+
+    def __init__(
+        self,
+        roles: frozenset[Role],
+        purpose: Purpose,
+        purposes: Mapping[Role, Purpose] | None,
+        stream_key: Callable[[Request], str],
+    ) -> None:
+        super().__init__(roles, purpose, purposes)
+        self.stream_key = stream_key
+
+    async def __call__(self, request: Request) -> Principal:
+        ticket = request.query_params.get("ticket", "")
+        redeemer: TicketRedeemer | None = getattr(request.app.state, "ticket_redeemer", None)
+        if not ticket or redeemer is None:
+            raise HTTPException(status_code=401, detail="Open the page again.")
+        try:
+            account = await redeemer(ticket, self.stream_key(request))
+        except Exception as exc:  # unknown, used, expired or for another stream
+            raise HTTPException(status_code=401, detail="Open the page again.") from exc
+        if account.role not in self.roles:
+            raise HTTPException(status_code=403, detail="You do not have access to this.")
+        principal = Principal(
+            kind=PrincipalKind.USER,
+            user_id=account.id,
+            role=account.role,
+            acting_for=account.id,
+            patient_scope=account.patient_id if account.role is Role.PATIENT else None,
+            purpose=self.purposes.get(account.role, self.purpose),
+            trace_id=TraceId(current_trace_id()),
+        )
+        request.state.principal = principal
+        return principal
+
+
+def require_stream(
+    *roles: Role,
+    stream_key: Callable[[Request], str],
+    purpose: Purpose = Purpose.SELF_ACCESS,
+    purposes: Mapping[Role, Purpose] | None = None,
+) -> StreamTicketGuard:
+    return StreamTicketGuard(frozenset(roles), purpose, purposes, stream_key)
+
+
 class PublicMarker:
     """Dependency that marks a route as intentionally public."""
 

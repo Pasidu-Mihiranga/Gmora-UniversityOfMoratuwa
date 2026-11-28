@@ -13,6 +13,7 @@ from typing import Any
 
 from fastapi import APIRouter, FastAPI
 
+from suwapath.contracts.ports.identity import UserAccount
 from suwapath.platform.clock import Clock, SystemClock
 from suwapath.platform.clock_store import SharedClock
 from suwapath.platform.config import Settings, get_settings
@@ -20,6 +21,7 @@ from suwapath.platform.db import Database
 from suwapath.platform.events.subscribers import SubscriberRegistry
 from suwapath.platform.http.app import create_app
 from suwapath.platform.http.auth import TokenVerifier
+from suwapath.platform.http.streams import StreamHub
 from suwapath.platform.tools import ToolRegistry
 from suwapath.platform.uow import UnitOfWorkFactory
 
@@ -108,8 +110,20 @@ def build_container(settings: Settings | None = None) -> Container:
 def create_api(settings: Settings | None = None) -> FastAPI:
     """uvicorn factory: `suwapath.bootstrap:create_api`."""
     container = build_container(settings)
+
+    async def redeem_ticket(ticket: str, stream: str) -> UserAccount:
+        identity = container.ports.get("identity")
+        if identity is None:
+            raise RuntimeError("identity is not bound")  # the guard answers 401
+        account: UserAccount = await identity.redeem_stream_ticket(ticket, stream)
+        return account
+
     app = create_app(
-        container.settings, token_verifier=container.token_verifier, routers=container.routers
+        container.settings,
+        token_verifier=container.token_verifier,
+        ticket_redeemer=redeem_ticket,
+        stream_hub=StreamHub(container.settings.database_url),
+        routers=container.routers,
     )
     app.state.container = container
     return app

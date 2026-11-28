@@ -2,17 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import AsyncIterator, Sequence
+from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from suwapath import __version__
 from suwapath.platform.config import Settings, get_settings
-from suwapath.platform.http.auth import TokenVerifier, check_route_roles, public
+from suwapath.platform.http.auth import TicketRedeemer, TokenVerifier, check_route_roles, public
 from suwapath.platform.http.errors import install_error_handlers
 from suwapath.platform.http.middleware import SecurityMiddleware
 from suwapath.platform.http.ratelimit import RateLimiter
+from suwapath.platform.http.streams import StreamHub
 
 API_PREFIX = "/api/v1"
 
@@ -34,10 +36,20 @@ def create_app(
     settings: Settings | None = None,
     *,
     token_verifier: TokenVerifier | None = None,
+    ticket_redeemer: TicketRedeemer | None = None,
+    stream_hub: StreamHub | None = None,
     routers: Sequence[APIRouter] = (),
 ) -> FastAPI:
     settings = settings or get_settings()
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        yield
+        if stream_hub is not None:
+            await stream_hub.close()
+
     app = FastAPI(
+        lifespan=lifespan,
         title="SuwaPath API",
         version=__version__,
         openapi_url=f"{API_PREFIX}/openapi.json",
@@ -46,6 +58,8 @@ def create_app(
     )
     app.state.settings = settings
     app.state.token_verifier = token_verifier
+    app.state.ticket_redeemer = ticket_redeemer
+    app.state.stream_hub = stream_hub
     app.state.allowed_origins = settings.origins
     app.state.rate_limiter = RateLimiter()
 

@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import secrets
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from suwapath.contracts.agents import AgentJob, AgentMessage
@@ -26,7 +27,12 @@ from suwapath.contracts.errors import AccessDenied, NotFound, QuotaExceeded
 from suwapath.contracts.ids import CaseId, JobId, PatientId, ResourceId, UserId
 from suwapath.contracts.ports.audit import AuditEntry, AuditEntryDraft, AuditQuery
 from suwapath.contracts.ports.consent import AccessDecision, AccessRequest
-from suwapath.contracts.ports.identity import IssuedTokens, UserAccount
+from suwapath.contracts.ports.identity import (
+    STREAM_TICKET_SECONDS,
+    IssuedTokens,
+    StreamTicket,
+    UserAccount,
+)
 from suwapath.contracts.ports.notifications import Notification, NotificationDraft
 from suwapath.contracts.ports.ops import ModelCallRecord, OpsOverview, UsageReservation
 from suwapath.contracts.principal import Principal
@@ -162,6 +168,7 @@ class InMemoryIdentityService:
     )  # login -> (password, id)
     access: dict[str, UserId] = field(default_factory=dict)
     refresh_tokens: dict[str, UserId] = field(default_factory=dict)
+    tickets: dict[str, tuple[UserId, str, datetime]] = field(default_factory=dict)
 
     def add_user(self, account: UserAccount, login: str, password: str) -> None:
         self.users[account.id] = account
@@ -193,6 +200,18 @@ class InMemoryIdentityService:
 
     async def logout(self, refresh_token: str) -> None:
         self.refresh_tokens.pop(refresh_token, None)
+
+    async def issue_stream_ticket(self, user_id: UserId, stream: str) -> StreamTicket:
+        expires = self.now() + timedelta(seconds=STREAM_TICKET_SECONDS)
+        ticket = secrets.token_urlsafe(32)
+        self.tickets[ticket] = (user_id, stream, expires)
+        return StreamTicket(ticket=ticket, stream=stream, expires_at=expires)
+
+    async def redeem_stream_ticket(self, ticket: str, stream: str) -> UserAccount:
+        found = self.tickets.pop(ticket, None)  # one use, even when it fails
+        if found is None or found[1] != stream or found[2] <= self.now():
+            raise AccessDenied("Open the page again")
+        return self.users[found[0]]
 
     async def verify_access_token(self, token: str) -> UserAccount:
         user_id = self.access.get(token)
