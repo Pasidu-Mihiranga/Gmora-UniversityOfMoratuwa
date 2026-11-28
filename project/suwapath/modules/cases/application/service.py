@@ -14,7 +14,7 @@ from collections.abc import Sequence
 from typing import Any, Literal
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 
 from suwapath.contracts.cases import CaseEventDraft, CaseEventKind, CaseState
@@ -57,6 +57,7 @@ from suwapath.modules.cases.application.access import (
     visible,
 )
 from suwapath.modules.cases.domain.aggregate import Case, apply, category_of, open_case, replay
+from suwapath.platform.http.streams import notify_stream
 from suwapath.platform.ids import new_id
 from suwapath.platform.tracing import current_trace_id
 from suwapath.platform.uow import UnitOfWork, UnitOfWorkFactory
@@ -234,6 +235,7 @@ class SqlCaseService:
                     simulated=simulated,
                 )
             )
+            await notify_stream(uow, stream_key(case_id))
             await uow.session.flush()
         return communication_id
 
@@ -253,6 +255,43 @@ class SqlCaseService:
                 )
             ).scalar()
         return UntrustedText(value=row.decode(), source="patient_message") if row else None
+
+    async def timeline_since(
+        self, principal: Principal, case_id: CaseId, after_seq: int | None, limit: int = 100
+    ) -> tuple[CaseState, list[tuple[int, TimelineItem]], int]:
+        """For the case stream: the viewer's state, the items after `after_seq` they may see,
+        and the position to continue from. `after_seq=None` means from now (no replay).
+        Access is decided again on every call (SEC-12); NotFound once it ends."""
+        async with self._uow.join() as uow:
+            case = await self._load(uow, case_id)
+            allowed = await visible(self._policy, principal, case.state, case.categories)
+            if after_seq is None:
+                position = (
+                    await uow.session.execute(
+                        select(func.coalesce(func.max(TimelineRow.seq), 0)).where(
+                            TimelineRow.case_id == case_id
+                        )
+                    )
+                ).scalar_one()
+                return filter_state(case.state, allowed), [], int(position)
+            rows = list(
+                (
+                    await uow.session.execute(
+                        select(TimelineRow)
+                        .where(
+                            TimelineRow.case_id == case_id,
+                            TimelineRow.seq > after_seq,
+                            TimelineRow.category.in_(sorted(c.value for c in allowed)),
+                        )
+                        .order_by(TimelineRow.seq)
+                        .limit(limit)
+                    )
+                ).scalars()
+            )
+            texts = await _texts(uow, rows)
+        items = [(row.seq, _item(row, texts)) for row in rows]
+        position = rows[-1].seq if rows else after_seq
+        return filter_state(case.state, allowed), items, position
 
     async def latest_patient_message(
         self, case_id: CaseId
@@ -448,6 +487,7 @@ class SqlCaseService:
                 simulated=state.simulated,
             )
         )
+        await notify_stream(uow, stream_key(state.id))  # delivered on commit (API-21)
         payload = _integration_event(case, kind, data)
         if payload is not None:
             uow.publish(
@@ -514,6 +554,10 @@ def _integration_event(
         case K.HANDED_TO_HUMAN:
             return HandedToHuman(case_id=state.id, reason=data["reason"])
     return None
+
+
+def stream_key(case_id: CaseId) -> str:
+    return f"case:{case_id}"
 
 
 def _timeline_kind(kind: CaseEventKind, data: dict[str, Any]) -> str:
