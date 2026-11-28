@@ -28,6 +28,17 @@ class IssuedTokens(Contract):
     refresh_expires_at: datetime
 
 
+class StreamTicket(Contract):
+    """SEC-5: SSE cannot send headers, so a stream opens with a one-use ticket."""
+
+    ticket: str  # random, never logged (SEC-6)
+    stream: str  # the stream it is bound to, e.g. "case:{case_id}" or "me"
+    expires_at: datetime
+
+
+STREAM_TICKET_SECONDS = 60
+
+
 class IdentityService(Protocol):
     async def authenticate(self, login: str, password: str, client_ip: str) -> IssuedTokens:
         """Raises AccessDenied on bad credentials or lockout (SEC-1)."""
@@ -42,3 +53,12 @@ class IdentityService(Protocol):
     async def verify_access_token(self, token: str) -> UserAccount: ...
 
     async def get_user(self, user_id: UserId) -> UserAccount: ...
+
+    async def issue_stream_ticket(self, user_id: UserId, stream: str) -> StreamTicket:
+        """Valid for 60 s and one use, bound to the user and the stream (SEC-5)."""
+        ...
+
+    async def redeem_stream_ticket(self, ticket: str, stream: str) -> UserAccount:
+        """The ticket's user. Raises AccessDenied when unknown, used, expired or for another
+        stream; a ticket is spent by its first redemption, even a failed one."""
+        ...
