@@ -1646,6 +1646,81 @@
         "title": "Notes",
         "type": "object"
       },
+      "Notification": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "read_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Read At"
+          },
+          "template_key": {
+            "title": "Template Key",
+            "type": "string"
+          },
+          "urgency": {
+            "default": "normal",
+            "enum": [
+              "normal",
+              "urgent",
+              "emergency"
+            ],
+            "title": "Urgency",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "kind",
+          "template_key",
+          "id",
+          "created_at"
+        ],
+        "title": "Notification",
+        "type": "object"
+      },
       "Observation": {
         "additionalProperties": false,
         "properties": {
@@ -1886,6 +1961,34 @@
           "items"
         ],
         "title": "Page[CaseState]",
+        "type": "object"
+      },
+      "Page_Notification_": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Notification"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Page[Notification]",
         "type": "object"
       },
       "Page_PatientResource_": {
@@ -4838,17 +4941,41 @@
     "/api/v1/me/stream": {
       "get": {
         "operationId": "notifications_get_me_stream",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Last-Event-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
-              }
+              "text/event-stream": {}
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M11)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "My events (SSE)",
@@ -4968,17 +5095,57 @@
     "/api/v1/notifications": {
       "get": {
         "operationId": "notifications_get_notifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Page_Notification_"
+                }
               }
             },
             "description": "Successful Response"
           },
-          "501": {
-            "description": "Not implemented yet (M11)"
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "My notifications",
@@ -4991,16 +5158,8 @@
       "post": {
         "operationId": "notifications_post_notifications_read_all",
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
+          "204": {
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (M11)"
           }
         },
         "summary": "Mark all read",
@@ -5018,18 +5177,14 @@
             "name": "notification_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Notification Id",
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
+          "204": {
             "description": "Successful Response"
           },
           "422": {
@@ -5041,9 +5196,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (M11)"
           }
         },
         "summary": "Mark read",

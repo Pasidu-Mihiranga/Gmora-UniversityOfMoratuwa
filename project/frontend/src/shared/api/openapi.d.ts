@@ -2264,6 +2264,42 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** Notification */
+        Notification: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Link */
+            link?: string | null;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** Read At */
+            read_at?: string | null;
+            /** Template Key */
+            template_key: string;
+            /**
+             * Urgency
+             * @default normal
+             * @enum {string}
+             */
+            urgency: "normal" | "urgent" | "emergency";
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
         /** Observation */
         Observation: {
             code: components["schemas"]["CodeableConcept"];
@@ -2340,6 +2376,13 @@ export interface components {
         Page_CaseState_: {
             /** Items */
             items: components["schemas"]["CaseState"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[Notification] */
+        Page_Notification_: {
+            /** Items */
+            items: components["schemas"]["Notification"][];
             /** Next Cursor */
             next_cursor?: string | null;
         };
@@ -4236,7 +4279,9 @@ export interface operations {
     notifications_get_me_stream: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "Last-Event-ID"?: string | null;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4248,15 +4293,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "text/event-stream": unknown;
                 };
             };
-            /** @description Not implemented yet (M11) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -4365,7 +4412,10 @@ export interface operations {
     };
     notifications_get_notifications: {
         parameters: {
-            query?: never;
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4378,15 +4428,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Page_Notification_"];
                 };
             };
-            /** @description Not implemented yet (M11) */
-            501: {
+            /** @description Validation Error */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -4400,16 +4452,7 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Not implemented yet (M11) */
-            501: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4429,13 +4472,11 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -4445,13 +4486,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (M11) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
