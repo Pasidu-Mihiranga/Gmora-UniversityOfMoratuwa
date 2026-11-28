@@ -38,6 +38,7 @@ const hospital = () => import("@/features/hospital/pages");
 const ops = () => import("@/features/ops/pages");
 const dev = () => import("@/features/dev/pages");
 const LoginPage = lazy(() => import("@/features/auth/LoginPage"));
+const RegisterPage = lazy(() => import("@/features/auth/RegisterPage"));
 
 function RequireRole({ roles }: { roles: Role[] }) {
   const { user, loading } = useSession();
@@ -75,6 +76,7 @@ const shared = (prefix: string): { path: string; element: ReactNode }[] => [
 
 export const router = createBrowserRouter([
   { path: "/login", element: <Suspense fallback={<Spinner />}><LoginPage /></Suspense>, errorElement: <RouteError /> },
+  { path: "/register", element: <Suspense fallback={<Spinner />}><RegisterPage /></Suspense>, errorElement: <RouteError /> },
   {
     element: <AppShell />,
     errorElement: <RouteError />,
