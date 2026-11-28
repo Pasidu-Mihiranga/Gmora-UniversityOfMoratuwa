@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/demo-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Demo accounts (development and demo only) */
+        get: operations["identity_get_auth_demo_accounts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -134,6 +151,23 @@ export interface paths {
         put?: never;
         /** Rotate the refresh token (cookie, CSRF checked) */
         post: operations["identity_post_auth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a patient or guardian account */
+        post: operations["identity_post_auth_register"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1730,6 +1764,16 @@ export interface components {
             /** Text */
             text?: string | null;
         };
+        /** DemoAccount */
+        DemoAccount: {
+            /** Display Name */
+            display_name: string;
+            /** Login */
+            login: string;
+            /** Password */
+            password: string;
+            role: components["schemas"]["Role"];
+        };
         /** FactRequest */
         FactRequest: {
             /** Fact Key */
@@ -1865,6 +1909,26 @@ export interface components {
             /** Rules Version */
             rules_version: string;
             urgency: components["schemas"]["Urgency"];
+        };
+        /**
+         * Registration
+         * @description Self sign-up is for patients and guardians only. Doctors and admins are created by an
+         *     admin, because a doctor must be verified before seeing patient data.
+         */
+        Registration: {
+            /** Display Name */
+            display_name: string;
+            /** @default si */
+            language: components["schemas"]["Language"];
+            /** Login */
+            login: string;
+            /** Password */
+            password: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "patient" | "guardian";
         };
         /**
          * Role
@@ -2165,6 +2229,26 @@ export interface operations {
             };
         };
     };
+    identity_get_auth_demo_accounts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoAccount"][];
+                };
+            };
+        };
+    };
     identity_post_auth_login: {
         parameters: {
             query?: never;
@@ -2232,6 +2316,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Session"];
+                };
+            };
+        };
+    };
+    identity_post_auth_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Registration"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
