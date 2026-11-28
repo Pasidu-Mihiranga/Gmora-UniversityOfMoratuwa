@@ -1500,11 +1500,120 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Accepted */
+        Accepted: {
+            /** Id */
+            id: string;
+        };
         /**
          * AgentKind
          * @enum {string}
          */
         AgentKind: "patient_companion" | "guardian_agent" | "doctor_assistant" | "verifier" | "single_agent_baseline";
+        /** ApprovalItem */
+        ApprovalItem: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Draft Id
+             * Format: uuid
+             */
+            draft_id: string;
+            /** Language */
+            language: string;
+            /** Text */
+            text: string;
+        };
+        /** Brief */
+        Brief: {
+            /**
+             * Built At
+             * Format: date-time
+             */
+            built_at: string;
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /**
+             * Hidden Categories Count
+             * @default 0
+             */
+            hidden_categories_count: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Lines
+             * @default []
+             */
+            lines: components["schemas"]["BriefLine"][];
+            /**
+             * Missing Facts
+             * @default []
+             */
+            missing_facts: string[];
+            /**
+             * Order
+             * @default [
+             *       "alerts",
+             *       "reason",
+             *       "navigation",
+             *       "conditions",
+             *       "medications",
+             *       "allergies",
+             *       "results",
+             *       "adherence",
+             *       "imaging",
+             *       "open_questions"
+             *     ]
+             */
+            order: components["schemas"]["BriefSection"][];
+            /**
+             * Patient Id
+             * Format: uuid
+             */
+            patient_id: string;
+            /** Version */
+            version: number;
+        };
+        /** BriefLine */
+        BriefLine: {
+            /** Label */
+            label: string;
+            /**
+             * Provenance Ids
+             * @default []
+             */
+            provenance_ids: string[];
+            section: components["schemas"]["BriefSection"];
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "record" | "report" | "imaging" | "patient_reported" | "case" | "safety" | "care";
+            /** Value */
+            value?: string | null;
+            /** Verified */
+            verified: boolean;
+        };
+        /**
+         * BriefSection
+         * @description Default order (spec 05 section 4); a doctor's preference may reorder them.
+         * @enum {string}
+         */
+        BriefSection: "alerts" | "reason" | "navigation" | "conditions" | "medications" | "allergies" | "results" | "adherence" | "imaging" | "open_questions";
         /** BudgetUsage */
         BudgetUsage: {
             /**
@@ -1611,6 +1720,21 @@ export interface components {
          * @enum {string}
          */
         CaseStatus: "open" | "intake" | "assessed" | "emergency" | "in_care" | "awaiting_doctor" | "replied" | "handed_to_human" | "closed";
+        /** Decision */
+        Decision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "approved" | "edited" | "rejected";
+            /** Text */
+            text?: string | null;
+        };
+        /** FactRequest */
+        FactRequest: {
+            /** Fact Key */
+            fact_key: string;
+        };
         /** GuardianBranchState */
         GuardianBranchState: {
             /** Last Alert Level */
@@ -1643,6 +1767,11 @@ export interface components {
              * Format: uuid
              */
             communication_id: string;
+        };
+        /** Notes */
+        Notes: {
+            /** Text */
+            text: string;
         };
         /** OpenCase */
         OpenCase: {
@@ -2477,15 +2606,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ApprovalItem"][];
                 };
-            };
-            /** @description Not implemented yet (A05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2498,15 +2620,19 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Decision"];
+            };
+        };
         responses: {
             /** @description Successful Response */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Accepted"];
                 };
             };
             /** @description Validation Error */
@@ -2517,13 +2643,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (A05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2544,7 +2663,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Brief"];
                 };
             };
             /** @description Validation Error */
@@ -2555,13 +2674,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (A05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2574,15 +2686,19 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Notes"];
+            };
+        };
         responses: {
             /** @description Successful Response */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Accepted"];
                 };
             };
             /** @description Validation Error */
@@ -2593,13 +2709,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (A05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2612,15 +2721,19 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FactRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Accepted"];
                 };
             };
             /** @description Validation Error */
@@ -2631,13 +2744,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Not implemented yet (A05) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2659,7 +2765,7 @@ export interface operations {
                     "application/json": unknown;
                 };
             };
-            /** @description Not implemented yet (A05) */
+            /** @description Not implemented yet (U06) */
             501: {
                 headers: {
                     [name: string]: unknown;

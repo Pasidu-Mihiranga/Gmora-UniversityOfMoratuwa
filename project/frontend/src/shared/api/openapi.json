@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "Accepted": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "Accepted",
+        "type": "object"
+      },
       "AgentKind": {
         "enum": [
           "patient_companion",
@@ -10,6 +24,198 @@
           "single_agent_baseline"
         ],
         "title": "AgentKind",
+        "type": "string"
+      },
+      "ApprovalItem": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "draft_id": {
+            "format": "uuid",
+            "title": "Draft Id",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "draft_id",
+          "case_id",
+          "text",
+          "language",
+          "created_at"
+        ],
+        "title": "ApprovalItem",
+        "type": "object"
+      },
+      "Brief": {
+        "additionalProperties": false,
+        "properties": {
+          "built_at": {
+            "format": "date-time",
+            "title": "Built At",
+            "type": "string"
+          },
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "hidden_categories_count": {
+            "default": 0,
+            "title": "Hidden Categories Count",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "lines": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BriefLine"
+            },
+            "title": "Lines",
+            "type": "array"
+          },
+          "missing_facts": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Facts",
+            "type": "array"
+          },
+          "order": {
+            "default": [
+              "alerts",
+              "reason",
+              "navigation",
+              "conditions",
+              "medications",
+              "allergies",
+              "results",
+              "adherence",
+              "imaging",
+              "open_questions"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/BriefSection"
+            },
+            "title": "Order",
+            "type": "array"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "case_id",
+          "patient_id",
+          "version",
+          "built_at"
+        ],
+        "title": "Brief",
+        "type": "object"
+      },
+      "BriefLine": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "maxLength": 200,
+            "title": "Label",
+            "type": "string"
+          },
+          "provenance_ids": {
+            "default": [],
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Provenance Ids",
+            "type": "array"
+          },
+          "section": {
+            "$ref": "#/components/schemas/BriefSection"
+          },
+          "source": {
+            "enum": [
+              "record",
+              "report",
+              "imaging",
+              "patient_reported",
+              "case",
+              "safety",
+              "care"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "section",
+          "label",
+          "source",
+          "verified"
+        ],
+        "title": "BriefLine",
+        "type": "object"
+      },
+      "BriefSection": {
+        "description": "Default order (spec 05 section 4); a doctor's preference may reorder them.",
+        "enum": [
+          "alerts",
+          "reason",
+          "navigation",
+          "conditions",
+          "medications",
+          "allergies",
+          "results",
+          "adherence",
+          "imaging",
+          "open_questions"
+        ],
+        "title": "BriefSection",
         "type": "string"
       },
       "BudgetUsage": {
@@ -247,6 +453,53 @@
         "title": "CaseStatus",
         "type": "string"
       },
+      "Decision": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "enum": [
+              "approved",
+              "edited",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "Decision",
+        "type": "object"
+      },
+      "FactRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "fact_key": {
+            "pattern": "^[a-z][a-z0-9_]{1,59}$",
+            "title": "Fact Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fact_key"
+        ],
+        "title": "FactRequest",
+        "type": "object"
+      },
       "GuardianBranchState": {
         "additionalProperties": false,
         "properties": {
@@ -324,6 +577,22 @@
           "communication_id"
         ],
         "title": "MessageAccepted",
+        "type": "object"
+      },
+      "Notes": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "Notes",
         "type": "object"
       },
       "OpenCase": {
@@ -1477,13 +1746,16 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalItem"
+                  },
+                  "title": "Response Agents Get Doctor Approvals",
+                  "type": "array"
+                }
               }
             },
             "description": "Successful Response"
-          },
-          "501": {
-            "description": "Not implemented yet (A05)"
           }
         },
         "summary": "Drafts waiting for approval",
@@ -1501,16 +1773,29 @@
             "name": "draft_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Draft Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Decision"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
+          "202": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
               }
             },
             "description": "Successful Response"
@@ -1524,9 +1809,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (A05)"
           }
         },
         "summary": "Approve, edit or reject",
@@ -1544,6 +1826,7 @@
             "name": "case_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Case Id",
               "type": "string"
             }
@@ -1553,7 +1836,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Brief"
+                }
               }
             },
             "description": "Successful Response"
@@ -1567,9 +1852,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (A05)"
           }
         },
         "summary": "Sourced brief",
@@ -1587,16 +1869,29 @@
             "name": "case_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Case Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Notes"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
+          "202": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
               }
             },
             "description": "Successful Response"
@@ -1610,9 +1905,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (A05)"
           }
         },
         "summary": "Notes for the reply",
@@ -1630,16 +1922,29 @@
             "name": "case_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Case Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FactRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "200": {
+          "202": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
               }
             },
             "description": "Successful Response"
@@ -1653,9 +1958,6 @@
               }
             },
             "description": "Validation Error"
-          },
-          "501": {
-            "description": "Not implemented yet (A05)"
           }
         },
         "summary": "Ask for a missing fact",
@@ -1677,7 +1979,7 @@
             "description": "Successful Response"
           },
           "501": {
-            "description": "Not implemented yet (A05)"
+            "description": "Not implemented yet (U06)"
           }
         },
         "summary": "Today's patients",
